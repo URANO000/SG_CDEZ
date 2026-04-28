@@ -1,13 +1,13 @@
-package com.cdez.sg_cdez;
+package com.cdez.sg_cdez_api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SgCdezApplication {
+public class SgCdezApiApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SgCdezApplication.class, args);
+		SpringApplication.run(SgCdezApiApplication.class, args);
 	}
 
 }
