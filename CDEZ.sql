@@ -16,6 +16,8 @@ CREATE TABLE Personal (
 	identificacion VARCHAR(100) NOT NULL,
 	direccion VARCHAR(200) NULL,
 	carnet VARCHAR(100) NULL,
+	usuario VARCHAR(80) NOT NULL,
+	contrasena VARCHAR(80) NOT NULL,
 	created_by UUID REFERENCES Personal(personal_id) NOT NULL,
 	created_at TIMESTAMP NOT NULL,
 	updated_by UUID REFERENCES Personal(personal_id) NULL,
