@@ -25,6 +25,7 @@ CREATE TABLE Personal (
 	updated_at TIMESTAMP NULL
 );
 
+
 CREATE TABLE AdultoMayor(
 	adulto_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	tipo_identificacion VARCHAR(100) NOT NULL,
