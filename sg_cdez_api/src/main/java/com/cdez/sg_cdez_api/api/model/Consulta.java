@@ -17,9 +17,6 @@ public class Consulta {
     @ManyToOne
     @JoinColumn(name = "adulto_id", nullable = false)
     private AdultoMayor adultoMayor;
-    @ManyToOne
-    @JoinColumn(name = "personal_id", nullable = false)
-    private Personal personal;
     private String motivo;
     private String tipoIntervencion;
     private String descripcion;

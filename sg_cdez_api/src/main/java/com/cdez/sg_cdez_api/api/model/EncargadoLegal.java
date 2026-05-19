@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -31,5 +33,12 @@ public class EncargadoLegal {
     @JoinColumn(name="updated_by", nullable = true)
     private Personal updatedBy;
     private LocalDateTime updatedAt;
+
+    //Relaciones
+    @OneToMany(mappedBy = "encargado")
+    private List<Contacto> contactos = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "encargados")
+    private List<AdultoMayor> adultos = new ArrayList<>();
 
 }

@@ -3,6 +3,8 @@ package com.cdez.sg_cdez_api.api.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -42,4 +44,16 @@ public class AdultoMayor {
     @JoinColumn(name="updated_by", nullable = true)
     private Personal updatedBy;
     private LocalDateTime updatedAt;
+
+    //Referencias
+    @OneToMany(mappedBy = "adultoMayor")
+    private List<Consulta> consultas = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "EncargadoAdulto",
+            joinColumns = @JoinColumn(name = "adulto_id"),
+            inverseJoinColumns = @JoinColumn(name = "encargado_id")
+    )
+    private List<EncargadoLegal> encargados = new ArrayList<>();
 }

@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,13 +41,21 @@ public class Personal {
 
     //Relaciones
     @OneToMany(mappedBy = "createdBy")
-    private List<AdultoMayor> adultosMayores;
+    private List<AdultoMayor> adultosMayores = new ArrayList<>();
     @OneToMany(mappedBy = "updatedBy")
-    private List<AdultoMayor> adultosMayoresU;
+    private List<AdultoMayor> adultosMayoresU = new ArrayList<>();
 
     @OneToMany(mappedBy = "createdBy")
-    private List<EncargadoLegal> encargadosLegales;
+    private List<EncargadoLegal> encargadosLegales = new ArrayList<>();
     @OneToMany(mappedBy = "updatedBy")
-    private List<EncargadoLegal> encargadosLegalesU;
+    private List<EncargadoLegal> encargadosLegalesU = new ArrayList<>();
+
+    @OneToMany(mappedBy = "referencia")
+    private List<Consulta> referenciaConsultas = new ArrayList<>();
+    @OneToMany(mappedBy = "createdBy")
+    private List<Consulta> consultas = new ArrayList<>();
+
+    @OneToMany(mappedBy = "personal")
+    private List<Documento> documentos = new ArrayList<>();
 
 }

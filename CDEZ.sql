@@ -89,7 +89,6 @@ CREATE TABLE Documento(
 CREATE TABLE Consulta(
 	consulta_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	adulto_id UUID REFERENCES AdultoMayor(adulto_id),
-	personal_id UUID REFERENCES Personal(personal_id),
 	motivo VARCHAR(100) NOT NULL,
 	tipo_intervencion VARCHAR(100) NOT NULL,
 	descripcion VARCHAR(250) NOT NULL,
@@ -99,4 +98,10 @@ CREATE TABLE Consulta(
 	referencia UUID REFERENCES Personal(personal_id),
 	created_by UUID REFERENCES Personal(personal_id) NOT NULL,
 	created_at TIMESTAMP NOT NULL
+);
+
+CREATE TABLE EncargadoAdulto(
+    adulto_id    UUID REFERENCES AdultoMayor(adulto_id),
+    encargado_id UUID REFERENCES EncargadoLegal(encargado_id),
+    PRIMARY KEY (adulto_id, encargado_id)
 );
