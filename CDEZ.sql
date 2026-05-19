@@ -18,11 +18,13 @@ CREATE TABLE Personal (
 	carnet VARCHAR(100) NULL,
 	usuario VARCHAR(80) NOT NULL,
 	contrasena VARCHAR(80) NOT NULL,
+	activo BOOL NOT NULL,
 	created_by UUID REFERENCES Personal(personal_id) NOT NULL,
 	created_at TIMESTAMP NOT NULL,
 	updated_by UUID REFERENCES Personal(personal_id) NULL,
 	updated_at TIMESTAMP NULL
 );
+
 
 CREATE TABLE AdultoMayor(
 	adulto_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -45,6 +47,7 @@ CREATE TABLE AdultoMayor(
 	fecha_retiro TIMESTAMP NULL,
 	fecha_fallecimiento TIMESTAMP NULL,
 	motivo_retiro VARCHAR(200) NULL,
+	activo BOOL NOT NULL,
 	created_by UUID REFERENCES Personal(personal_id) NOT NULL,
 	created_at TIMESTAMP NOT NULL,
 	updated_by UUID REFERENCES Personal(personal_id) NULL,
@@ -60,6 +63,7 @@ CREATE TABLE EncargadoLegal(
 	primer_apellido VARCHAR(50) NOT NULL,
 	segundo_apellido VARCHAR(50) NULL,
 	direccion VARCHAR(200) NOT NULL,
+	activo BOOL NOT NULL,
 	created_by UUID REFERENCES Personal(personal_id) NOT NULL,
 	created_at TIMESTAMP NOT NULL,
 	updated_by UUID REFERENCES Personal(personal_id) NULL,
@@ -85,7 +89,6 @@ CREATE TABLE Documento(
 CREATE TABLE Consulta(
 	consulta_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	adulto_id UUID REFERENCES AdultoMayor(adulto_id),
-	personal_id UUID REFERENCES Personal(personal_id),
 	motivo VARCHAR(100) NOT NULL,
 	tipo_intervencion VARCHAR(100) NOT NULL,
 	descripcion VARCHAR(250) NOT NULL,
@@ -95,4 +98,10 @@ CREATE TABLE Consulta(
 	referencia UUID REFERENCES Personal(personal_id),
 	created_by UUID REFERENCES Personal(personal_id) NOT NULL,
 	created_at TIMESTAMP NOT NULL
+);
+
+CREATE TABLE EncargadoAdulto(
+    adulto_id    UUID REFERENCES AdultoMayor(adulto_id),
+    encargado_id UUID REFERENCES EncargadoLegal(encargado_id),
+    PRIMARY KEY (adulto_id, encargado_id)
 );
