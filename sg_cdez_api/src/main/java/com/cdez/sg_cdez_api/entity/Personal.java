@@ -23,6 +23,7 @@ public class Personal {
     private String identificacion;
     private String direccion;
     private String carnet;
+    @Column(unique = true)
     private String usuario;
     private String contrasena;
     private boolean activo;
