@@ -1,4 +1,4 @@
-package com.cdez.sg_cdez_api.api.model;
+package com.cdez.sg_cdez_api.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,18 +9,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="Contacto")
-public class Contacto {
+@Table(name = "Documento")
+public class Documento {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int contactoId;
+    private int documentoId;
     @ManyToOne
     @JoinColumn(name = "personal_id", nullable = true)
     private Personal personal;
     @ManyToOne
     @JoinColumn(name = "encargado_id", nullable = true)
-    private EncargadoLegal encargado;
-    private String valor;
-    private String tipoValor;
+    private EncargadoLegal encargadoLegal;
+    @ManyToOne
+    @JoinColumn(name = "adulto_id", nullable = true)
+    private AdultoMayor adultoMayor;
+    private byte[] archivo;
 
 }
