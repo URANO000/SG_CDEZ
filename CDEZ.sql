@@ -25,8 +25,6 @@ CREATE TABLE Personal (
 	updated_at TIMESTAMP NULL
 );
 
-INSERT INTO Rol (nombre)
-VALUES ('ADMIN'), ('PERSONAL');
 
 CREATE TABLE AdultoMayor(
 	adulto_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -107,3 +105,7 @@ CREATE TABLE EncargadoAdulto(
     encargado_id UUID REFERENCES EncargadoLegal(encargado_id),
     PRIMARY KEY (adulto_id, encargado_id)
 );
+
+/** Some data **/
+INSERT INTO Rol (nombre)
+VALUES ('ADMIN'), ('PERSONAL');
