@@ -17,7 +17,7 @@ CREATE TABLE Personal (
 	direccion VARCHAR(200) NULL,
 	carnet VARCHAR(100) NULL,
 	usuario VARCHAR(80) NOT NULL,
-	contrasena VARCHAR(80) NOT NULL,
+	contrasena VARCHAR(255) NOT NULL,
 	activo BOOL NOT NULL,
 	created_by UUID REFERENCES Personal(personal_id),
 	created_at TIMESTAMP NOT NULL,
@@ -27,12 +27,6 @@ CREATE TABLE Personal (
 
 INSERT INTO Rol (nombre)
 VALUES ('ADMIN'), ('PERSONAL');
-
-INSERT INTO Personal (rol_id, especialidad, tipo_identificacion, identificacion,
-direccion, carnet, usuario, contrasena, activo)
-VALUES (1, 'Programador', 'cédula', '402740838', 'Avenida 123', '123456789', 'asevilla40838@ufide.ac.cr', '123',
-true);
-
 
 CREATE TABLE AdultoMayor(
 	adulto_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
