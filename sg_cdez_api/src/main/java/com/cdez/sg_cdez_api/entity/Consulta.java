@@ -1,4 +1,4 @@
-package com.cdez.sg_cdez_api.api.model;
+package com.cdez.sg_cdez_api.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

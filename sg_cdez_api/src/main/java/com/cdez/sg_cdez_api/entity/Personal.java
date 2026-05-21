@@ -1,20 +1,21 @@
-package com.cdez.sg_cdez_api.api.model;
+package com.cdez.sg_cdez_api.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.Id;
+import org.jspecify.annotations.Nullable;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Personal")
-public class Personal {
+@Table(name = "personal")
+public class Personal implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID personalId;
@@ -26,6 +27,7 @@ public class Personal {
     private String identificacion;
     private String direccion;
     private String carnet;
+    @Column(unique = true)
     private String usuario;
     private String contrasena;
     private boolean activo;
@@ -58,4 +60,45 @@ public class Personal {
     @OneToMany(mappedBy = "personal")
     private List<Documento> documentos = new ArrayList<>();
 
+    //Para la autenticación y autorización
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+
+        //Convertir entidad de Rol en SimpleGrantedAuthority para añadir a la lista
+        //El ROLE_ simplemente es el prefix estándar
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + rol.getNombre()));
+        return authorities;
+    }
+
+    @Override
+    public @Nullable String getPassword() {
+        return contrasena;
+    }
+
+    @Override
+    public String getUsername() {
+        return usuario;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return activo;
+    }
 }

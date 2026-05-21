@@ -17,9 +17,9 @@ CREATE TABLE Personal (
 	direccion VARCHAR(200) NULL,
 	carnet VARCHAR(100) NULL,
 	usuario VARCHAR(80) NOT NULL,
-	contrasena VARCHAR(80) NOT NULL,
+	contrasena VARCHAR(255) NOT NULL,
 	activo BOOL NOT NULL,
-	created_by UUID REFERENCES Personal(personal_id) NOT NULL,
+	created_by UUID REFERENCES Personal(personal_id),
 	created_at TIMESTAMP NOT NULL,
 	updated_by UUID REFERENCES Personal(personal_id) NULL,
 	updated_at TIMESTAMP NULL
@@ -105,3 +105,12 @@ CREATE TABLE EncargadoAdulto(
     encargado_id UUID REFERENCES EncargadoLegal(encargado_id),
     PRIMARY KEY (adulto_id, encargado_id)
 );
+
+/** Some data **/
+INSERT INTO Rol (nombre)
+VALUES ('ADMIN'), ('PERSONAL');
+
+INSERT INTO Personal (rol_id, especialidad, tipo_identificacion, identificacion,
+direccion, carnet, usuario, contrasena, activo, created_at)
+VALUES (1, 'Programador', 'cédula', '402240833', 'Avenida 123', '123456789', 'example@gmail.com', '$2a$12$xiiXfivq.xywYjmXbFxg6.BbptpYUiUcZO6zACscQA79OqXGXGjT2',
+true, NOW());
