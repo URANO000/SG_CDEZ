@@ -19,11 +19,19 @@ CREATE TABLE Personal (
 	usuario VARCHAR(80) NOT NULL,
 	contrasena VARCHAR(80) NOT NULL,
 	activo BOOL NOT NULL,
-	created_by UUID REFERENCES Personal(personal_id) NOT NULL,
+	created_by UUID REFERENCES Personal(personal_id),
 	created_at TIMESTAMP NOT NULL,
 	updated_by UUID REFERENCES Personal(personal_id) NULL,
 	updated_at TIMESTAMP NULL
 );
+
+INSERT INTO Rol (nombre)
+VALUES ('ADMIN'), ('PERSONAL');
+
+INSERT INTO Personal (rol_id, especialidad, tipo_identificacion, identificacion,
+direccion, carnet, usuario, contrasena, activo)
+VALUES (1, 'Programador', 'cédula', '402740838', 'Avenida 123', '123456789', 'asevilla40838@ufide.ac.cr', '123',
+true);
 
 
 CREATE TABLE AdultoMayor(
