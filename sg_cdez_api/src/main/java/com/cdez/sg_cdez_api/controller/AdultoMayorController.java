@@ -4,6 +4,7 @@ import com.cdez.sg_cdez_api.dto.request.AdultoMayorRequest;
 import com.cdez.sg_cdez_api.dto.response.AdultoMayorResponse;
 import com.cdez.sg_cdez_api.service.AdultoMayorService;
 import org.springframework.web.bind.annotation.*;
+import java.util.UUID;
 
 import java.util.List;
 
@@ -21,9 +22,21 @@ public class AdultoMayorController {
     public List<AdultoMayorResponse> listarAdultosMayores() {
         return adultoMayorService.listarAdultosMayores();
     }
+    @GetMapping("/{id}")
+    public AdultoMayorResponse obtenerAdultoMayorPorId(@PathVariable UUID id) {
+        return adultoMayorService.obtenerAdultoMayorPorId(id);
+    }
 
     @PostMapping
     public AdultoMayorResponse crearAdultoMayor(@RequestBody AdultoMayorRequest request) {
         return adultoMayorService.crearAdultoMayor(request);
+    }
+
+    @PutMapping("/{id}")
+    public AdultoMayorResponse actualizarAdultoMayor(
+            @PathVariable UUID id,
+            @RequestBody AdultoMayorRequest request
+    ) {
+        return adultoMayorService.actualizarAdultoMayor(id, request);
     }
 }

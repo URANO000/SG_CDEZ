@@ -8,6 +8,7 @@ import com.cdez.sg_cdez_api.entity.AdultoMayor;
 import com.cdez.sg_cdez_api.repository.AdultoMayorRepository;
 import com.cdez.sg_cdez_api.service.AdultoMayorService;
 import org.springframework.stereotype.Service;
+import java.util.UUID;
 
 import java.util.List;
 
@@ -85,5 +86,42 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         AdultoMayor adultoGuardado = adultoMayorRepository.save(adultoMayor);
 
         return mapToResponse(adultoGuardado);
+    }
+    @Override
+    public AdultoMayorResponse obtenerAdultoMayorPorId(UUID id) {
+
+        AdultoMayor adultoMayor = adultoMayorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
+
+        return mapToResponse(adultoMayor);
+    }
+    @Override
+    public AdultoMayorResponse actualizarAdultoMayor(UUID id, AdultoMayorRequest request) {
+
+        AdultoMayor adultoMayor = adultoMayorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
+
+        adultoMayor.setTipoIdentificacion(request.tipoIdentificacion());
+        adultoMayor.setIdentificacion(request.identificacion());
+        adultoMayor.setPrimerNombre(request.primerNombre());
+        adultoMayor.setSegundoNombre(request.segundoNombre());
+        adultoMayor.setPrimerApellido(request.primerApellido());
+        adultoMayor.setSegundoApellido(request.segundoApellido());
+        adultoMayor.setNacionalidad(request.nacionalidad());
+        adultoMayor.setFechaNacimiento(request.fechaNacimiento());
+        adultoMayor.setSexo(request.sexo());
+        adultoMayor.setDireccion(request.direccion());
+        adultoMayor.setEscolaridad(request.escolaridad());
+        adultoMayor.setGrupoFamiliar(request.grupoFamiliar());
+        adultoMayor.setPension(request.pension());
+        adultoMayor.setFuncionalidadFisica(request.funcionalidadFisica());
+        adultoMayor.setAyudaBiomecanica(request.ayudaBiomecanica());
+        adultoMayor.setFechaIngreso(request.fechaIngreso());
+
+        adultoMayor.setUpdatedAt(java.time.LocalDateTime.now());
+
+        AdultoMayor adultoActualizado = adultoMayorRepository.save(adultoMayor);
+
+        return mapToResponse(adultoActualizado);
     }
 }
