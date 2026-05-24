@@ -25,6 +25,10 @@ public class Personal implements UserDetails {
     private String especialidad;
     private String tipoIdentificacion;
     private String identificacion;
+    private String primerNombre;
+    private String segundoNombre;
+    private String primerApellido;
+    private String segundoApellido;
     private String direccion;
     private String carnet;
     @Column(unique = true)
