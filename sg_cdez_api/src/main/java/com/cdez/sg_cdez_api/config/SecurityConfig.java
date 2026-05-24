@@ -35,8 +35,9 @@ public class SecurityConfig {
                 //Configurar reglas de autorización
                 .authorizeHttpRequests(auth -> auth
                 //Endpoints públicos
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/public/**").permitAll()
+                                .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/api/public/**").permitAll()
+                                .requestMatchers("/adultos-mayores/**").permitAll()
                 //Todoo lo demás requiere autenticación y autorización
                         .anyRequest().authenticated()
                 )
