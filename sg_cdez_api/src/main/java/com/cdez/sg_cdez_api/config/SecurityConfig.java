@@ -34,11 +34,11 @@ public class SecurityConfig {
 
                 //Configurar reglas de autorización
                 .authorizeHttpRequests(auth -> auth
-                //Endpoints públicos
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/public/**").permitAll()
-                //Todoo lo demás requiere autenticación y autorización
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/auth/iniciarSesion").permitAll()
+                        .requestMatchers("/api/auth/adminAPI").hasRole("ADMIN")
+                        .requestMatchers("/api/auth/personalAPI").hasAnyRole("PERSONAL", "ADMIN")
+                        .anyRequest()
+                        .authenticated()
                 )
 
                 //No se guarda la sesión en el servidor

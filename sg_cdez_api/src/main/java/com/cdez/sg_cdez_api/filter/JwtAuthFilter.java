@@ -1,14 +1,14 @@
 package com.cdez.sg_cdez_api.filter;
 
-import com.cdez.sg_cdez_api.repository.AuthRepository;
+
 import com.cdez.sg_cdez_api.service.JwtService;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -74,6 +74,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }catch (Exception e){
             handlerExceptionResolver.resolveException(request, response, null, e);
         }
+
+        filterChain.doFilter(request, response);
 
     }
 

@@ -20,4 +20,15 @@ public class AuthController {
     public ResponseEntity<JwtAuthResponse> iniciarSesion(@RequestBody LoginRequest loginRequest){
         return ResponseEntity.ok(SERVICE.iniciarSesion(loginRequest));
     }
+
+    //APIs de prueba para control de roles
+    @GetMapping("/adminAPI")
+    public String adminAPI(){
+        return "Hellom I am an ADMIN user";
+    }
+
+    @GetMapping("/personalAPI")
+    public String personalAPI(){
+        return "Hello, I am a PERSONAL user, admin can also access this too :0";
+    }
 }
