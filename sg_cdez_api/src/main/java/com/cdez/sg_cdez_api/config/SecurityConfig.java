@@ -1,7 +1,7 @@
 package com.cdez.sg_cdez_api.config;
 
 import com.cdez.sg_cdez_api.filter.JwtAuthFilter;
-import com.cdez.sg_cdez_api.repository.AuthRepository;
+import jakarta.servlet.DispatcherType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.context.annotation.*;
@@ -37,6 +37,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/iniciarSesion").permitAll()
                         .requestMatchers("/api/auth/adminAPI").hasRole("ADMIN")
                         .requestMatchers("/api/auth/personalAPI").hasAnyRole("PERSONAL", "ADMIN")
+
+                        .requestMatchers("/error").permitAll()
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .anyRequest()
                         .authenticated()
                 )
