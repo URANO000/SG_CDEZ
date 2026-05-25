@@ -1,25 +1,26 @@
 package com.cdez.sg_cdez_api.filter;
 
-import com.cdez.sg_cdez_api.repository.AuthRepository;
+
+import com.cdez.sg_cdez_api.service.CustomUserDetailsService;
 import com.cdez.sg_cdez_api.service.JwtService;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -27,7 +28,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final HandlerExceptionResolver handlerExceptionResolver;
 
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
@@ -45,14 +46,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try{
             //Si el formato es correcto, extraer toddo luego de Bearer
             final String jwt = authHeader.substring(7);
-            final String username = jwtService.extractUsername(jwt);
+            final String userId = jwtService.extractUserId(jwt);
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             //Si tenemos un username y no existe ninguna autenticación antes
-            if(username != null && authentication == null){
+            if(userId != null && authentication == null){
                 //Cargar datos del usuario desde la base de datos
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+                UserDetails userDetails = this.userDetailsService.loadUserById(UUID.fromString(userId));
+
+                System.out.println(userDetails.getAuthorities());
 
                 //Validar el token
                 if(jwtService.isTokenValid(jwt, userDetails)){
@@ -74,6 +77,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }catch (Exception e){
             handlerExceptionResolver.resolveException(request, response, null, e);
         }
+
+        filterChain.doFilter(request, response);
 
     }
 

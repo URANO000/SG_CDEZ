@@ -1,15 +1,14 @@
 package com.cdez.sg_cdez_api.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "Documento")
+@Table(name = "documento")
 public class Documento {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

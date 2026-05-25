@@ -1,9 +1,11 @@
 package com.cdez.sg_cdez_api.service;
 
+import com.cdez.sg_cdez_api.entity.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -21,9 +23,10 @@ public class JwtService {
     @Value("${jwt.expirationMs}")
     private long jwtExpiration;
 
-    public String extractUsername(String token){
+    public String extractUserId(String token){
         return extractClaim(token, Claims::getSubject);
     }
+
 
     public<T> T extractClaim(String token, Function<Claims, T> claimsResolver){
         final Claims claims = extractAllClaims(token);
@@ -31,9 +34,9 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails){
-        return generateToken(new HashMap<>(), userDetails);
+        return generateToken(new HashMap<>(),(CustomUserDetails) userDetails);
     }
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    public String generateToken(Map<String, Object> extraClaims, CustomUserDetails userDetails) {
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
     public long getExpirationTime(){
@@ -42,13 +45,14 @@ public class JwtService {
 
     private String buildToken(
             Map<String, Object> extraClaims,
-            UserDetails userDetails,
+            CustomUserDetails userDetails,
             long expiration
     ){
         return Jwts
                 .builder()
                 .claims(extraClaims)
-                .subject(userDetails.getUsername())
+                .subject(userDetails.getUsuarioId().toString())
+                .claim("roles", userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey())
@@ -56,8 +60,9 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails){
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        CustomUserDetails user = (CustomUserDetails) userDetails;
+        final String userId = extractUserId(token);
+        return (userId.equals(user.getUsuarioId().toString()) && !isTokenExpired(token));
     }
 
     private boolean isTokenExpired(String token){

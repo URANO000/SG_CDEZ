@@ -5,11 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
 @Setter
-@AllArgsConstructor
+@Getter
 @NoArgsConstructor
-public class LoginRequest {
-    private String usuario;
-    private String contrasena;
+@AllArgsConstructor
+public class CambiaContrasenaRequest {
+    private String nuevaContransena;
+    private String confirmarContrasena;
 }

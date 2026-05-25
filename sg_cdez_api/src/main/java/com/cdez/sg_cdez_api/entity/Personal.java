@@ -2,20 +2,17 @@ package com.cdez.sg_cdez_api.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.jspecify.annotations.Nullable;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 @Entity
 @Table(name = "personal")
-public class Personal implements UserDetails {
+public class Personal {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID personalId;
@@ -25,6 +22,10 @@ public class Personal implements UserDetails {
     private String especialidad;
     private String tipoIdentificacion;
     private String identificacion;
+    private String primerNombre;
+    private String segundoNombre;
+    private String primerApellido;
+    private String segundoApellido;
     private String direccion;
     private String carnet;
     @Column(unique = true)
@@ -32,7 +33,7 @@ public class Personal implements UserDetails {
     private String contrasena;
     private boolean activo;
     @ManyToOne
-    @JoinColumn(name = "created_by", nullable = false)
+    @JoinColumn(name = "created_by", nullable = true)
     private Personal createdBy;
     private LocalDateTime createdAt;
     @ManyToOne
@@ -59,46 +60,4 @@ public class Personal implements UserDetails {
 
     @OneToMany(mappedBy = "personal")
     private List<Documento> documentos = new ArrayList<>();
-
-    //Para la autenticación y autorización
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<GrantedAuthority> authorities = new ArrayList<>();
-
-        //Convertir entidad de Rol en SimpleGrantedAuthority para añadir a la lista
-        //El ROLE_ simplemente es el prefix estándar
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + rol.getNombre()));
-        return authorities;
-    }
-
-    @Override
-    public @Nullable String getPassword() {
-        return contrasena;
-    }
-
-    @Override
-    public String getUsername() {
-        return usuario;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return activo;
-    }
 }

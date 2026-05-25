@@ -11,6 +11,11 @@ CREATE TABLE Rol(
 CREATE TABLE Personal (
 	personal_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	rol_id INT REFERENCES Rol(rol_id),
+	primer_nombre VARCHAR(50) NOT NULL,
+	segundo_nombre VARCHAR(50) NULL,
+	primer_apellido VARCHAR(50) NOT NULL,
+	segundo_apellido VARCHAR(50) NULL,
+	
 	especialidad VARCHAR(200) NOT NULL,
 	tipo_identificacion VARCHAR(100) NOT NULL,
 	identificacion VARCHAR(100) NOT NULL,
@@ -112,5 +117,5 @@ VALUES ('ADMIN'), ('PERSONAL');
 
 INSERT INTO Personal (rol_id, especialidad, tipo_identificacion, identificacion,
 direccion, carnet, usuario, contrasena, activo, created_at)
-VALUES (1, 'Programador', 'cédula', '402240833', 'Avenida 123', '123456789', 'example@gmail.com', '$2a$12$xiiXfivq.xywYjmXbFxg6.BbptpYUiUcZO6zACscQA79OqXGXGjT2',
+VALUES (2, 'Programador', 'cédula', '402250833', 'Avenida 123', '123456789', 'hello@gmail.com', '$2a$12$xiiXfivq.xywYjmXbFxg6.BbptpYUiUcZO6zACscQA79OqXGXGjT2',
 true, NOW());

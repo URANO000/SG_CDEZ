@@ -8,11 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="EncargadoLegal")
+@Table(name="encargadoLegal")
 public class EncargadoLegal {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
