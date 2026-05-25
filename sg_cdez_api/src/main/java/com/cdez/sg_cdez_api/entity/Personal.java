@@ -33,7 +33,7 @@ public class Personal {
     private String contrasena;
     private boolean activo;
     @ManyToOne
-    @JoinColumn(name = "created_by", nullable = false)
+    @JoinColumn(name = "created_by", nullable = true)
     private Personal createdBy;
     private LocalDateTime createdAt;
     @ManyToOne

@@ -1,10 +1,15 @@
 package com.cdez.sg_cdez_api.dto.request;
 
-import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class CambiaContrasenaRequest {
-    private UUID personalId;
-    private String ususuario;
     private String nuevaContransena;
     private String confirmarContrasena;
 }
