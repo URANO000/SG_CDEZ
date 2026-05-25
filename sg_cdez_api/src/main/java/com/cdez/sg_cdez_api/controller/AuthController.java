@@ -18,6 +18,7 @@ public class AuthController {
     //Login Api
     @PostMapping("/iniciarSesion")
     public ResponseEntity<JwtAuthResponse> iniciarSesion(@RequestBody LoginRequest loginRequest){
+
         return ResponseEntity.ok(SERVICE.iniciarSesion(loginRequest));
     }
 
