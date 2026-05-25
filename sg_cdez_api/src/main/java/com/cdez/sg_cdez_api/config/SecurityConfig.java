@@ -37,6 +37,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/iniciarSesion").permitAll()
                         .requestMatchers("/api/auth/adminAPI").hasRole("ADMIN")
                         .requestMatchers("/api/auth/personalAPI").hasAnyRole("PERSONAL", "ADMIN")
+                        .requestMatchers("/api/auth/cambiarContrasena").hasAnyRole("PERSONAL", "ADMIN")
 
                         .requestMatchers("/error").permitAll()
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()

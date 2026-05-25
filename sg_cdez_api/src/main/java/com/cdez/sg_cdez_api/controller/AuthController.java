@@ -1,5 +1,6 @@
 package com.cdez.sg_cdez_api.controller;
 
+import com.cdez.sg_cdez_api.dto.request.CambiaContrasenaRequest;
 import com.cdez.sg_cdez_api.dto.request.LoginRequest;
 import com.cdez.sg_cdez_api.dto.response.JwtAuthResponse;
 import com.cdez.sg_cdez_api.service.AuthService;
@@ -7,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -17,9 +20,15 @@ public class AuthController {
 
     //Login Api
     @PostMapping("/iniciarSesion")
-    public ResponseEntity<JwtAuthResponse> iniciarSesion(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity<JwtAuthResponse> iniciarSesion(@RequestBody LoginRequest request){
 
-        return ResponseEntity.ok(SERVICE.iniciarSesion(loginRequest));
+        return ResponseEntity.ok(SERVICE.iniciarSesion(request));
+    }
+
+    //Cambiar contraseña API
+    @PostMapping("/cambiarContrasena/{usuarioId}")
+    public ResponseEntity<?> cambiarContrasena(@RequestBody CambiaContrasenaRequest request, @PathVariable(name = "usuarioId") UUID usuarioId){
+        return ResponseEntity.ok(SERVICE.cambiarContrasena(request, usuarioId));
     }
 
     //APIs de prueba para control de roles
