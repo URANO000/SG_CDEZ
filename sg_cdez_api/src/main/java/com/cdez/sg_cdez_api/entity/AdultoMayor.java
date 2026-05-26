@@ -37,11 +37,11 @@ public class AdultoMayor {
     private LocalDateTime fechaFallecimiento;
     private String motivoRetiro;
     private boolean activo;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="created_by", nullable = false )
     private Personal createdBy;
     private LocalDateTime createdAt;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="updated_by", nullable = true)
     private Personal updatedBy;
     private LocalDateTime updatedAt;
