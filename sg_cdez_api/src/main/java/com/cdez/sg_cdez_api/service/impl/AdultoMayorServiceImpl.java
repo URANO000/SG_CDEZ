@@ -4,10 +4,13 @@ import com.cdez.sg_cdez_api.entity.Personal;
 import com.cdez.sg_cdez_api.repository.AuthRepository;
 import com.cdez.sg_cdez_api.dto.request.AdultoMayorRequest;
 import com.cdez.sg_cdez_api.dto.response.AdultoMayorResponse;
+import com.cdez.sg_cdez_api.dto.request.AdultoMayorUpdateRequest;
 import com.cdez.sg_cdez_api.entity.AdultoMayor;
 import com.cdez.sg_cdez_api.repository.AdultoMayorRepository;
 import com.cdez.sg_cdez_api.service.AdultoMayorService;
 import org.springframework.stereotype.Service;
+import com.cdez.sg_cdez_api.entity.CustomUserDetails;
+import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.UUID;
 
 import java.util.List;
@@ -78,9 +81,7 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         adultoMayor.setActivo(true);
         adultoMayor.setCreatedAt(java.time.LocalDateTime.now());
 
-        Personal usuarioCreador = authRepository.findByUsuario("example@gmail.com")
-                .orElseThrow(() -> new RuntimeException("Usuario creador de prueba no encontrado"));
-
+        Personal usuarioCreador = obtenerUsuarioAutenticado();
         adultoMayor.setCreatedBy(usuarioCreador);
 
         AdultoMayor adultoGuardado = adultoMayorRepository.save(adultoMayor);
@@ -96,32 +97,36 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         return mapToResponse(adultoMayor);
     }
     @Override
-    public AdultoMayorResponse actualizarAdultoMayor(UUID id, AdultoMayorRequest request) {
+    public AdultoMayorResponse actualizarAdultoMayor(UUID id, AdultoMayorUpdateRequest request) {
 
         AdultoMayor adultoMayor = adultoMayorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
 
-        adultoMayor.setTipoIdentificacion(request.tipoIdentificacion());
-        adultoMayor.setIdentificacion(request.identificacion());
-        adultoMayor.setPrimerNombre(request.primerNombre());
-        adultoMayor.setSegundoNombre(request.segundoNombre());
-        adultoMayor.setPrimerApellido(request.primerApellido());
-        adultoMayor.setSegundoApellido(request.segundoApellido());
-        adultoMayor.setNacionalidad(request.nacionalidad());
-        adultoMayor.setFechaNacimiento(request.fechaNacimiento());
-        adultoMayor.setSexo(request.sexo());
         adultoMayor.setDireccion(request.direccion());
         adultoMayor.setEscolaridad(request.escolaridad());
         adultoMayor.setGrupoFamiliar(request.grupoFamiliar());
-        adultoMayor.setPension(request.pension());
         adultoMayor.setFuncionalidadFisica(request.funcionalidadFisica());
         adultoMayor.setAyudaBiomecanica(request.ayudaBiomecanica());
-        adultoMayor.setFechaIngreso(request.fechaIngreso());
 
         adultoMayor.setUpdatedAt(java.time.LocalDateTime.now());
+
+        Personal usuarioActualizador = obtenerUsuarioAutenticado();
+        adultoMayor.setUpdatedBy(usuarioActualizador);
 
         AdultoMayor adultoActualizado = adultoMayorRepository.save(adultoMayor);
 
         return mapToResponse(adultoActualizado);
+    }
+    private Personal obtenerUsuarioAutenticado() {
+        Object principal = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (!(principal instanceof CustomUserDetails userDetails)) {
+            throw new RuntimeException("Usuario autenticado no válido");
+        }
+
+        return authRepository.findByPersonalId(userDetails.getUsuarioId())
+                .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado"));
     }
 }

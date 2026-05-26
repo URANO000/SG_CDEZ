@@ -1,6 +1,7 @@
 package com.cdez.sg_cdez_api.controller;
 
 import com.cdez.sg_cdez_api.dto.request.AdultoMayorRequest;
+import com.cdez.sg_cdez_api.dto.request.AdultoMayorUpdateRequest;
 import com.cdez.sg_cdez_api.dto.response.AdultoMayorResponse;
 import com.cdez.sg_cdez_api.service.AdultoMayorService;
 import org.springframework.web.bind.annotation.*;
@@ -31,11 +32,10 @@ public class AdultoMayorController {
     public AdultoMayorResponse crearAdultoMayor(@RequestBody AdultoMayorRequest request) {
         return adultoMayorService.crearAdultoMayor(request);
     }
-
     @PutMapping("/{id}")
     public AdultoMayorResponse actualizarAdultoMayor(
             @PathVariable UUID id,
-            @RequestBody AdultoMayorRequest request
+            @RequestBody AdultoMayorUpdateRequest request
     ) {
         return adultoMayorService.actualizarAdultoMayor(id, request);
     }
