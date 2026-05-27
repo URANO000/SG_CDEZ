@@ -11,6 +11,8 @@ import com.cdez.sg_cdez_api.service.AdultoMayorService;
 import org.springframework.stereotype.Service;
 import com.cdez.sg_cdez_api.entity.CustomUserDetails;
 import org.springframework.security.core.context.SecurityContextHolder;
+import com.cdez.sg_cdez_api.dto.request.AdultoMayorDesactivarRequest;
+import com.cdez.sg_cdez_api.dto.request.AdultoMayorFallecimientoRequest;
 import java.util.UUID;
 
 import java.util.List;
@@ -128,5 +130,67 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
 
         return authRepository.findByPersonalId(userDetails.getUsuarioId())
                 .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado"));
+    }
+    @Override
+    public AdultoMayorResponse desactivarAdultoMayor(UUID id, AdultoMayorDesactivarRequest request) {
+
+        AdultoMayor adultoMayor = adultoMayorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
+
+        if (adultoMayor.getFechaFallecimiento() != null) {
+            throw new RuntimeException("No se puede desactivar un adulto mayor fallecido");
+        }
+
+        adultoMayor.setActivo(false);
+        adultoMayor.setFechaRetiro(request.fechaRetiro());
+        adultoMayor.setMotivoRetiro(request.motivoRetiro());
+        adultoMayor.setUpdatedAt(java.time.LocalDateTime.now());
+
+        Personal usuarioActualizador = obtenerUsuarioAutenticado();
+        adultoMayor.setUpdatedBy(usuarioActualizador);
+
+        AdultoMayor actualizado = adultoMayorRepository.save(adultoMayor);
+
+        return mapToResponse(actualizado);
+    }
+    @Override
+    public AdultoMayorResponse activarAdultoMayor(UUID id) {
+
+        AdultoMayor adultoMayor = adultoMayorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
+
+        if (adultoMayor.getFechaFallecimiento() != null) {
+            throw new RuntimeException("No se puede activar un adulto mayor fallecido");
+        }
+
+        adultoMayor.setActivo(true);
+        adultoMayor.setFechaRetiro(null);
+        adultoMayor.setMotivoRetiro(null);
+        adultoMayor.setUpdatedAt(java.time.LocalDateTime.now());
+
+        Personal usuarioActualizador = obtenerUsuarioAutenticado();
+        adultoMayor.setUpdatedBy(usuarioActualizador);
+
+        AdultoMayor actualizado = adultoMayorRepository.save(adultoMayor);
+
+        return mapToResponse(actualizado);
+    }
+    @Override
+    public AdultoMayorResponse registrarFallecimiento(UUID id, AdultoMayorFallecimientoRequest request) {
+
+        AdultoMayor adultoMayor = adultoMayorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
+
+        adultoMayor.setActivo(false);
+        adultoMayor.setFechaFallecimiento(request.fechaFallecimiento());
+        adultoMayor.setMotivoRetiro(request.motivoRetiro());
+        adultoMayor.setUpdatedAt(java.time.LocalDateTime.now());
+
+        Personal usuarioActualizador = obtenerUsuarioAutenticado();
+        adultoMayor.setUpdatedBy(usuarioActualizador);
+
+        AdultoMayor actualizado = adultoMayorRepository.save(adultoMayor);
+
+        return mapToResponse(actualizado);
     }
 }

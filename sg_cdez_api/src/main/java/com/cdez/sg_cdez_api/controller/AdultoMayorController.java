@@ -5,6 +5,8 @@ import com.cdez.sg_cdez_api.dto.request.AdultoMayorUpdateRequest;
 import com.cdez.sg_cdez_api.dto.response.AdultoMayorResponse;
 import com.cdez.sg_cdez_api.service.AdultoMayorService;
 import org.springframework.web.bind.annotation.*;
+import com.cdez.sg_cdez_api.dto.request.AdultoMayorDesactivarRequest;
+import com.cdez.sg_cdez_api.dto.request.AdultoMayorFallecimientoRequest;
 import java.util.UUID;
 
 import java.util.List;
@@ -38,5 +40,25 @@ public class AdultoMayorController {
             @RequestBody AdultoMayorUpdateRequest request
     ) {
         return adultoMayorService.actualizarAdultoMayor(id, request);
+    }
+    @PatchMapping("/{id}/desactivar")
+    public AdultoMayorResponse desactivarAdultoMayor(
+            @PathVariable UUID id,
+            @RequestBody AdultoMayorDesactivarRequest request
+    ) {
+        return adultoMayorService.desactivarAdultoMayor(id, request);
+    }
+    @PatchMapping("/{id}/activar")
+    public AdultoMayorResponse activarAdultoMayor(
+            @PathVariable UUID id
+    ) {
+        return adultoMayorService.activarAdultoMayor(id);
+    }
+    @PatchMapping("/{id}/fallecimiento")
+    public AdultoMayorResponse registrarFallecimiento(
+            @PathVariable UUID id,
+            @RequestBody AdultoMayorFallecimientoRequest request
+    ) {
+        return adultoMayorService.registrarFallecimiento(id, request);
     }
 }
