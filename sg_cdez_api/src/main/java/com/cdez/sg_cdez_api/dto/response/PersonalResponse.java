@@ -19,9 +19,9 @@ public record PersonalResponse(
         String usuario,
         String contrasena,
         String activo,
-        UUID createdBy,
+        String createdBy,
         LocalDateTime createdAt,
-        UUID updatedBy,
+        String updatedBy,
         LocalDateTime updatedAt
 ) {
 }
