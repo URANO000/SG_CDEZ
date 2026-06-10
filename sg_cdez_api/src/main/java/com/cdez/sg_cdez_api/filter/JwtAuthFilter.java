@@ -55,8 +55,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 //Cargar datos del usuario desde la base de datos
                 UserDetails userDetails = this.userDetailsService.loadUserById(UUID.fromString(userId));
 
-                System.out.println(userDetails.getAuthorities());
-
                 //Validar el token
                 if(jwtService.isTokenValid(jwt, userDetails)){
                     //Crear token de autenticacion
