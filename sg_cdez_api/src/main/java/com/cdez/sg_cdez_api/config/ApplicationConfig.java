@@ -1,6 +1,5 @@
 package com.cdez.sg_cdez_api.config;
 
-import com.cdez.sg_cdez_api.repository.AuthRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
