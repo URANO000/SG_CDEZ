@@ -8,6 +8,6 @@ import java.util.List;
 
 @Service
 public interface PersonalService {
-    List<PersonalResponse> listarPersonal();
-    Personal obtenerPersonalPorId();
+//    List<PersonalResponse> listarPersonal();
+//    Personal obtenerPersonalPorId();
 }

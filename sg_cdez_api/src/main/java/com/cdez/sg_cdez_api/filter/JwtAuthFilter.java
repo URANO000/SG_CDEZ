@@ -3,9 +3,9 @@ package com.cdez.sg_cdez_api.filter;
 
 import com.cdez.sg_cdez_api.service.CustomUserDetailsService;
 import com.cdez.sg_cdez_api.service.JwtService;
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -34,18 +34,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
     throws ServletException, IOException {
 
-        //Get el header de autorización
-        final String authHeader = request.getHeader("Authorization");
-
-        //Si no hay header o no empieza con 'Bearer', salir de este filtro
-        if(authHeader == null || !authHeader.startsWith("Bearer ")){
+        //Get jwt from cookie
+        String jwt = extractJwtFromCookies(request);
+        if(jwt == null){
             filterChain.doFilter(request, response);
             return;
         }
 
         try{
             //Si el formato es correcto, extraer toddo luego de Bearer
-            final String jwt = authHeader.substring(7);
             final String userId = jwtService.extractUserId(jwt);
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -78,6 +75,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
 
+    }
+
+    //helper
+    private String extractJwtFromCookies(HttpServletRequest request){
+        Cookie[] cookies = request.getCookies();
+
+        if(cookies == null){
+            return null;
+        }
+
+        for(Cookie cookie : cookies){
+            if("access_token".equals(cookie.getName())){
+                return cookie.getValue();
+            }
+        }
+
+        return null;
     }
 
 }

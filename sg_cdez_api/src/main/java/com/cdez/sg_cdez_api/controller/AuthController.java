@@ -6,9 +6,8 @@ import com.cdez.sg_cdez_api.dto.response.JwtAuthResponse;
 import com.cdez.sg_cdez_api.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.UUID;
 
 @RestController
@@ -20,9 +19,28 @@ public class AuthController {
 
     //Login Api
     @PostMapping("/iniciarSesion")
-    public ResponseEntity<JwtAuthResponse> iniciarSesion(@RequestBody LoginRequest request){
+    public ResponseEntity<Void> iniciarSesion(@RequestBody LoginRequest request){
 
-        return ResponseEntity.ok(SERVICE.iniciarSesion(request));
+        JwtAuthResponse authResponse =
+                SERVICE.iniciarSesion(request);
+
+        ResponseCookie cookie = ResponseCookie.from(
+                "access_token",
+                authResponse.getAccessToken()
+        )
+                .httpOnly(true)
+                .secure(false) //Cambiamos a true en prod
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(15 * 60)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.SET_COOKIE,
+                        cookie.toString()
+                )
+                .build();
     }
 
     //Cambiar contraseña API

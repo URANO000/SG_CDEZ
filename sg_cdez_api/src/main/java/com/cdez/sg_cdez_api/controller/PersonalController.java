@@ -13,8 +13,8 @@ import java.util.List;
 public class PersonalController {
     private final PersonalService SERVICE;
 
-    @GetMapping("/listarPersonal")
-    public List<PersonalResponse> listarPersonal(){
-        return SERVICE.listarPersonal();
-    }
+//    @GetMapping("/listarPersonal")
+//    public List<PersonalResponse> listarPersonal(){
+//        return SERVICE.listarPersonal();
+//    }
 }
