@@ -30,6 +30,16 @@ public class AdultoMayorController {
         return adultoMayorService.obtenerAdultoMayorPorId(id);
     }
 
+    @GetMapping("/inactivos")
+    public List<AdultoMayorResponse> listarAdultosMayoresInactivos() {
+        return adultoMayorService.listarAdultosMayoresInactivos();
+    }
+
+    @GetMapping("/fallecidos")
+    public List<AdultoMayorResponse> listarAdultosMayoresFallecidos() {
+        return adultoMayorService.listarAdultosMayoresFallecidos();
+    }
+
     @PostMapping
     public AdultoMayorResponse crearAdultoMayor(@RequestBody AdultoMayorRequest request) {
         return adultoMayorService.crearAdultoMayor(request);

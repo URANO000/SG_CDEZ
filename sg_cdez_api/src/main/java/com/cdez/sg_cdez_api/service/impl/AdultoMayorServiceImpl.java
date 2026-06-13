@@ -29,7 +29,21 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
     }
     @Override
     public List<AdultoMayorResponse> listarAdultosMayores() {
-        return adultoMayorRepository.findAll()
+        return adultoMayorRepository.findByActivoTrue()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+    @Override
+    public List<AdultoMayorResponse> listarAdultosMayoresInactivos() {
+        return adultoMayorRepository.findByActivoFalseAndFechaFallecimientoIsNull()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+    @Override
+    public List<AdultoMayorResponse> listarAdultosMayoresFallecidos() {
+        return adultoMayorRepository.findByFechaFallecimientoIsNotNull()
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
