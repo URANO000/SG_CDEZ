@@ -1,12 +1,9 @@
-package com.cdez.sg_cdez_api.dto.response;
-
-import org.springframework.cglib.core.Local;
+package com.cdez.sg_cdez_api.dto.request;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
-public record PersonalResponse(
-        String rol,
+public record PersonalActualizarRequest(
+        int rol,
         String especialidad,
         String tipoIdentificacion,
         String identificacion,
@@ -17,10 +14,6 @@ public record PersonalResponse(
         String direccion,
         String carnet,
         String usuario,
-        String activo,
-        String createdBy,
-        LocalDateTime createdAt,
-        String updatedBy,
         LocalDateTime updatedAt
 ) {
 }
