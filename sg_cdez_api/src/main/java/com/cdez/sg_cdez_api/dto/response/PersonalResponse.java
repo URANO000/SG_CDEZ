@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record PersonalResponse(
+        UUID personalId,
         String rol,
         String especialidad,
         String tipoIdentificacion,

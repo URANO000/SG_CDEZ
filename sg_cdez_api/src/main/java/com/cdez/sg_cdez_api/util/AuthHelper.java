@@ -7,9 +7,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
+
 @Service
 public class AuthHelper {
     AuthRepository authRepository;
+
+    // Para password
+    private static final String CHARS =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     public AuthHelper(AuthRepository authRepository) {
         this.authRepository = authRepository;
@@ -34,4 +41,18 @@ public class AuthHelper {
         return esAdmin;
 
     }
+
+    public static String generarPassword(int longitud) {
+
+        StringBuilder sb = new StringBuilder();
+
+        for(int i = 0; i < longitud; i++) {
+            sb.append(CHARS.charAt(
+                    RANDOM.nextInt(CHARS.length())
+            ));
+        }
+
+        return sb.toString();
+    }
+
 }

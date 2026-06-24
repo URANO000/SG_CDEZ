@@ -27,12 +27,12 @@ public class PersonalController {
     }
 
     @PostMapping("/crearPersonal")
-    public PersonalResponse crearPersonal(PersonalCreateRequest request){
+    public PersonalResponse crearPersonal(@RequestBody PersonalCreateRequest request){
         return SERVICE.crearPersonal(request);
     }
 
     @PostMapping("/actualizarPersonal/{id}")
-    public PersonalResponse actualizarPersonal(@PathVariable(name = "id") UUID id, PersonalActualizarRequest request){
+    public PersonalResponse actualizarPersonal(@PathVariable(name = "id") UUID id,@RequestBody PersonalActualizarRequest request){
         return SERVICE.actualizarPersonal(id,request);
     }
 

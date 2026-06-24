@@ -7,9 +7,11 @@ import com.cdez.sg_cdez_api.entity.Personal;
 import com.cdez.sg_cdez_api.entity.Rol;
 import com.cdez.sg_cdez_api.repository.PersonalRepository;
 import com.cdez.sg_cdez_api.repository.RolRepository;
+import com.cdez.sg_cdez_api.service.EmailService;
 import com.cdez.sg_cdez_api.service.PersonalService;
 import com.cdez.sg_cdez_api.util.AuthHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -21,8 +23,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PersonalServiceImpl implements PersonalService {
     private final PersonalRepository REPOSITORY;
-    private final AuthHelper AUTHHELPER;
-    private final RolRepository ROLREPOSITORY;
+    private final AuthHelper AUTH_HELPER;
+    private final RolRepository ROL_REPOSITORY;
+    private final PasswordEncoder ENCODER;
+    private final EmailService EMAIL_SERVICE;
 
     @Override
     public List<PersonalResponse> listarPersonal() {
@@ -36,13 +40,21 @@ public class PersonalServiceImpl implements PersonalService {
 
     @Override
     public PersonalResponse crearPersonal(PersonalCreateRequest request){
-        if(!AUTHHELPER.isUsuarioAdmin()){
+        // Validaciones
+        if(!AUTH_HELPER.isUsuarioAdmin()){
             throw new RuntimeException("Sólo un usuario administrador puede crear nuevo personal.");
         }
+        if(REPOSITORY.existsByUsuario(request.usuario())){
+            throw new RuntimeException("Ya existe un usuario con ese correo.");
+        }
+
+        // Contraseña temporal
+        String passwordTemporal = AuthHelper.generarPassword(12);
 
         Personal personalNuevo = new Personal();
 
-        Rol rol = ROLREPOSITORY.findById(request.rol()).orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+        Rol rol = ROL_REPOSITORY.findById(request.rol()).orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+        System.out.println("Este es el rol" + rol);
         personalNuevo.setRol(rol);
         personalNuevo.setEspecialidad(request.especialidad());
         personalNuevo.setTipoIdentificacion(request.tipoIdentificacion());
@@ -54,23 +66,28 @@ public class PersonalServiceImpl implements PersonalService {
         personalNuevo.setDireccion(request.direccion());
         personalNuevo.setCarnet(request.carnet());
         personalNuevo.setUsuario(request.usuario());
-        personalNuevo.setActivo(request.activo());
+        personalNuevo.setContrasena(ENCODER.encode(passwordTemporal));
+        personalNuevo.setActivo(true); // Por defecto
         personalNuevo.setCreatedAt(LocalDateTime.now(Clock.systemUTC()));
-        personalNuevo.setCreatedBy(AUTHHELPER.obtenerUsuarioAutenticado());
+        personalNuevo.setCreatedBy(AUTH_HELPER.obtenerUsuarioAutenticado());
 
         Personal personalGuardado = REPOSITORY.save(personalNuevo);
+
+        // Enviar correo con contraseña temporal
+        EMAIL_SERVICE.enviarCredenciales(personalGuardado.getUsuario(), passwordTemporal);
+
         return mapDTO(personalGuardado);
     }
 
     @Override
     public PersonalResponse actualizarPersonal(UUID id, PersonalActualizarRequest request){
-        if(!AUTHHELPER.isUsuarioAdmin()){
+        if(!AUTH_HELPER.isUsuarioAdmin()){
             throw new RuntimeException("Sólo un usuario administrador puede editar el personal.");
         }
 
         Personal personalViejo = obtenerPersonalCheck(id);
 
-        Rol rol = ROLREPOSITORY.findById(request.rol()).orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+        Rol rol = ROL_REPOSITORY.findById(request.rol()).orElseThrow(() -> new RuntimeException("Rol no encontrado"));
         personalViejo.setRol(rol);
         personalViejo.setEspecialidad(request.especialidad());
         personalViejo.setTipoIdentificacion(request.tipoIdentificacion());
@@ -82,7 +99,7 @@ public class PersonalServiceImpl implements PersonalService {
         personalViejo.setDireccion(request.direccion());
         personalViejo.setCarnet(request.carnet());
         personalViejo.setUsuario(request.usuario());
-        personalViejo.setUpdatedBy(AUTHHELPER.obtenerUsuarioAutenticado());
+        personalViejo.setUpdatedBy(AUTH_HELPER.obtenerUsuarioAutenticado());
         personalViejo.setUpdatedAt(LocalDateTime.now(Clock.systemUTC()));
 
         Personal personalNuevo = REPOSITORY.save(personalViejo);
@@ -91,7 +108,7 @@ public class PersonalServiceImpl implements PersonalService {
 
     @Override
     public PersonalResponse activarPersonal(UUID id){
-        if(!AUTHHELPER.isUsuarioAdmin()){
+        if(!AUTH_HELPER.isUsuarioAdmin()){
             throw new RuntimeException("Sólo un usuario administrador puede activar el personal.");
         }
 
@@ -106,7 +123,7 @@ public class PersonalServiceImpl implements PersonalService {
 
     @Override
     public PersonalResponse desactivarPersonal(UUID id){
-        if(!AUTHHELPER.isUsuarioAdmin()){
+        if(!AUTH_HELPER.isUsuarioAdmin()){
             throw new RuntimeException("Sólo un usuario administrador puede desactivar el personal.");
         }
 
@@ -122,6 +139,7 @@ public class PersonalServiceImpl implements PersonalService {
     //Mapper
     private PersonalResponse mapDTO(Personal personal){
         return new PersonalResponse(
+                personal.getPersonalId(),
                 personal.getRol().getNombre(),
                 personal.getEspecialidad(),
                 personal.getTipoIdentificacion(),
