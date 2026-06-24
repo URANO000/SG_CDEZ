@@ -12,7 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "adultoMayor")
+@Table(name = "adultomayor")
 public class AdultoMayor {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -52,7 +52,7 @@ public class AdultoMayor {
 
     @ManyToMany
     @JoinTable(
-            name = "EncargadoAdulto",
+            name = "encargadoadulto",
             joinColumns = @JoinColumn(name = "adulto_id"),
             inverseJoinColumns = @JoinColumn(name = "encargado_id")
     )

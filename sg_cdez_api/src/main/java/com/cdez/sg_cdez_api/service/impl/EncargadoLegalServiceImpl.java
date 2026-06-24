@@ -1,0 +1,124 @@
+package com.cdez.sg_cdez_api.service.impl;
+
+import com.cdez.sg_cdez_api.dto.request.EncargadoLegalRequest;
+import com.cdez.sg_cdez_api.dto.request.EncargadoLegalUpdateRequest;
+import com.cdez.sg_cdez_api.dto.response.EncargadoLegalResponse;
+import com.cdez.sg_cdez_api.entity.AdultoMayor;
+import com.cdez.sg_cdez_api.entity.CustomUserDetails;
+import com.cdez.sg_cdez_api.entity.EncargadoLegal;
+import com.cdez.sg_cdez_api.entity.Personal;
+import com.cdez.sg_cdez_api.repository.AdultoMayorRepository;
+import com.cdez.sg_cdez_api.repository.AuthRepository;
+import com.cdez.sg_cdez_api.repository.EncargadoLegalRepository;
+import com.cdez.sg_cdez_api.service.EncargadoLegalService;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class EncargadoLegalServiceImpl implements EncargadoLegalService {
+
+    private final EncargadoLegalRepository encargadoLegalRepository;
+    private final AdultoMayorRepository adultoMayorRepository;
+    private final AuthRepository authRepository;
+
+    public EncargadoLegalServiceImpl(
+            EncargadoLegalRepository encargadoLegalRepository,
+            AdultoMayorRepository adultoMayorRepository,
+            AuthRepository authRepository
+    ) {
+        this.encargadoLegalRepository = encargadoLegalRepository;
+        this.adultoMayorRepository = adultoMayorRepository;
+        this.authRepository = authRepository;
+    }
+
+    /**
+     * Registra un nuevo encargado legal y establece
+     * su relación con un adulto mayor.
+     */
+    @Override
+    public EncargadoLegalResponse registrarEncargado(UUID adultoId, EncargadoLegalRequest request) {
+
+        AdultoMayor adultoMayor = adultoMayorRepository.findById(adultoId)
+                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
+
+        EncargadoLegal encargado = new EncargadoLegal();
+        encargado.setTipoIdentificacion(request.tipoIdentificacion());
+        encargado.setIdentificacion(request.identificacion());
+        encargado.setPrimerNombre(request.primerNombre());
+        encargado.setSegundoNombre(request.segundoNombre());
+        encargado.setPrimerApellido(request.primerApellido());
+        encargado.setSegundoApellido(request.segundoApellido());
+        encargado.setDireccion(request.direccion());
+        encargado.setActivo(true);
+        encargado.setCreatedAt(LocalDateTime.now());
+        encargado.setCreatedBy(obtenerUsuarioAutenticado());
+
+        encargado.getAdultos().add(adultoMayor);
+        adultoMayor.getEncargados().add(encargado);
+
+        EncargadoLegal guardado = encargadoLegalRepository.save(encargado);
+
+        return mapToResponse(guardado);
+    }
+
+    @Override
+    public List<EncargadoLegalResponse> listarEncargadosPorAdulto(UUID adultoId) {
+        return encargadoLegalRepository.findByAdultosAdultoIdAndActivoTrue(adultoId)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    @Override
+    public EncargadoLegalResponse obtenerEncargadoPorId(UUID encargadoId) {
+        EncargadoLegal encargado = encargadoLegalRepository.findById(encargadoId)
+                .orElseThrow(() -> new RuntimeException("Encargado legal no encontrado"));
+
+        return mapToResponse(encargado);
+    }
+
+    @Override
+    public EncargadoLegalResponse actualizarEncargado(UUID encargadoId, EncargadoLegalUpdateRequest request) {
+        EncargadoLegal encargado = encargadoLegalRepository.findById(encargadoId)
+                .orElseThrow(() -> new RuntimeException("Encargado legal no encontrado"));
+
+        encargado.setDireccion(request.direccion());
+        encargado.setUpdatedAt(LocalDateTime.now());
+        encargado.setUpdatedBy(obtenerUsuarioAutenticado());
+
+        EncargadoLegal actualizado = encargadoLegalRepository.save(encargado);
+
+        return mapToResponse(actualizado);
+    }
+
+    private EncargadoLegalResponse mapToResponse(EncargadoLegal encargado) {
+        return new EncargadoLegalResponse(
+                encargado.getEncargadoId(),
+                encargado.getTipoIdentificacion(),
+                encargado.getIdentificacion(),
+                encargado.getPrimerNombre(),
+                encargado.getSegundoNombre(),
+                encargado.getPrimerApellido(),
+                encargado.getSegundoApellido(),
+                encargado.getDireccion(),
+                encargado.isActivo()
+        );
+    }
+
+    private Personal obtenerUsuarioAutenticado() {
+        Object principal = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (!(principal instanceof CustomUserDetails userDetails)) {
+            throw new RuntimeException("Usuario autenticado no válido");
+        }
+
+        return authRepository.findByPersonalId(userDetails.getUsuarioId())
+                .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado"));
+    }
+}
