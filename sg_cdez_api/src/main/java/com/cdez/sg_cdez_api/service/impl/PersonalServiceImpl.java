@@ -39,7 +39,7 @@ public class PersonalServiceImpl implements PersonalService {
         if(!AUTHHELPER.isUsuarioAdmin()){
             throw new RuntimeException("Sólo un usuario administrador puede crear nuevo personal.");
         }
-        
+
         Personal personalNuevo = new Personal();
 
         Rol rol = ROLREPOSITORY.findById(request.rol()).orElseThrow(() -> new RuntimeException("Rol no encontrado"));
@@ -152,8 +152,7 @@ public class PersonalServiceImpl implements PersonalService {
 
     //Personal existe?
     private Personal obtenerPersonalCheck(UUID id){
-        Personal personal = REPOSITORY.findById(id)
+        return REPOSITORY.findById(id)
                 .orElseThrow(()-> new RuntimeException("Personal no encontrado."));
-        return personal;
     }
 }

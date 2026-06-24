@@ -5,8 +5,9 @@ import com.cdez.sg_cdez_api.entity.Personal;
 import com.cdez.sg_cdez_api.repository.AuthRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 
-
+@Service
 public class AuthHelper {
     AuthRepository authRepository;
 
