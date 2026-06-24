@@ -25,6 +25,12 @@ public class AdultoMayorController {
     public List<AdultoMayorResponse> listarAdultosMayores() {
         return adultoMayorService.listarAdultosMayores();
     }
+    @GetMapping("/buscar")
+    public List<AdultoMayorResponse> buscarAdultosMayores(
+            @RequestParam(required = false) String texto
+    ) {
+        return adultoMayorService.buscarAdultosMayores(texto);
+    }
     @GetMapping("/{id}")
     public AdultoMayorResponse obtenerAdultoMayorPorId(@PathVariable UUID id) {
         return adultoMayorService.obtenerAdultoMayorPorId(id);

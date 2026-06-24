@@ -71,6 +71,25 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                 adultoMayor.isActivo()
         );
     }
+    @Override
+    public List<AdultoMayorResponse> buscarAdultosMayores(String texto) {
+
+        if (texto == null || texto.isBlank()) {
+            return listarAdultosMayores();
+        }
+
+        return adultoMayorRepository
+                .findByPrimerNombreContainingIgnoreCaseOrSegundoNombreContainingIgnoreCaseOrPrimerApellidoContainingIgnoreCaseOrSegundoApellidoContainingIgnoreCaseOrIdentificacionContainingIgnoreCase(
+                        texto,
+                        texto,
+                        texto,
+                        texto,
+                        texto
+                )
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
 
     @Override
     public AdultoMayorResponse crearAdultoMayor(AdultoMayorRequest request) {

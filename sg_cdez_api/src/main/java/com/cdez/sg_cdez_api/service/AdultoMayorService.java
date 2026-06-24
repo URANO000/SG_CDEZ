@@ -12,6 +12,7 @@ public interface AdultoMayorService {
     List<AdultoMayorResponse> listarAdultosMayores();
     List<AdultoMayorResponse> listarAdultosMayoresInactivos();
     List<AdultoMayorResponse> listarAdultosMayoresFallecidos();
+    List<AdultoMayorResponse> buscarAdultosMayores(String texto);
     AdultoMayorResponse crearAdultoMayor(AdultoMayorRequest request);
     AdultoMayorResponse obtenerAdultoMayorPorId(UUID id);
     AdultoMayorResponse actualizarAdultoMayor(UUID id, AdultoMayorUpdateRequest request);

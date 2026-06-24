@@ -12,4 +12,12 @@ public interface AdultoMayorRepository extends JpaRepository<AdultoMayor, UUID> 
     List<AdultoMayor> findByActivoFalseAndFechaFallecimientoIsNull();
 
     List<AdultoMayor> findByFechaFallecimientoIsNotNull();
+
+    List<AdultoMayor> findByPrimerNombreContainingIgnoreCaseOrSegundoNombreContainingIgnoreCaseOrPrimerApellidoContainingIgnoreCaseOrSegundoApellidoContainingIgnoreCaseOrIdentificacionContainingIgnoreCase(
+            String primerNombre,
+            String segundoNombre,
+            String primerApellido,
+            String segundoApellido,
+            String identificacion
+    );
 }
