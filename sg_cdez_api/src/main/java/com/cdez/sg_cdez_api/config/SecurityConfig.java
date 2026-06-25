@@ -45,6 +45,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/adultos-mayores/**").hasAnyRole("PERSONAL", "ADMIN")
 
+                        .requestMatchers("/api/personal/**").hasRole("ADMIN")
+
                         .requestMatchers("/error").permitAll()
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .anyRequest().authenticated()

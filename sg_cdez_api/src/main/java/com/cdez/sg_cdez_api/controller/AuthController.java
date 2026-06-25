@@ -7,6 +7,8 @@ import com.cdez.sg_cdez_api.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
@@ -43,6 +45,27 @@ public class AuthController {
                 .build();
     }
 
+    @PostMapping("/cerrarSesion")
+    public ResponseEntity<Void> cerrarSesion(){
+        ResponseCookie deleteCookie = ResponseCookie.from(
+                        "access_token",
+                        ""
+                )
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.SET_COOKIE,
+                        deleteCookie.toString()
+                )
+                .build();
+    }
+
     //Cambiar contraseña API
     @PostMapping("/cambiarContrasena/{usuarioId}")
     public ResponseEntity<?> cambiarContrasena(@RequestBody CambiaContrasenaRequest request, @PathVariable(name = "usuarioId") UUID usuarioId){
@@ -52,6 +75,10 @@ public class AuthController {
     //APIs de prueba para control de roles
     @GetMapping("/adminAPI")
     public String adminAPI(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        System.out.println(auth);
+        System.out.println(auth.getAuthorities());
         return "Hellom I am an ADMIN user";
     }
 
