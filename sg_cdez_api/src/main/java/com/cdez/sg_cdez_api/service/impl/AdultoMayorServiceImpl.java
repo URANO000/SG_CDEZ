@@ -164,6 +164,7 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         return authRepository.findByPersonalId(userDetails.getUsuarioId())
                 .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado"));
     }
+    
     @Override
     public AdultoMayorResponse desactivarAdultoMayor(UUID id, AdultoMayorDesactivarRequest request) {
 
