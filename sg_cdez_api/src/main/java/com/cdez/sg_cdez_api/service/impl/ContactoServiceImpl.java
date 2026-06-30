@@ -17,7 +17,12 @@ public class ContactoServiceImpl implements ContactoService {
     private final ContactoRepository CONTACTO_REPOSITORY;
 
     @Override
-    public List<ContactoResponse> listarContactoPorId(UUID uuid) {
+    public List<ContactoResponse> listarContactoPorPersonal(Personal personal) {
+        return CONTACTO_REPOSITORY.findByPersonal(personal).stream().map(this::mapDTO).toList();
+    }
+
+    @Override
+    public List<ContactoResponse> listarContactoPorEncargado(UUID encargado) {
         return List.of();
     }
 
@@ -51,5 +56,15 @@ public class ContactoServiceImpl implements ContactoService {
     @Override
     public ContactoResponse actualizarContacto(UUID id, ContactoUpdateRequest request) {
         return null;
+    }
+
+    private ContactoResponse mapDTO(Contacto contacto){
+        return new ContactoResponse(
+                contacto.getContactoId(),
+                contacto.getPersonal() != null ? contacto.getPersonal().getNombreCompleto() : null,
+                contacto.getEncargado() != null ? contacto.getEncargado().getNombreCompleto() : null,
+                contacto.getValor(),
+                contacto.getTipoValor()
+        );
     }
 }

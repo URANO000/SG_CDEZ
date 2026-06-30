@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -60,4 +62,11 @@ public class Personal {
 
     @OneToMany(mappedBy = "personal")
     private List<Documento> documentos = new ArrayList<>();
+
+    // Util para conseguir nombre completo
+    public String getNombreCompleto(){
+        return Stream.of(getPrimerNombre(), getSegundoNombre(), getPrimerApellido(), getSegundoApellido())
+                .filter(s -> s != null && !s.trim().isEmpty())
+                .collect(Collectors.joining(" "));
+    }
 }

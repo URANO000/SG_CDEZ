@@ -157,7 +157,9 @@ public class PersonalServiceImpl implements PersonalService {
                 personal.getUsuario(),
                 personal.getCreatedAt(),
                 personal.getUsuario(),
-                personal.getUpdatedAt()
+                personal.getUpdatedAt(),
+
+                CONTACTO_SERVICE.listarContactoPorPersonal(personal)
         );
     }
 
