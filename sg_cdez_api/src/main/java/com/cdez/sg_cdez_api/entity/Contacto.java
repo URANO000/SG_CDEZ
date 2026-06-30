@@ -14,10 +14,10 @@ public class Contacto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int contactoId;
     @ManyToOne
-    @JoinColumn(name = "personal_id", nullable = true)
+    @JoinColumn(name = "personal_id")
     private Personal personal;
     @ManyToOne
-    @JoinColumn(name = "encargado_id", nullable = true)
+    @JoinColumn(name = "encargado_id")
     private EncargadoLegal encargado;
     private String valor;
     private String tipoValor;

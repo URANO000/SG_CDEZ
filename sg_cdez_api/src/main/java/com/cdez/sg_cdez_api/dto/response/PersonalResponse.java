@@ -1,9 +1,7 @@
 package com.cdez.sg_cdez_api.dto.response;
 
-import org.springframework.cglib.core.Local;
-
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.*;
 
 public record PersonalResponse(
         UUID personalId,
@@ -22,6 +20,8 @@ public record PersonalResponse(
         String createdBy,
         LocalDateTime createdAt,
         String updatedBy,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+
+        List<ContactoResponse> contactos
 ) {
 }
