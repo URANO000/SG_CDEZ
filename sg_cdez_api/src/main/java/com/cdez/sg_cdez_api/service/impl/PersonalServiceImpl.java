@@ -154,9 +154,9 @@ public class PersonalServiceImpl implements PersonalService {
                 personal.getCarnet(),
                 personal.getUsuario(),
                 activoConversion(personal.isActivo()),
-                personal.getUsuario(),
+                personal.getCreatedBy() != null ? personal.getCreatedBy().getUsuario() : null,
                 personal.getCreatedAt(),
-                personal.getUsuario(),
+                personal.getUpdatedBy() != null ? personal.getUpdatedBy().getUsuario() : null ,
                 personal.getUpdatedAt(),
 
                 CONTACTO_SERVICE.listarContactoPorPersonal(personal)
