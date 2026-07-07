@@ -1,15 +1,12 @@
 package com.cdez.sg_cdez_api.service.impl;
 
-import com.cdez.sg_cdez_api.dto.request.PersonalActualizarRequest;
-import com.cdez.sg_cdez_api.dto.request.PersonalCreateRequest;
+import com.cdez.sg_cdez_api.dto.request.*;
 import com.cdez.sg_cdez_api.dto.response.PersonalResponse;
-import com.cdez.sg_cdez_api.entity.Personal;
-import com.cdez.sg_cdez_api.entity.Rol;
-import com.cdez.sg_cdez_api.repository.PersonalRepository;
-import com.cdez.sg_cdez_api.repository.RolRepository;
-import com.cdez.sg_cdez_api.service.EmailService;
-import com.cdez.sg_cdez_api.service.PersonalService;
+import com.cdez.sg_cdez_api.entity.*;
+import com.cdez.sg_cdez_api.repository.*;
+import com.cdez.sg_cdez_api.service.*;
 import com.cdez.sg_cdez_api.util.AuthHelper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,6 +24,7 @@ public class PersonalServiceImpl implements PersonalService {
     private final RolRepository ROL_REPOSITORY;
     private final PasswordEncoder ENCODER;
     private final EmailService EMAIL_SERVICE;
+    private final ContactoService CONTACTO_SERVICE;
 
     @Override
     public List<PersonalResponse> listarPersonal() {
@@ -38,6 +36,7 @@ public class PersonalServiceImpl implements PersonalService {
         return mapDTO(obtenerPersonalCheck(id));
     }
 
+    @Transactional
     @Override
     public PersonalResponse crearPersonal(PersonalCreateRequest request){
         // Validaciones
@@ -72,6 +71,9 @@ public class PersonalServiceImpl implements PersonalService {
         personalNuevo.setCreatedBy(AUTH_HELPER.obtenerUsuarioAutenticado());
 
         Personal personalGuardado = REPOSITORY.save(personalNuevo);
+
+        //Crear contactos nuevos (o contacto nuevo)
+        CONTACTO_SERVICE.crearContactoPersonal(request.contactos(), personalGuardado);
 
         // Enviar correo con contraseña temporal
         EMAIL_SERVICE.enviarCredenciales(personalGuardado.getUsuario(), passwordTemporal);
@@ -152,10 +154,12 @@ public class PersonalServiceImpl implements PersonalService {
                 personal.getCarnet(),
                 personal.getUsuario(),
                 activoConversion(personal.isActivo()),
-                personal.getUsuario(),
+                personal.getCreatedBy() != null ? personal.getCreatedBy().getUsuario() : null,
                 personal.getCreatedAt(),
-                personal.getUsuario(),
-                personal.getUpdatedAt()
+                personal.getUpdatedBy() != null ? personal.getUpdatedBy().getUsuario() : null ,
+                personal.getUpdatedAt(),
+
+                CONTACTO_SERVICE.listarContactoPorPersonal(personal)
         );
     }
 

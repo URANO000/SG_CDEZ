@@ -5,8 +5,10 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -41,5 +43,13 @@ public class EncargadoLegal {
 
     @ManyToMany(mappedBy = "encargados")
     private List<AdultoMayor> adultos = new ArrayList<>();
+
+    // Util para conseguir nombre completo
+    public String getNombreCompleto(){
+        return Arrays.asList(getPrimerNombre(), getSegundoNombre(), getPrimerApellido(), getSegundoApellido())
+                .stream()
+                .filter(s -> s != null && !s.trim().isEmpty())
+                .collect(Collectors.joining(" "));
+    }
 
 }
