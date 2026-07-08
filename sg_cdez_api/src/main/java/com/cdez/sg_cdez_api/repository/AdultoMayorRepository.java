@@ -20,4 +20,5 @@ public interface AdultoMayorRepository extends JpaRepository<AdultoMayor, UUID> 
             String segundoApellido,
             String identificacion
     );
+    boolean existsByIdentificacion(String identificacion);
 }

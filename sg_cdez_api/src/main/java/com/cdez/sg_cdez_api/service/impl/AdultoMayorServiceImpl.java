@@ -13,6 +13,8 @@ import com.cdez.sg_cdez_api.entity.CustomUserDetails;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.cdez.sg_cdez_api.dto.request.AdultoMayorDesactivarRequest;
 import com.cdez.sg_cdez_api.dto.request.AdultoMayorFallecimientoRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import java.util.UUID;
 
 import java.util.List;
@@ -94,6 +96,12 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
     @Override
     public AdultoMayorResponse crearAdultoMayor(AdultoMayorRequest request) {
 
+        if (adultoMayorRepository.existsByIdentificacion(request.identificacion())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Ya existe un adulto mayor con esa identificación"
+            );
+        }
         AdultoMayor adultoMayor = new AdultoMayor();
 
         adultoMayor.setTipoIdentificacion(request.tipoIdentificacion());
@@ -125,9 +133,11 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
     }
     @Override
     public AdultoMayorResponse obtenerAdultoMayorPorId(UUID id) {
-
         AdultoMayor adultoMayor = adultoMayorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Adulto mayor no encontrado"
+                ));
 
         return mapToResponse(adultoMayor);
     }
@@ -135,7 +145,10 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
     public AdultoMayorResponse actualizarAdultoMayor(UUID id, AdultoMayorUpdateRequest request) {
 
         AdultoMayor adultoMayor = adultoMayorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Adulto mayor no encontrado"
+                ));
 
         adultoMayor.setDireccion(request.direccion());
         adultoMayor.setEscolaridad(request.escolaridad());
@@ -164,17 +177,18 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         return authRepository.findByPersonalId(userDetails.getUsuarioId())
                 .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado"));
     }
-    
+
     @Override
     public AdultoMayorResponse desactivarAdultoMayor(UUID id, AdultoMayorDesactivarRequest request) {
 
         AdultoMayor adultoMayor = adultoMayorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
-
         if (adultoMayor.getFechaFallecimiento() != null) {
-            throw new RuntimeException("No se puede desactivar un adulto mayor fallecido");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "No se puede desactivar un adulto mayor fallecido"
+            );
         }
-
         adultoMayor.setActivo(false);
         adultoMayor.setFechaRetiro(request.fechaRetiro());
         adultoMayor.setMotivoRetiro(request.motivoRetiro());
@@ -191,10 +205,16 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
     public AdultoMayorResponse activarAdultoMayor(UUID id) {
 
         AdultoMayor adultoMayor = adultoMayorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Adulto mayor no encontrado"
+                ));
 
         if (adultoMayor.getFechaFallecimiento() != null) {
-            throw new RuntimeException("No se puede activar un adulto mayor fallecido");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "No se puede activar un adulto mayor fallecido"
+            );
         }
 
         adultoMayor.setActivo(true);
@@ -213,7 +233,10 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
     public AdultoMayorResponse registrarFallecimiento(UUID id, AdultoMayorFallecimientoRequest request) {
 
         AdultoMayor adultoMayor = adultoMayorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Adulto mayor no encontrado"
+                ));
 
         adultoMayor.setActivo(false);
         adultoMayor.setFechaFallecimiento(request.fechaFallecimiento());
