@@ -119,3 +119,41 @@ INSERT INTO Personal (rol_id, especialidad, tipo_identificacion, identificacion,
 direccion, carnet, usuario, contrasena, activo, created_at)
 VALUES (2, 'Programador', 'cédula', '402250833', 'Avenida 123', '123456789', 'hello@gmail.com', '$2a$12$xiiXfivq.xywYjmXbFxg6.BbptpYUiUcZO6zACscQA79OqXGXGjT2',
 true, NOW());
+
+/*Tablas e índices relacionados al modelo inicial de las epicrisis (08/07/2026)*/
+CREATE TABLE Epicrisis(
+	epicrisis_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	adulto_id UUID REFERENCES AdultoMayor(adulto_id) NOT NULL,
+
+	fecha_emision TIMESTAMP NOT NULL,
+	centro_salud VARCHAR(150) NOT NULL,
+
+	nombre_archivo VARCHAR(200) NOT NULL,
+	tipo_archivo VARCHAR(100) NOT NULL,
+	tamano_archivo BIGINT NOT NULL,
+	archivo BYTEA NOT NULL,
+
+	activo BOOL NOT NULL,
+
+	created_by UUID REFERENCES Personal(personal_id) NOT NULL,
+	created_at TIMESTAMP NOT NULL,
+	updated_by UUID REFERENCES Personal(personal_id) NULL,
+	updated_at TIMESTAMP NULL,
+
+	CONSTRAINT chk_epicrisis_tamano_archivo
+	CHECK (tamano_archivo > 0)
+);
+
+CREATE INDEX idx_epicrisis_adulto_id
+ON Epicrisis(adulto_id);
+
+CREATE INDEX idx_epicrisis_fecha_emision
+ON Epicrisis(fecha_emision);
+
+SELECT
+    conname AS constraint_name,
+    contype AS constraint_type,
+    pg_get_constraintdef(c.oid) AS definition
+FROM pg_constraint c
+JOIN pg_class t ON c.conrelid = t.oid
+WHERE t.relname = 'epicrisis';
