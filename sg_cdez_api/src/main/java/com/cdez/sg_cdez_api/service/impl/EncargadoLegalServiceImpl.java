@@ -57,10 +57,10 @@ public class EncargadoLegalServiceImpl implements EncargadoLegalService {
         encargado.setCreatedAt(LocalDateTime.now());
         encargado.setCreatedBy(obtenerUsuarioAutenticado());
 
-        encargado.getAdultos().add(adultoMayor);
-        adultoMayor.getEncargados().add(encargado);
-
         EncargadoLegal guardado = encargadoLegalRepository.save(encargado);
+
+        adultoMayor.getEncargados().add(guardado);
+        adultoMayorRepository.save(adultoMayor);
 
         return mapToResponse(guardado);
     }

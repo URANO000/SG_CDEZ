@@ -43,7 +43,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/personalAPI").hasAnyRole("PERSONAL", "ADMIN")
                         .requestMatchers("/api/auth/cambiarContrasena/**").hasAnyRole("PERSONAL", "ADMIN")
 
-                        .requestMatchers("/adultos-mayores/**").hasAnyRole("PERSONAL", "ADMIN")
+                        .requestMatchers("/api/adultos-mayores/**").hasAnyRole("PERSONAL", "ADMIN")
+                        .requestMatchers("/api/encargados/**").hasAnyRole("PERSONAL", "ADMIN")
 
                         .requestMatchers("/api/personal/**").hasRole("ADMIN")
 
