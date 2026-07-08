@@ -12,7 +12,7 @@ import java.util.UUID;
 import java.util.List;
 
 @RestController
-@RequestMapping("/adultos-mayores")
+@RequestMapping("/api/adultos-mayores")
 public class AdultoMayorController {
 
     private final AdultoMayorService adultoMayorService;
