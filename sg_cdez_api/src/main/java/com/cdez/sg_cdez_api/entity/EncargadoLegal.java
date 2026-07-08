@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="encargadoLegal")
+@Table(name="encargadolegal")
 public class EncargadoLegal {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

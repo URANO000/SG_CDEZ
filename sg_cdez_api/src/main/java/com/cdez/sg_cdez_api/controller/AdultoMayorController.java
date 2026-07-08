@@ -25,9 +25,25 @@ public class AdultoMayorController {
     public List<AdultoMayorResponse> listarAdultosMayores() {
         return adultoMayorService.listarAdultosMayores();
     }
+    @GetMapping("/buscar")
+    public List<AdultoMayorResponse> buscarAdultosMayores(
+            @RequestParam(required = false) String texto
+    ) {
+        return adultoMayorService.buscarAdultosMayores(texto);
+    }
     @GetMapping("/{id}")
     public AdultoMayorResponse obtenerAdultoMayorPorId(@PathVariable UUID id) {
         return adultoMayorService.obtenerAdultoMayorPorId(id);
+    }
+
+    @GetMapping("/inactivos")
+    public List<AdultoMayorResponse> listarAdultosMayoresInactivos() {
+        return adultoMayorService.listarAdultosMayoresInactivos();
+    }
+
+    @GetMapping("/fallecidos")
+    public List<AdultoMayorResponse> listarAdultosMayoresFallecidos() {
+        return adultoMayorService.listarAdultosMayoresFallecidos();
     }
 
     @PostMapping
