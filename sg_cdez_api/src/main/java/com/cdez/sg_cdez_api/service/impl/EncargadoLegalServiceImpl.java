@@ -10,7 +10,9 @@ import com.cdez.sg_cdez_api.entity.Personal;
 import com.cdez.sg_cdez_api.repository.AdultoMayorRepository;
 import com.cdez.sg_cdez_api.repository.AuthRepository;
 import com.cdez.sg_cdez_api.repository.EncargadoLegalRepository;
+import com.cdez.sg_cdez_api.service.ContactoService;
 import com.cdez.sg_cdez_api.service.EncargadoLegalService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -19,21 +21,13 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class EncargadoLegalServiceImpl implements EncargadoLegalService {
 
     private final EncargadoLegalRepository encargadoLegalRepository;
     private final AdultoMayorRepository adultoMayorRepository;
     private final AuthRepository authRepository;
-
-    public EncargadoLegalServiceImpl(
-            EncargadoLegalRepository encargadoLegalRepository,
-            AdultoMayorRepository adultoMayorRepository,
-            AuthRepository authRepository
-    ) {
-        this.encargadoLegalRepository = encargadoLegalRepository;
-        this.adultoMayorRepository = adultoMayorRepository;
-        this.authRepository = authRepository;
-    }
+    private final ContactoService CONTACTO_SERVICE;
 
     /**
      * Registra un nuevo encargado legal y establece
@@ -61,6 +55,10 @@ public class EncargadoLegalServiceImpl implements EncargadoLegalService {
 
         adultoMayor.getEncargados().add(guardado);
         adultoMayorRepository.save(adultoMayor);
+
+        //Crear contacto si aplica
+
+        CONTACTO_SERVICE.crearContactoEncargado(request.contactos(), guardado);
 
         return mapToResponse(guardado);
     }
@@ -105,7 +103,9 @@ public class EncargadoLegalServiceImpl implements EncargadoLegalService {
                 encargado.getPrimerApellido(),
                 encargado.getSegundoApellido(),
                 encargado.getDireccion(),
-                encargado.isActivo()
+                encargado.isActivo(),
+
+                CONTACTO_SERVICE.listarContactoPorEncargado(encargado)
         );
     }
 
