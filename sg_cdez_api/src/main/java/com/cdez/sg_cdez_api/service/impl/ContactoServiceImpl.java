@@ -22,8 +22,8 @@ public class ContactoServiceImpl implements ContactoService {
     }
 
     @Override
-    public List<ContactoResponse> listarContactoPorEncargado(UUID encargado) {
-        return List.of();
+    public List<ContactoResponse> listarContactoPorEncargado(EncargadoLegal encargado) {
+        return CONTACTO_REPOSITORY.findByEncargado(encargado).stream().map(this::mapDTO).toList();
     }
 
     @Override

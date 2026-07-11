@@ -1,5 +1,6 @@
 package com.cdez.sg_cdez_api.dto.response;
 
+import java.util.List;
 import java.util.UUID;
 
 public record EncargadoLegalResponse(
@@ -11,6 +12,8 @@ public record EncargadoLegalResponse(
         String primerApellido,
         String segundoApellido,
         String direccion,
-        boolean activo
+        boolean activo,
+
+        List<ContactoResponse> contactos
 ) {
 }

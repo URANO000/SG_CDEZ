@@ -11,7 +11,7 @@ import java.util.UUID;
 @Service
 public interface ContactoService {
     List<ContactoResponse> listarContactoPorPersonal(Personal personal);
-    List<ContactoResponse> listarContactoPorEncargado(UUID encargado);
+    List<ContactoResponse> listarContactoPorEncargado(EncargadoLegal encargado);
     void crearContactoPersonal(List<ContactoCreateRequest> requests, Personal personal);
     void crearContactoEncargado(List<ContactoCreateRequest> requests, EncargadoLegal encargadoLegal);
     ContactoResponse actualizarContacto(UUID id, ContactoUpdateRequest request);
