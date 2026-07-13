@@ -2,9 +2,14 @@ package com.cdez.sg_cdez_api.controller;
 
 import com.cdez.sg_cdez_api.dto.request.PersonalActualizarRequest;
 import com.cdez.sg_cdez_api.dto.request.PersonalCreateRequest;
+import com.cdez.sg_cdez_api.dto.response.PageResponse;
 import com.cdez.sg_cdez_api.dto.response.PersonalResponse;
 import com.cdez.sg_cdez_api.service.PersonalService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,8 +22,8 @@ public class PersonalController {
     private final PersonalService SERVICE;
 
     @GetMapping("/listarPersonal")
-    public List<PersonalResponse> listarPersonal(){
-        return SERVICE.listarPersonal();
+    public PageResponse<PersonalResponse> listarPersonal(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
+        return SERVICE.listarPersonal(pageable);
     }
 
     @GetMapping("/obtenerPersonalPorId/{id}")
