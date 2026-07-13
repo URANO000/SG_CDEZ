@@ -1,6 +1,7 @@
 package com.cdez.sg_cdez_api.service.impl;
 
 import com.cdez.sg_cdez_api.dto.request.*;
+import com.cdez.sg_cdez_api.dto.response.PageResponse;
 import com.cdez.sg_cdez_api.dto.response.PersonalResponse;
 import com.cdez.sg_cdez_api.entity.*;
 import com.cdez.sg_cdez_api.repository.*;
@@ -8,6 +9,10 @@ import com.cdez.sg_cdez_api.service.*;
 import com.cdez.sg_cdez_api.util.AuthHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +32,10 @@ public class PersonalServiceImpl implements PersonalService {
     private final ContactoService CONTACTO_SERVICE;
 
     @Override
-    public List<PersonalResponse> listarPersonal() {
-        return REPOSITORY.findAll().stream().map(this::mapDTO).toList();
+    public PageResponse<PersonalResponse> listarPersonal(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<Personal> personalPage = REPOSITORY.findAll(pageable);
+        Page<PersonalResponse> responsePage = personalPage.map(this::mapDTO);
+        return new PageResponse<>(responsePage);
     }
 
     @Override
