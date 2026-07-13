@@ -7,6 +7,7 @@ import com.cdez.sg_cdez_api.entity.*;
 import com.cdez.sg_cdez_api.repository.*;
 import com.cdez.sg_cdez_api.service.*;
 import com.cdez.sg_cdez_api.util.AuthHelper;
+import com.cdez.sg_cdez_api.util.Exceptions.PageOutOfBoundsException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -34,6 +34,14 @@ public class PersonalServiceImpl implements PersonalService {
     @Override
     public PageResponse<PersonalResponse> listarPersonal(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<Personal> personalPage = REPOSITORY.findAll(pageable);
+
+        //Manejo de excepciones
+        if(personalPage.getTotalElements() > 0 && pageable.getPageNumber() >= personalPage.getTotalPages()){
+            throw new PageOutOfBoundsException(
+                    String.format("Número de página %d está fuera de rango. Páginas totales: %d", pageable.getPageNumber(), personalPage.getTotalPages())
+            );
+        }
+
         Page<PersonalResponse> responsePage = personalPage.map(this::mapDTO);
         return new PageResponse<>(responsePage);
     }
