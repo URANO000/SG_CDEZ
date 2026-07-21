@@ -5,6 +5,7 @@ import com.cdez.sg_cdez_api.dto.response.PageResponse;
 import com.cdez.sg_cdez_api.dto.response.PersonalResponse;
 import com.cdez.sg_cdez_api.entity.*;
 import com.cdez.sg_cdez_api.repository.*;
+import com.cdez.sg_cdez_api.repository.specifications.PersonalSpecs;
 import com.cdez.sg_cdez_api.service.*;
 import com.cdez.sg_cdez_api.util.AuthHelper;
 import com.cdez.sg_cdez_api.util.Exceptions.PageOutOfBoundsException;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,6 +47,37 @@ public class PersonalServiceImpl implements PersonalService {
         Page<PersonalResponse> responsePage = personalPage.map(this::mapDTO);
         return new PageResponse<>(responsePage);
     }
+
+    @Override
+    public PageResponse<PersonalResponse> listarPersonalFiltrado(PersonalFiltro filtros, Pageable pageable){
+        Specification<Personal> spec = Specification.unrestricted();
+
+        if(filtros.especialidad() != null){
+            spec = spec.and(PersonalSpecs.hasEspecialidad(filtros.especialidad()));
+        }
+
+        if(filtros.activo() != null){
+            spec = spec.and(PersonalSpecs.hasEstado(filtros.activo()));
+        }
+
+        if(filtros.searchTerm() != null){
+            spec = spec.and(PersonalSpecs.containsSearch(filtros.searchTerm()));
+        }
+
+        Page<Personal> personalPage = REPOSITORY.findAll(spec, pageable);
+
+        //Manejo de excepciones
+        if(personalPage.getTotalElements() > 0 && pageable.getPageNumber() >= personalPage.getTotalPages()){
+            throw new PageOutOfBoundsException(
+                    String.format("Número de página %d está fuera de rango. Páginas totales: %d", pageable.getPageNumber(), personalPage.getTotalPages())
+            );
+        }
+
+        Page<PersonalResponse> responsePage = personalPage.map(this::mapDTO);
+        return new PageResponse<>(responsePage);
+
+    }
+
 
     @Override
     public PersonalResponse obtenerPersonalPorId(UUID id) {
