@@ -83,13 +83,43 @@ CREATE TABLE Contacto(
 	tipo_valor VARCHAR(50) NULL
 );
 
+/** Modified (17/7/2026) **/
 CREATE TABLE Documento(
 	documento_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+
 	personal_id UUID NULL REFERENCES Personal(personal_id),
 	encargado_id UUID NULL REFERENCES EncargadoLegal(encargado_id),
 	adulto_id UUID NULL REFERENCES AdultoMayor(adulto_id),
-	archivo BYTEA NOT NULL
+
+	nombre_archivo VARCHAR(200) NOT NULL,
+	tipo_archivo VARCHAR(100) NOT NULL,
+	tamano_archivo BIGINT NOT NULL,
+
+	archivo BYTEA NOT NULL,
+	activo BOOL NOT NULL,
+
+	created_by UUID REFERENCES Personal(personal_id) NOT NULL,
+	created_at TIMESTAMP NOT NULL,
+	updated_by UUID REFERENCES Personal(personal_id) NULL,
+	updated_at TIMESTAMP NULL,
+
+	CONSTRAINT chk_documento_tamano_archivo
+	CHECK (tamano_archivo > 0)
 );
+CREATE INDEX idx_documento_adulto_id
+ON Documento(adulto_id);
+
+CREATE INDEX idx_documento_personal_id
+ON Documento(personal_id);
+
+CREATE INDEX idx_documento_encargado_id
+ON Documento(encargado_id);
+
+CREATE INDEX idx_documento_activo
+ON Documento(activo);
+
+CREATE INDEX idx_documento_created_at
+ON Documento(created_at);
 
 CREATE TABLE Consulta(
 	consulta_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -130,21 +160,9 @@ CREATE TABLE Epicrisis(
 	fecha_recepcion TIMESTAMP NULL,
 	centro_salud VARCHAR(150) NOT NULL,
 
-	nombre_archivo VARCHAR(200) NOT NULL,
-	tipo_archivo VARCHAR(100) NOT NULL,
-	tamano_archivo BIGINT NOT NULL,
-
 	vigente BOOL NOT NULL,
-	activo BOOL NOT NULL,
 
-	created_by UUID REFERENCES Personal(personal_id) NOT NULL,
-	created_at TIMESTAMP NOT NULL,
-	updated_by UUID REFERENCES Personal(personal_id) NULL,
-	updated_at TIMESTAMP NULL,
-
-	CONSTRAINT uq_epicrisis_documento UNIQUE(documento_id),
-	CONSTRAINT chk_epicrisis_tamano_archivo
-	CHECK (tamano_archivo > 0)
+	CONSTRAINT uq_epicrisis_documento UNIQUE(documento_id)
 );
 
 CREATE INDEX idx_epicrisis_documento_id
@@ -155,6 +173,3 @@ ON Epicrisis(fecha_emision);
 
 CREATE INDEX idx_epicrisis_vigente
 ON Epicrisis(vigente);
-
-CREATE INDEX IF NOT EXISTS idx_documento_adulto_id
-ON Documento(adulto_id);

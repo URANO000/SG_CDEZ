@@ -32,32 +32,6 @@ public class Epicrisis {
     @Column(name = "centro_salud", nullable = false, length = 150)
     private String centroSalud;
 
-    @Column(name = "nombre_archivo", nullable = false, length = 200)
-    private String nombreArchivo;
-
-    @Column(name = "tipo_archivo", nullable = false, length = 100)
-    private String tipoArchivo;
-
-    @Column(name = "tamano_archivo", nullable = false)
-    private Long tamanoArchivo;
-
     @Column(name = "vigente", nullable = false)
     private Boolean vigente;
-
-    @Column(name = "activo", nullable = false)
-    private Boolean activo;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by", nullable = false)
-    private Personal createdBy;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "updated_by")
-    private Personal updatedBy;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 }
