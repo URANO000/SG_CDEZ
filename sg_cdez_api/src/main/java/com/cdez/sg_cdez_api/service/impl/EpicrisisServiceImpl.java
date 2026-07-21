@@ -56,11 +56,15 @@ public class EpicrisisServiceImpl implements EpicrisisService {
         LocalDateTime ahora = LocalDateTime.now();
 
         epicrisisRepository
-                .findByDocumentoAdultoMayorAdultoIdAndVigenteTrueAndActivoTrue(adultoId)
+                .findByDocumentoAdultoMayorAdultoIdAndVigenteTrueAndDocumentoActivoTrue(adultoId)
                 .ifPresent(epicrisisAnterior -> {
                     epicrisisAnterior.setVigente(false);
-                    epicrisisAnterior.setUpdatedBy(usuarioAutenticado);
-                    epicrisisAnterior.setUpdatedAt(ahora);
+
+                    Documento documentoAnterior = epicrisisAnterior.getDocumento();
+                    documentoAnterior.setUpdatedBy(usuarioAutenticado);
+                    documentoAnterior.setUpdatedAt(ahora);
+
+                    documentoRepository.save(documentoAnterior);
                     epicrisisRepository.save(epicrisisAnterior);
                 });
 
@@ -68,6 +72,12 @@ public class EpicrisisServiceImpl implements EpicrisisService {
         documento.setAdultoMayor(adultoMayor);
         documento.setPersonal(null);
         documento.setEncargadoLegal(null);
+        documento.setNombreArchivo(obtenerNombreSeguro(archivo));
+        documento.setTipoArchivo(obtenerTipoArchivoSeguro(archivo));
+        documento.setTamanoArchivo(archivo.getSize());
+        documento.setActivo(true);
+        documento.setCreatedBy(usuarioAutenticado);
+        documento.setCreatedAt(ahora);
 
         try {
             documento.setArchivo(archivo.getBytes());
@@ -85,13 +95,7 @@ public class EpicrisisServiceImpl implements EpicrisisService {
         epicrisis.setFechaEmision(fechaEmision);
         epicrisis.setFechaRecepcion(fechaRecepcion);
         epicrisis.setCentroSalud(centroSalud.trim());
-        epicrisis.setNombreArchivo(obtenerNombreSeguro(archivo));
-        epicrisis.setTipoArchivo(obtenerTipoArchivoSeguro(archivo));
-        epicrisis.setTamanoArchivo(archivo.getSize());
         epicrisis.setVigente(true);
-        epicrisis.setActivo(true);
-        epicrisis.setCreatedBy(usuarioAutenticado);
-        epicrisis.setCreatedAt(ahora);
 
         Epicrisis epicrisisGuardada = epicrisisRepository.save(epicrisis);
 
@@ -133,7 +137,7 @@ public class EpicrisisServiceImpl implements EpicrisisService {
         }
 
         Epicrisis epicrisis = epicrisisRepository
-                .findByDocumentoAdultoMayorAdultoIdAndVigenteTrueAndActivoTrue(adultoId)
+                .findByDocumentoAdultoMayorAdultoIdAndVigenteTrueAndDocumentoActivoTrue(adultoId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "No existe una epicrisis vigente para este adulto mayor."
@@ -146,37 +150,39 @@ public class EpicrisisServiceImpl implements EpicrisisService {
     @Transactional(readOnly = true)
     public byte[] descargarArchivo(UUID epicrisisId) {
         Epicrisis epicrisis = buscarEpicrisis(epicrisisId);
+        Documento documento = epicrisis.getDocumento();
 
-        if (!Boolean.TRUE.equals(epicrisis.getActivo())) {
+        if (!Boolean.TRUE.equals(documento.getActivo())) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "La epicrisis se encuentra inactiva."
             );
         }
 
-        return epicrisis.getDocumento().getArchivo();
+        return documento.getArchivo();
     }
 
     @Override
     @Transactional(readOnly = true)
     public String obtenerNombreArchivo(UUID epicrisisId) {
         Epicrisis epicrisis = buscarEpicrisis(epicrisisId);
-        return epicrisis.getNombreArchivo();
+        return epicrisis.getDocumento().getNombreArchivo();
     }
 
     @Override
     @Transactional(readOnly = true)
     public String obtenerTipoArchivo(UUID epicrisisId) {
         Epicrisis epicrisis = buscarEpicrisis(epicrisisId);
-        return epicrisis.getTipoArchivo();
+        return epicrisis.getDocumento().getTipoArchivo();
     }
 
     @Override
     @Transactional
     public EpicrisisResponse actualizarMetadatos(UUID epicrisisId, EpicrisisUpdateRequest request) {
         Epicrisis epicrisis = buscarEpicrisis(epicrisisId);
+        Documento documento = epicrisis.getDocumento();
 
-        if (!Boolean.TRUE.equals(epicrisis.getActivo())) {
+        if (!Boolean.TRUE.equals(documento.getActivo())) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "No se puede actualizar una epicrisis inactiva."
@@ -202,9 +208,11 @@ public class EpicrisisServiceImpl implements EpicrisisService {
         epicrisis.setFechaEmision(request.fechaEmision());
         epicrisis.setFechaRecepcion(request.fechaRecepcion());
         epicrisis.setCentroSalud(request.centroSalud().trim());
-        epicrisis.setUpdatedBy(usuarioAutenticado);
-        epicrisis.setUpdatedAt(LocalDateTime.now());
 
+        documento.setUpdatedBy(usuarioAutenticado);
+        documento.setUpdatedAt(LocalDateTime.now());
+
+        documentoRepository.save(documento);
         Epicrisis epicrisisActualizada = epicrisisRepository.save(epicrisis);
 
         return mapToResponse(epicrisisActualizada);
@@ -214,18 +222,21 @@ public class EpicrisisServiceImpl implements EpicrisisService {
     @Transactional
     public void desactivarEpicrisis(UUID epicrisisId) {
         Epicrisis epicrisis = buscarEpicrisis(epicrisisId);
+        Documento documento = epicrisis.getDocumento();
 
-        if (!Boolean.TRUE.equals(epicrisis.getActivo())) {
+        if (!Boolean.TRUE.equals(documento.getActivo())) {
             return;
         }
 
         Personal usuarioAutenticado = obtenerUsuarioAutenticado();
 
-        epicrisis.setActivo(false);
-        epicrisis.setVigente(false);
-        epicrisis.setUpdatedBy(usuarioAutenticado);
-        epicrisis.setUpdatedAt(LocalDateTime.now());
+        documento.setActivo(false);
+        documento.setUpdatedBy(usuarioAutenticado);
+        documento.setUpdatedAt(LocalDateTime.now());
 
+        epicrisis.setVigente(false);
+
+        documentoRepository.save(documento);
         epicrisisRepository.save(epicrisis);
     }
 
@@ -287,7 +298,7 @@ public class EpicrisisServiceImpl implements EpicrisisService {
         String nombreOriginal = archivo.getOriginalFilename();
 
         if (nombreOriginal == null || nombreOriginal.isBlank()) {
-            return "epicrisis";
+            return "documento";
         }
 
         return Paths.get(nombreOriginal).getFileName().toString();
@@ -314,13 +325,13 @@ public class EpicrisisServiceImpl implements EpicrisisService {
                 epicrisis.getFechaEmision(),
                 epicrisis.getFechaRecepcion(),
                 epicrisis.getCentroSalud(),
-                epicrisis.getNombreArchivo(),
-                epicrisis.getTipoArchivo(),
-                epicrisis.getTamanoArchivo(),
+                documento.getNombreArchivo(),
+                documento.getTipoArchivo(),
+                documento.getTamanoArchivo(),
                 epicrisis.getVigente(),
-                epicrisis.getActivo(),
-                epicrisis.getCreatedAt(),
-                epicrisis.getUpdatedAt()
+                documento.getActivo(),
+                documento.getCreatedAt(),
+                documento.getUpdatedAt()
         );
     }
 }
