@@ -14,4 +14,6 @@ public interface EpicrisisRepository extends JpaRepository<Epicrisis, UUID> {
     List<Epicrisis> findByDocumentoAdultoMayorAdultoIdAndDocumentoActivoTrueOrderByFechaEmisionDesc(UUID adultoId);
 
     Optional<Epicrisis> findByDocumentoAdultoMayorAdultoIdAndVigenteTrueAndDocumentoActivoTrue(UUID adultoId);
+
+    boolean existsByDocumentoDocumentoId(Integer documentoId);
 }
