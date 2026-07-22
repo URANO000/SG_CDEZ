@@ -33,23 +33,23 @@ public class PersonalServiceImpl implements PersonalService {
     private final EmailService EMAIL_SERVICE;
     private final ContactoService CONTACTO_SERVICE;
 
+//    @Override
+//    public PageResponse<PersonalResponse> listarPersonal(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+//        Page<Personal> personalPage = REPOSITORY.findAll(pageable);
+//
+//        //Manejo de excepciones
+//        if(personalPage.getTotalElements() > 0 && pageable.getPageNumber() >= personalPage.getTotalPages()){
+//            throw new PageOutOfBoundsException(
+//                    String.format("Número de página %d está fuera de rango. Páginas totales: %d", pageable.getPageNumber(), personalPage.getTotalPages())
+//            );
+//        }
+//
+//        Page<PersonalResponse> responsePage = personalPage.map(this::mapDTO);
+//        return new PageResponse<>(responsePage);
+//    }
+
     @Override
-    public PageResponse<PersonalResponse> listarPersonal(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<Personal> personalPage = REPOSITORY.findAll(pageable);
-
-        //Manejo de excepciones
-        if(personalPage.getTotalElements() > 0 && pageable.getPageNumber() >= personalPage.getTotalPages()){
-            throw new PageOutOfBoundsException(
-                    String.format("Número de página %d está fuera de rango. Páginas totales: %d", pageable.getPageNumber(), personalPage.getTotalPages())
-            );
-        }
-
-        Page<PersonalResponse> responsePage = personalPage.map(this::mapDTO);
-        return new PageResponse<>(responsePage);
-    }
-
-    @Override
-    public PageResponse<PersonalResponse> listarPersonalFiltrado(PersonalFiltro filtros, Pageable pageable){
+    public PageResponse<PersonalResponse> listarPersonalFiltrado(PersonalFiltro filtros,@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
         Specification<Personal> spec = Specification.unrestricted();
 
         if(filtros.especialidad() != null){

@@ -17,8 +17,8 @@ import java.util.UUID;
 
 @Service
 public interface PersonalService {
-    PageResponse<PersonalResponse> listarPersonal(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable);
-    PageResponse<PersonalResponse> listarPersonalFiltrado(PersonalFiltro filtros, Pageable pageable);
+//    PageResponse<PersonalResponse> listarPersonal(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable);
+    PageResponse<PersonalResponse> listarPersonalFiltrado(PersonalFiltro filtros,@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable);
     PersonalResponse obtenerPersonalPorId(UUID id);
     PersonalResponse crearPersonal(PersonalCreateRequest request);
     PersonalResponse actualizarPersonal(UUID id, PersonalActualizarRequest request);
