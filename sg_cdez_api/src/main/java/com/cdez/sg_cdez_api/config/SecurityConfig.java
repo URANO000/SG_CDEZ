@@ -47,7 +47,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/epicrisis/**").hasAnyRole("ADMIN", "PERSONAL")
                         .requestMatchers("/api/encargados/**").hasAnyRole("PERSONAL", "ADMIN")
                         .requestMatchers("/api/documentos/**").hasAnyRole("PERSONAL", "ADMIN")
-
+                        .requestMatchers("/api/auditorias/**").hasRole("ADMIN")
                         .requestMatchers("/api/personal/**").hasRole("ADMIN")
 
                         .requestMatchers("/error").permitAll()
