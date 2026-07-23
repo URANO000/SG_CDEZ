@@ -7,10 +7,11 @@ import com.cdez.sg_cdez_api.entity.Consulta;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ConsultaRepository extends JpaRepository<Consulta, Integer> {
+public interface ConsultaRepository extends JpaRepository<Consulta, Integer>, JpaSpecificationExecutor<Consulta> {
     PageResponse<ConsultaResponse> findConsultasFiltradas(ConsultaFiltro filtros,@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable);
 }
