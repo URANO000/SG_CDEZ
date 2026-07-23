@@ -13,6 +13,10 @@ public class ConsultaSpecs {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("adultoMayor").get("adultoId"), providedAdultoId);
     }
 
+    public static Specification<Consulta> hasCreatedById(UUID providedPersonalId){
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("createdBy").get("personalId"), providedPersonalId);
+    }
+
     public static Specification<Consulta> hasEspecialidad(String providedEspecialidad){
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("createdBy").get("especialidad"), providedEspecialidad);
     }

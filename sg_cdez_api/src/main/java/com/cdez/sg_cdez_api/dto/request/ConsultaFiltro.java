@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public record ConsultaFiltro(
         UUID adultoId,
-        boolean personalView,
+        Boolean personalView,
         String especialidad,
         String nombreCreadoPor
 ) {
