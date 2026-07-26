@@ -83,6 +83,7 @@ CREATE TABLE Contacto(
 	tipo_valor VARCHAR(50) NULL
 );
 
+
 /** Modified (17/7/2026) **/
 CREATE TABLE Documento(
 	documento_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -173,3 +174,16 @@ ON Epicrisis(fecha_emision);
 
 CREATE INDEX idx_epicrisis_vigente
 ON Epicrisis(vigente);
+
+-- Modified on 26/7/2026
+CREATE TABLE historialAcciones(
+	historial_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	accion VARCHAR(255) NOT NULL,
+	campo_afectado VARCHAR(255) NULL,
+	valor_anterior VARCHAR(255) NULL,
+	valor_nuevo VARCHAR(255) NULL,
+	descripcion VARCHAR(255) NOT NULL,
+
+	performed_at TIMESTAMP NOT NULL,
+	performed_by UUID NOT NULL REFERENCES Personal(personal_id)
+);
