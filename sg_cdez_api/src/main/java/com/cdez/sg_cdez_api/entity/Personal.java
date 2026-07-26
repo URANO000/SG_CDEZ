@@ -63,6 +63,9 @@ public class Personal {
     @OneToMany(mappedBy = "personal")
     private List<Documento> documentos = new ArrayList<>();
 
+    @OneToMany(mappedBy = "performedAt")
+    private List<HistorialAcciones> historialAcciones = new ArrayList<>();
+
     // Util para conseguir nombre completo
     public String getNombreCompleto(){
         return Stream.of(getPrimerNombre(), getSegundoNombre(), getPrimerApellido(), getSegundoApellido())

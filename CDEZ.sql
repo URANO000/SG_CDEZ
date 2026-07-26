@@ -176,7 +176,7 @@ CREATE INDEX idx_epicrisis_vigente
 ON Epicrisis(vigente);
 
 -- Modified on 26/7/2026
-CREATE TABLE historialAcciones(
+CREATE TABLE HistorialAcciones(
 	historial_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	accion VARCHAR(255) NOT NULL,
 	campo_afectado VARCHAR(255) NULL,
