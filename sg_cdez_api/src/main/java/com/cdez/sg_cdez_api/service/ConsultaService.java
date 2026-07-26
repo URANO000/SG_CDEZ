@@ -2,11 +2,11 @@ package com.cdez.sg_cdez_api.service;
 
 import com.cdez.sg_cdez_api.dto.request.ConsultaFiltro;
 import com.cdez.sg_cdez_api.dto.response.*;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Pageable;
 
 @Service
 public interface ConsultaService {
