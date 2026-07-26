@@ -11,6 +11,7 @@ import com.cdez.sg_cdez_api.repository.DocumentoRepository;
 import com.cdez.sg_cdez_api.repository.EpicrisisRepository;
 import com.cdez.sg_cdez_api.repository.PersonalRepository;
 import com.cdez.sg_cdez_api.service.EpicrisisService;
+import com.cdez.sg_cdez_api.service.AuditoriaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -34,6 +35,7 @@ public class EpicrisisServiceImpl implements EpicrisisService {
     private final DocumentoRepository documentoRepository;
     private final AdultoMayorRepository adultoMayorRepository;
     private final PersonalRepository personalRepository;
+    private final AuditoriaService auditoriaService;
 
     @Override
     @Transactional
@@ -99,6 +101,14 @@ public class EpicrisisServiceImpl implements EpicrisisService {
 
         Epicrisis epicrisisGuardada = epicrisisRepository.save(epicrisis);
 
+        auditoriaService.registrarAccion(
+                "REGISTRAR_EPICRISIS",
+                "EPICRISIS",
+                "Epicrisis",
+                epicrisisGuardada.getEpicrisisId().toString(),
+                "Se registró una epicrisis en el expediente del adulto mayor."
+        );
+
         return mapToResponse(epicrisisGuardada);
     }
 
@@ -147,7 +157,7 @@ public class EpicrisisServiceImpl implements EpicrisisService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public byte[] descargarArchivo(UUID epicrisisId) {
         Epicrisis epicrisis = buscarEpicrisis(epicrisisId);
         Documento documento = epicrisis.getDocumento();
@@ -158,7 +168,13 @@ public class EpicrisisServiceImpl implements EpicrisisService {
                     "La epicrisis se encuentra inactiva."
             );
         }
-
+        auditoriaService.registrarAccion(
+                "DESCARGAR_EPICRISIS",
+                "EPICRISIS",
+                "Epicrisis",
+                epicrisis.getEpicrisisId().toString(),
+                "Se descargó el archivo de una epicrisis."
+        );
         return documento.getArchivo();
     }
 
@@ -215,6 +231,14 @@ public class EpicrisisServiceImpl implements EpicrisisService {
         documentoRepository.save(documento);
         Epicrisis epicrisisActualizada = epicrisisRepository.save(epicrisis);
 
+        auditoriaService.registrarAccion(
+                "ACTUALIZAR_EPICRISIS",
+                "EPICRISIS",
+                "Epicrisis",
+                epicrisisActualizada.getEpicrisisId().toString(),
+                "Se actualizaron los metadatos de una epicrisis."
+        );
+
         return mapToResponse(epicrisisActualizada);
     }
 
@@ -238,6 +262,14 @@ public class EpicrisisServiceImpl implements EpicrisisService {
 
         documentoRepository.save(documento);
         epicrisisRepository.save(epicrisis);
+
+        auditoriaService.registrarAccion(
+                "DESACTIVAR_EPICRISIS",
+                "EPICRISIS",
+                "Epicrisis",
+                epicrisis.getEpicrisisId().toString(),
+                "Se desactivó una epicrisis del expediente del adulto mayor."
+        );
     }
 
     private Epicrisis buscarEpicrisis(UUID epicrisisId) {
