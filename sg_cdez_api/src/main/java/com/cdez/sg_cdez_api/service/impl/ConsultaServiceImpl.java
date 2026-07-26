@@ -58,7 +58,17 @@ public class ConsultaServiceImpl implements ConsultaService {
     private ConsultaResponse mapDTO(Consulta consulta){
         return new ConsultaResponse(
                 consulta.getConsultaId(),
-                consulta.getAdultoMayor().
-        )
+                consulta.getAdultoMayor().getNombreCompleto(),
+                consulta.getMotivo(),
+                consulta.getTipoIntervencion(),
+                consulta.getDescripcion(),
+                consulta.getDiagnostico(),
+                consulta.getRecomendaciones(),
+                consulta.getNotas(),
+                consulta.getReferencia().getPersonalId(),
+                consulta.getCreatedBy().getNombreCompleto(),
+                consulta.getCreatedBy().getPersonalId(),
+                consulta.getCreatedAt()
+        );
     }
 }
