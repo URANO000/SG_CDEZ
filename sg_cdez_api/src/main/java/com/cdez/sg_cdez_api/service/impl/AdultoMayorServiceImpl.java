@@ -8,6 +8,7 @@ import com.cdez.sg_cdez_api.dto.request.AdultoMayorUpdateRequest;
 import com.cdez.sg_cdez_api.entity.AdultoMayor;
 import com.cdez.sg_cdez_api.repository.AdultoMayorRepository;
 import com.cdez.sg_cdez_api.service.AdultoMayorService;
+import com.cdez.sg_cdez_api.service.AuditoriaService;
 import org.springframework.stereotype.Service;
 import com.cdez.sg_cdez_api.entity.CustomUserDetails;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,18 +17,39 @@ import com.cdez.sg_cdez_api.dto.request.AdultoMayorFallecimientoRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.UUID;
-
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class AdultoMayorServiceImpl implements AdultoMayorService {
 
     private final AdultoMayorRepository adultoMayorRepository;
     private final AuthRepository authRepository;
+    private final AuditoriaService auditoriaService;
 
-    public AdultoMayorServiceImpl(AdultoMayorRepository adultoMayorRepository, AuthRepository authRepository) {
+    private void registrarAuditoria(
+            String accion,
+            AdultoMayor adultoMayor,
+            String descripcion
+    ) {
+        auditoriaService.registrarAccion(
+                accion,
+                "ADULTO_MAYOR",
+                "AdultoMayor",
+                adultoMayor.getAdultoId().toString(),
+                descripcion
+        );
+    }
+
+    public AdultoMayorServiceImpl(
+            AdultoMayorRepository adultoMayorRepository,
+            AuthRepository authRepository,
+            AuditoriaService auditoriaService
+    ) {
         this.adultoMayorRepository = adultoMayorRepository;
         this.authRepository = authRepository;
+        this.auditoriaService = auditoriaService;
     }
     @Override
     public List<AdultoMayorResponse> listarAdultosMayores() {
@@ -127,9 +149,15 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         Personal usuarioCreador = obtenerUsuarioAutenticado();
         adultoMayor.setCreatedBy(usuarioCreador);
 
-        AdultoMayor adultoGuardado = adultoMayorRepository.save(adultoMayor);
+        AdultoMayor adultoMayorGuardado = adultoMayorRepository.save(adultoMayor);
 
-        return mapToResponse(adultoGuardado);
+        registrarAuditoria(
+                "REGISTRAR_ADULTO_MAYOR",
+                adultoMayorGuardado,
+                "Se registró un adulto mayor en el sistema."
+        );
+
+        return mapToResponse(adultoMayorGuardado);
     }
     @Override
     public AdultoMayorResponse obtenerAdultoMayorPorId(UUID id) {
@@ -161,9 +189,15 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         Personal usuarioActualizador = obtenerUsuarioAutenticado();
         adultoMayor.setUpdatedBy(usuarioActualizador);
 
-        AdultoMayor adultoActualizado = adultoMayorRepository.save(adultoMayor);
+        AdultoMayor adultoMayorActualizado = adultoMayorRepository.save(adultoMayor);
 
-        return mapToResponse(adultoActualizado);
+        registrarAuditoria(
+                "ACTUALIZAR_ADULTO_MAYOR",
+                adultoMayorActualizado,
+                "Se actualizó la información del adulto mayor."
+        );
+
+        return mapToResponse(adultoMayorActualizado);
     }
     private Personal obtenerUsuarioAutenticado() {
         Object principal = SecurityContextHolder.getContext()
@@ -199,6 +233,12 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
 
         AdultoMayor actualizado = adultoMayorRepository.save(adultoMayor);
 
+        registrarAuditoria(
+                "DESACTIVAR_ADULTO_MAYOR",
+                actualizado,
+                "Se desactivó el expediente del adulto mayor."
+        );
+
         return mapToResponse(actualizado);
     }
     @Override
@@ -227,6 +267,12 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
 
         AdultoMayor actualizado = adultoMayorRepository.save(adultoMayor);
 
+        registrarAuditoria(
+                "ACTIVAR_ADULTO_MAYOR",
+                actualizado,
+                "Se activó nuevamente el expediente del adulto mayor."
+        );
+
         return mapToResponse(actualizado);
     }
     @Override
@@ -247,6 +293,12 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         adultoMayor.setUpdatedBy(usuarioActualizador);
 
         AdultoMayor actualizado = adultoMayorRepository.save(adultoMayor);
+
+        registrarAuditoria(
+                "REGISTRAR_FALLECIMIENTO",
+                actualizado,
+                "Se registró el fallecimiento del adulto mayor."
+        );
 
         return mapToResponse(actualizado);
     }
