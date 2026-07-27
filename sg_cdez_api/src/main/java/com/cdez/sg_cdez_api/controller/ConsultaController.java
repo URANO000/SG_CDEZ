@@ -5,13 +5,14 @@ import com.cdez.sg_cdez_api.dto.response.ConsultaResponse;
 import com.cdez.sg_cdez_api.dto.response.PageResponse;
 import com.cdez.sg_cdez_api.service.ConsultaService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.awt.print.Pageable;
+
 
 @RestController
 @RequiredArgsConstructor

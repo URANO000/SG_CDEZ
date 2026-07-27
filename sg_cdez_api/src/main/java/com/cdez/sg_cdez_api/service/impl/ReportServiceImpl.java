@@ -2,6 +2,8 @@ package com.cdez.sg_cdez_api.service.impl;
 
 import com.cdez.sg_cdez_api.entity.reports.PdfTableReport;
 import com.cdez.sg_cdez_api.service.ReportService;
+import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.*;
@@ -9,6 +11,8 @@ import com.itextpdf.layout.properties.UnitValue;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import com.cdez.sg_cdez_api.entity.reports.Column;
 
 @Service
@@ -16,7 +20,7 @@ import com.cdez.sg_cdez_api.entity.reports.Column;
 public class ReportServiceImpl implements ReportService {
 
     @Override
-    public <T> byte[] generarTablaPDF(PdfTableReport<T> report) {
+    public <T> byte[] generarTablaPDF(PdfTableReport<T> report) throws IOException {
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
@@ -24,10 +28,12 @@ public class ReportServiceImpl implements ReportService {
         PdfDocument pdf = new PdfDocument(writer);
         Document document = new Document(pdf);
 
-        document.add(
-                new Paragraph(report.getTitulo())
-                        .setFontSize(18)
-        );
+        Paragraph title = new Paragraph(report.getTitulo());
+
+        title.setFontSize(18);
+        title.setFont(PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD));
+
+        document.add(title);
 
         float[] widths = new float[report.getColumnas().size()];
 

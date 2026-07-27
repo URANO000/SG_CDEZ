@@ -3,11 +3,12 @@ package com.cdez.sg_cdez_api.service.impl;
 import com.cdez.sg_cdez_api.dto.request.*;
 import com.cdez.sg_cdez_api.dto.response.*;
 import com.cdez.sg_cdez_api.entity.*;
+import com.cdez.sg_cdez_api.entity.reports.Column;
+import com.cdez.sg_cdez_api.entity.reports.PdfTableReport;
 import com.cdez.sg_cdez_api.repository.*;
 import com.cdez.sg_cdez_api.repository.specifications.PersonalSpecs;
 import com.cdez.sg_cdez_api.service.*;
 import com.cdez.sg_cdez_api.util.AuthHelper;
-import com.cdez.sg_cdez_api.util.Exceptions.PageOutOfBoundsException;
 import com.cdez.sg_cdez_api.util.ValidationHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +18,13 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,21 +36,12 @@ public class PersonalServiceImpl implements PersonalService {
     private final PasswordEncoder ENCODER;
     private final EmailService EMAIL_SERVICE;
     private final ContactoService CONTACTO_SERVICE;
+    private final ReportService REPORT_SERVICE;
 
-//    @Override
-//    public PageResponse<PersonalResponse> listarPersonal(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-//        Page<Personal> personalPage = REPOSITORY.findAll(pageable);
-//
-//        //Manejo de excepciones
-//        if(personalPage.getTotalElements() > 0 && pageable.getPageNumber() >= personalPage.getTotalPages()){
-//            throw new PageOutOfBoundsException(
-//                    String.format("Número de página %d está fuera de rango. Páginas totales: %d", pageable.getPageNumber(), personalPage.getTotalPages())
-//            );
-//        }
-//
-//        Page<PersonalResponse> responsePage = personalPage.map(this::mapDTO);
-//        return new PageResponse<>(responsePage);
-//    }
+    @Override
+    public List<PersonalResponse> listarPersonal() {
+        return REPOSITORY.findAll().stream().map(this::mapDTO).toList();
+    }
 
     @Override
     public PageResponse<PersonalResponse> listarPersonalFiltrado(PersonalFiltro filtros,@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
@@ -179,6 +175,51 @@ public class PersonalServiceImpl implements PersonalService {
         return mapDTO(personal);
     }
 
+    @Override
+    public byte[] generarReportePersonalPDF() throws IOException {
+        try{
+            List<PersonalResponse> personal = listarPersonal();
+
+            PdfTableReport<PersonalResponse> reporte =
+                    PdfTableReport.<PersonalResponse>builder()
+                            .titulo("Reporte de Personal")
+                            .datos(personal)
+                            .columnas(List.of(
+                                    new Column<>("Rol", PersonalResponse::rol),
+                                    new Column<>("Especialidad", PersonalResponse::especialidad),
+                                    new Column<>("Tipo Identificación", PersonalResponse::tipoIdentificacion),
+                                    new Column<>("Identificación", PersonalResponse::identificacion),
+                                    new Column<>("Nombre Completo", PersonalResponse::nombreCompleto),
+                                    new Column<>("Dirección", PersonalResponse::direccion),
+                                    new Column<>("Carné", PersonalResponse::carnet),
+                                    new Column<>("Usuario", PersonalResponse::usuario),
+                                    new Column<>(
+                                            "Contactos",
+                                            p -> p.contactos().stream()
+                                                    .map(c -> c.tipoValor() + ": " + c.valor())
+                                                    .collect(Collectors.joining("\n"))
+                                    ),
+                                    new Column<>("Estado", PersonalResponse::activo),
+                                    new Column<>("Fecha Creación",   p -> p.createdAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))),
+                                    new Column<>("Creado Por", PersonalResponse::createdBy),
+                                    new Column<>("Fecha Actualización",
+                                            p -> p.updatedAt() == null
+                                                    ? "Sin Actualizaciones"
+                                                    : p.updatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))),
+                                    new Column<>("Actualizado Por",
+                                            p -> p.updatedBy() == null
+                                                    ? "Sin Actualizaciones"
+                                                    : p.updatedBy())
+
+
+                            )).build();
+
+            return REPORT_SERVICE.generarTablaPDF(reporte);
+        }catch(IOException ex){
+            throw new RuntimeException("Error de fuente.");
+        }
+    }
+
     //Mapper
     private PersonalResponse mapDTO(Personal personal){
         return new PersonalResponse(
@@ -187,10 +228,7 @@ public class PersonalServiceImpl implements PersonalService {
                 personal.getEspecialidad(),
                 personal.getTipoIdentificacion(),
                 personal.getIdentificacion(),
-                personal.getPrimerNombre(),
-                personal.getSegundoNombre(),
-                personal.getPrimerApellido(),
-                personal.getSegundoApellido(),
+                personal.getNombreCompleto(),
                 personal.getDireccion(),
                 personal.getCarnet(),
                 personal.getUsuario(),

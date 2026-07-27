@@ -3,10 +3,9 @@ package com.cdez.sg_cdez_api.service;
 import com.cdez.sg_cdez_api.entity.reports.PdfTableReport;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.function.Function;
+import java.io.IOException;
 
 @Service
 public interface ReportService {
-    <T> byte[] generarTablaPDF(PdfTableReport<T> report);
+    <T> byte[] generarTablaPDF(PdfTableReport<T> report) throws IOException;
 }
