@@ -11,8 +11,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,5 +59,15 @@ public class PersonalController {
     @PostMapping("/desactivarPersonal/{id}")
     public PersonalResponse desactivarPersonal(@PathVariable(name = "id") UUID id){
         return SERVICE.desactivarPersonal(id);
+    }
+
+    @GetMapping("/reporte")
+    public ResponseEntity<byte[]> generarReportePdf() throws IOException {
+        byte[] pdf = SERVICE.generarReportePersonalPDF();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=reporte_de_personal.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 }

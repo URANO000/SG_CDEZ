@@ -1,52 +1,48 @@
 package com.cdez.sg_cdez_api.service.impl;
 
 import com.cdez.sg_cdez_api.dto.request.*;
-import com.cdez.sg_cdez_api.dto.response.PageResponse;
-import com.cdez.sg_cdez_api.dto.response.PersonalResponse;
+import com.cdez.sg_cdez_api.dto.response.*;
 import com.cdez.sg_cdez_api.entity.*;
+import com.cdez.sg_cdez_api.entity.reports.Column;
+import com.cdez.sg_cdez_api.entity.reports.PdfTableReport;
 import com.cdez.sg_cdez_api.repository.*;
 import com.cdez.sg_cdez_api.repository.specifications.PersonalSpecs;
 import com.cdez.sg_cdez_api.service.*;
 import com.cdez.sg_cdez_api.util.AuthHelper;
-import com.cdez.sg_cdez_api.util.Exceptions.PageOutOfBoundsException;
+import com.cdez.sg_cdez_api.util.ValidationHelper;
+import com.itextpdf.layout.properties.TextAlignment;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PersonalServiceImpl implements PersonalService {
     private final PersonalRepository REPOSITORY;
     private final AuthHelper AUTH_HELPER;
+    private final ValidationHelper VALIDATION_HELPER;
     private final RolRepository ROL_REPOSITORY;
     private final PasswordEncoder ENCODER;
     private final EmailService EMAIL_SERVICE;
     private final ContactoService CONTACTO_SERVICE;
+    private final ReportService REPORT_SERVICE;
 
-//    @Override
-//    public PageResponse<PersonalResponse> listarPersonal(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-//        Page<Personal> personalPage = REPOSITORY.findAll(pageable);
-//
-//        //Manejo de excepciones
-//        if(personalPage.getTotalElements() > 0 && pageable.getPageNumber() >= personalPage.getTotalPages()){
-//            throw new PageOutOfBoundsException(
-//                    String.format("Número de página %d está fuera de rango. Páginas totales: %d", pageable.getPageNumber(), personalPage.getTotalPages())
-//            );
-//        }
-//
-//        Page<PersonalResponse> responsePage = personalPage.map(this::mapDTO);
-//        return new PageResponse<>(responsePage);
-//    }
+    @Override
+    public List<PersonalResponse> listarPersonal() {
+        return REPOSITORY.findAll().stream().map(this::mapDTO).toList();
+    }
 
     @Override
     public PageResponse<PersonalResponse> listarPersonalFiltrado(PersonalFiltro filtros,@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
@@ -66,13 +62,7 @@ public class PersonalServiceImpl implements PersonalService {
 
         Page<Personal> personalPage = REPOSITORY.findAll(spec, pageable);
 
-        //Manejo de excepciones
-        if(personalPage.getTotalElements() > 0 && pageable.getPageNumber() >= personalPage.getTotalPages()){
-            throw new PageOutOfBoundsException(
-                    String.format("Número de página %d está fuera de rango. Páginas totales: %d", pageable.getPageNumber(), personalPage.getTotalPages())
-            );
-        }
-
+        VALIDATION_HELPER.checkPaginationBounds(personalPage, pageable);
         Page<PersonalResponse> responsePage = personalPage.map(this::mapDTO);
         return new PageResponse<>(responsePage);
 
@@ -186,6 +176,42 @@ public class PersonalServiceImpl implements PersonalService {
         return mapDTO(personal);
     }
 
+    @Override
+    public byte[] generarReportePersonalPDF() throws IOException {
+        try{
+            List<PersonalResponse> personal = listarPersonal();
+
+            PdfTableReport<PersonalResponse> reporte =
+                    PdfTableReport.<PersonalResponse>builder()
+                            .titulo("Reporte de Personal")
+                            .datos(personal)
+                            .columnas(List.of(
+                                    new Column<>("Rol", PersonalResponse::rol, TextAlignment.LEFT, 1f),
+                                    new Column<>("Especialidad", PersonalResponse::especialidad, TextAlignment.LEFT, 1.5f),
+                                    new Column<>("Tipo Identificación", PersonalResponse::tipoIdentificacion, TextAlignment.LEFT, 2f),
+                                    new Column<>("Identificación", PersonalResponse::identificacion, TextAlignment.LEFT, 1.5f),
+                                    new Column<>("Nombre Completo", PersonalResponse::nombreCompleto, TextAlignment.LEFT, 2.5f),
+                                    new Column<>("Dirección", PersonalResponse::direccion, TextAlignment.LEFT, 2.5f),
+                                    new Column<>("Carné", PersonalResponse::carnet, TextAlignment.LEFT, 1f),
+                                    new Column<>("Usuario", PersonalResponse::usuario, TextAlignment.LEFT, 2f),
+                                    new Column<>(
+                                            "Contactos",
+                                            p -> p.contactos().isEmpty()
+                                                    ? "Sin contactos"
+                                                    : p.contactos().stream()
+                                                    .map(c -> c.tipoValor() + ": " + c.valor())
+                                                    .collect(Collectors.joining("\n")),
+                                            TextAlignment.LEFT, 3f
+                                    ),
+                                    new Column<>("Estado", PersonalResponse::activo, TextAlignment.CENTER, 1f)
+                            )).build();
+
+            return REPORT_SERVICE.generarTablaPDF(reporte);
+        }catch(IOException ex){
+            throw new RuntimeException("Error de fuente.");
+        }
+    }
+
     //Mapper
     private PersonalResponse mapDTO(Personal personal){
         return new PersonalResponse(
@@ -194,10 +220,7 @@ public class PersonalServiceImpl implements PersonalService {
                 personal.getEspecialidad(),
                 personal.getTipoIdentificacion(),
                 personal.getIdentificacion(),
-                personal.getPrimerNombre(),
-                personal.getSegundoNombre(),
-                personal.getPrimerApellido(),
-                personal.getSegundoApellido(),
+                personal.getNombreCompleto(),
                 personal.getDireccion(),
                 personal.getCarnet(),
                 personal.getUsuario(),
