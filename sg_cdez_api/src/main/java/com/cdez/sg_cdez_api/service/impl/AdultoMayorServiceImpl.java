@@ -1,34 +1,44 @@
 package com.cdez.sg_cdez_api.service.impl;
 
 import com.cdez.sg_cdez_api.entity.Personal;
-import com.cdez.sg_cdez_api.repository.AuthRepository;
+import com.cdez.sg_cdez_api.entity.reports.Column;
+import com.cdez.sg_cdez_api.entity.reports.PdfTableReport;
 import com.cdez.sg_cdez_api.dto.request.AdultoMayorRequest;
 import com.cdez.sg_cdez_api.dto.response.AdultoMayorResponse;
 import com.cdez.sg_cdez_api.dto.request.AdultoMayorUpdateRequest;
 import com.cdez.sg_cdez_api.entity.AdultoMayor;
 import com.cdez.sg_cdez_api.repository.AdultoMayorRepository;
 import com.cdez.sg_cdez_api.service.AdultoMayorService;
+import com.cdez.sg_cdez_api.service.ReportService;
+import com.cdez.sg_cdez_api.util.AuthHelper;
+import com.cdez.sg_cdez_api.util.MiscHelper;
+import com.itextpdf.layout.properties.TextAlignment;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.cdez.sg_cdez_api.entity.CustomUserDetails;
-import org.springframework.security.core.context.SecurityContextHolder;
 import com.cdez.sg_cdez_api.dto.request.AdultoMayorDesactivarRequest;
 import com.cdez.sg_cdez_api.dto.request.AdultoMayorFallecimientoRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
 import java.util.UUID;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class AdultoMayorServiceImpl implements AdultoMayorService {
 
     private final AdultoMayorRepository adultoMayorRepository;
-    private final AuthRepository authRepository;
+    private final ReportService REPORT_SERVICE;
+    private final MiscHelper MISC_HELPER;
+    private final AuthHelper AUTH_HELPER;
 
-    public AdultoMayorServiceImpl(AdultoMayorRepository adultoMayorRepository, AuthRepository authRepository) {
-        this.adultoMayorRepository = adultoMayorRepository;
-        this.authRepository = authRepository;
+    @Override
+    public List<AdultoMayorResponse> listarAdultosMayoresSinFiltro() {
+        return adultoMayorRepository.findAll().stream().map(this::mapToResponse).toList();
     }
+
     @Override
     public List<AdultoMayorResponse> listarAdultosMayores() {
         return adultoMayorRepository.findByActivoTrue()
@@ -56,10 +66,7 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                 adultoMayor.getAdultoId(),
                 adultoMayor.getTipoIdentificacion(),
                 adultoMayor.getIdentificacion(),
-                adultoMayor.getPrimerNombre(),
-                adultoMayor.getSegundoNombre(),
-                adultoMayor.getPrimerApellido(),
-                adultoMayor.getSegundoApellido(),
+                adultoMayor.getNombreCompleto(),
                 adultoMayor.getNacionalidad(),
                 adultoMayor.getFechaNacimiento(),
                 adultoMayor.getSexo(),
@@ -70,7 +77,7 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                 adultoMayor.getFuncionalidadFisica(),
                 adultoMayor.isAyudaBiomecanica(),
                 adultoMayor.getFechaIngreso(),
-                adultoMayor.isActivo()
+                MISC_HELPER.activoConversion(adultoMayor.isActivo())
         );
     }
     @Override
@@ -124,7 +131,7 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         adultoMayor.setActivo(true);
         adultoMayor.setCreatedAt(java.time.LocalDateTime.now());
 
-        Personal usuarioCreador = obtenerUsuarioAutenticado();
+        Personal usuarioCreador = AUTH_HELPER.obtenerUsuarioAutenticado();
         adultoMayor.setCreatedBy(usuarioCreador);
 
         AdultoMayor adultoGuardado = adultoMayorRepository.save(adultoMayor);
@@ -158,24 +165,12 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
 
         adultoMayor.setUpdatedAt(java.time.LocalDateTime.now());
 
-        Personal usuarioActualizador = obtenerUsuarioAutenticado();
+        Personal usuarioActualizador = AUTH_HELPER.obtenerUsuarioAutenticado();
         adultoMayor.setUpdatedBy(usuarioActualizador);
 
         AdultoMayor adultoActualizado = adultoMayorRepository.save(adultoMayor);
 
         return mapToResponse(adultoActualizado);
-    }
-    private Personal obtenerUsuarioAutenticado() {
-        Object principal = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-
-        if (!(principal instanceof CustomUserDetails userDetails)) {
-            throw new RuntimeException("Usuario autenticado no válido");
-        }
-
-        return authRepository.findByPersonalId(userDetails.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado"));
     }
 
     @Override
@@ -194,7 +189,7 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         adultoMayor.setMotivoRetiro(request.motivoRetiro());
         adultoMayor.setUpdatedAt(java.time.LocalDateTime.now());
 
-        Personal usuarioActualizador = obtenerUsuarioAutenticado();
+        Personal usuarioActualizador = AUTH_HELPER.obtenerUsuarioAutenticado();
         adultoMayor.setUpdatedBy(usuarioActualizador);
 
         AdultoMayor actualizado = adultoMayorRepository.save(adultoMayor);
@@ -222,7 +217,7 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         adultoMayor.setMotivoRetiro(null);
         adultoMayor.setUpdatedAt(java.time.LocalDateTime.now());
 
-        Personal usuarioActualizador = obtenerUsuarioAutenticado();
+        Personal usuarioActualizador = AUTH_HELPER.obtenerUsuarioAutenticado();
         adultoMayor.setUpdatedBy(usuarioActualizador);
 
         AdultoMayor actualizado = adultoMayorRepository.save(adultoMayor);
@@ -243,11 +238,38 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         adultoMayor.setMotivoRetiro(request.motivoRetiro());
         adultoMayor.setUpdatedAt(java.time.LocalDateTime.now());
 
-        Personal usuarioActualizador = obtenerUsuarioAutenticado();
+        Personal usuarioActualizador = AUTH_HELPER.obtenerUsuarioAutenticado();
         adultoMayor.setUpdatedBy(usuarioActualizador);
 
         AdultoMayor actualizado = adultoMayorRepository.save(adultoMayor);
 
         return mapToResponse(actualizado);
     }
+
+    @Override
+    public byte[] generarReporteAdultoPDF() {
+        try{
+            List<AdultoMayorResponse> adulosMayores = listarAdultosMayoresSinFiltro();
+
+            PdfTableReport<AdultoMayorResponse> reporte =
+                    PdfTableReport.<AdultoMayorResponse>builder()
+                            .titulo("Reporte de Adultos Mayores")
+                            .datos(adulosMayores)
+                            .columnas(List.of(
+                                    new Column<>("Tipo Identificación", AdultoMayorResponse::tipoIdentificacion, TextAlignment.LEFT, 2f),
+                                    new Column<>("Identificación", AdultoMayorResponse::identificacion, TextAlignment.LEFT, 1.5f),
+                                    new Column<>("Nombre Completo", AdultoMayorResponse::nombreCompleto, TextAlignment.LEFT, 2.5f),
+                                    new Column<>("Nacionalidad", AdultoMayorResponse::nacionalidad, TextAlignment.LEFT, 1.5f),
+                                    new Column<>("Dirección", AdultoMayorResponse::direccion, TextAlignment.LEFT, 2.5f),
+                                    new Column<>("Sexo", AdultoMayorResponse::sexo),
+                                    new Column<>("Estado", AdultoMayorResponse::activo)
+                            )).build();
+            return REPORT_SERVICE.generarTablaPDF(reporte);
+
+        }catch (IOException ex){
+            throw new RuntimeException("Error de fuente.");
+        }
+    }
+
+
 }

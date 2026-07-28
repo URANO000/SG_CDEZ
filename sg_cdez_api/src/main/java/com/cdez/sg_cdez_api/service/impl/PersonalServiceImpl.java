@@ -3,13 +3,11 @@ package com.cdez.sg_cdez_api.service.impl;
 import com.cdez.sg_cdez_api.dto.request.*;
 import com.cdez.sg_cdez_api.dto.response.*;
 import com.cdez.sg_cdez_api.entity.*;
-import com.cdez.sg_cdez_api.entity.reports.Column;
-import com.cdez.sg_cdez_api.entity.reports.PdfTableReport;
+import com.cdez.sg_cdez_api.entity.reports.*;
 import com.cdez.sg_cdez_api.repository.*;
 import com.cdez.sg_cdez_api.repository.specifications.PersonalSpecs;
 import com.cdez.sg_cdez_api.service.*;
-import com.cdez.sg_cdez_api.util.AuthHelper;
-import com.cdez.sg_cdez_api.util.ValidationHelper;
+import com.cdez.sg_cdez_api.util.*;
 import com.itextpdf.layout.properties.TextAlignment;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +16,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.io.IOException;
-import java.time.Clock;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.UUID;
+import java.time.*;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +32,7 @@ public class PersonalServiceImpl implements PersonalService {
     private final EmailService EMAIL_SERVICE;
     private final ContactoService CONTACTO_SERVICE;
     private final ReportService REPORT_SERVICE;
+    private final MiscHelper MISC_HELPER;
 
     @Override
     public List<PersonalResponse> listarPersonal() {
@@ -45,7 +40,7 @@ public class PersonalServiceImpl implements PersonalService {
     }
 
     @Override
-    public PageResponse<PersonalResponse> listarPersonalFiltrado(PersonalFiltro filtros,@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
+    public PageResponse<PersonalResponse> listarPersonalFiltrado(PersonalFiltro filtros,@PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
         Specification<Personal> spec = Specification.unrestricted();
 
         if(filtros.especialidad() != null){
@@ -177,7 +172,7 @@ public class PersonalServiceImpl implements PersonalService {
     }
 
     @Override
-    public byte[] generarReportePersonalPDF() throws IOException {
+    public byte[] generarReportePersonalPDF() {
         try{
             List<PersonalResponse> personal = listarPersonal();
 
@@ -224,7 +219,7 @@ public class PersonalServiceImpl implements PersonalService {
                 personal.getDireccion(),
                 personal.getCarnet(),
                 personal.getUsuario(),
-                activoConversion(personal.isActivo()),
+                MISC_HELPER.activoConversion(personal.isActivo()),
                 personal.getCreatedBy() != null ? personal.getCreatedBy().getUsuario() : null,
                 personal.getCreatedAt(),
                 personal.getUpdatedBy() != null ? personal.getUpdatedBy().getUsuario() : null ,
@@ -232,15 +227,6 @@ public class PersonalServiceImpl implements PersonalService {
 
                 CONTACTO_SERVICE.listarContactoPorPersonal(personal)
         );
-    }
-
-    //Activo bool a string
-    private String activoConversion(boolean isActivo){
-        if(isActivo){
-            return "Activo";
-        }
-
-        return "Inactivo";
     }
 
     //Personal existe?

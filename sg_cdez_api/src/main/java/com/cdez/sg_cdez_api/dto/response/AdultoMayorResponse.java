@@ -7,10 +7,7 @@ public record AdultoMayorResponse(
         UUID adultoId,
         String tipoIdentificacion,
         String identificacion,
-        String primerNombre,
-        String segundoNombre,
-        String primerApellido,
-        String segundoApellido,
+        String nombreCompleto,
         String nacionalidad,
         LocalDateTime fechaNacimiento,
         String sexo,
@@ -21,6 +18,6 @@ public record AdultoMayorResponse(
         String funcionalidadFisica,
         boolean ayudaBiomecanica,
         LocalDateTime fechaIngreso,
-        boolean activo
+        String activo
 ) {
 }

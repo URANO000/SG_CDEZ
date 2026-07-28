@@ -9,6 +9,7 @@ import com.cdez.sg_cdez_api.dto.request.AdultoMayorFallecimientoRequest;
 import java.util.List;
 
 public interface AdultoMayorService {
+    List<AdultoMayorResponse> listarAdultosMayoresSinFiltro();
     List<AdultoMayorResponse> listarAdultosMayores();
     List<AdultoMayorResponse> listarAdultosMayoresInactivos();
     List<AdultoMayorResponse> listarAdultosMayoresFallecidos();
@@ -19,5 +20,6 @@ public interface AdultoMayorService {
     AdultoMayorResponse desactivarAdultoMayor(UUID id, AdultoMayorDesactivarRequest request);
     AdultoMayorResponse activarAdultoMayor(UUID id);
     AdultoMayorResponse registrarFallecimiento(UUID id, AdultoMayorFallecimientoRequest request);
+    byte[] generarReporteAdultoPDF();
 
 }
