@@ -176,18 +176,19 @@ ON Epicrisis(vigente);
 
 /* Tabla e índices para auditoría del sistema (23-07-2026)*/
 CREATE TABLE Auditoria(
-	auditoria_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    auditoria_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-	usuario_id UUID REFERENCES Personal(personal_id) NOT NULL,
+    usuario_id UUID REFERENCES Personal(personal_id) NOT NULL,
 
-	accion VARCHAR(100) NOT NULL,
-	modulo VARCHAR(100) NOT NULL,
-	entidad_afectada VARCHAR(100) NOT NULL,
-	registro_afectado_id VARCHAR(100) NOT NULL,
+    accion VARCHAR(100) NOT NULL,
+    modulo VARCHAR(100) NOT NULL,
+    entidad_afectada VARCHAR(100) NOT NULL,
+    registro_afectado_id VARCHAR(100) NOT NULL,
 
-	descripcion VARCHAR(500) NULL,
+    descripcion VARCHAR(500) NULL,
+    cambios JSONB NULL,
 
-	created_at TIMESTAMP NOT NULL
+    created_at TIMESTAMP NOT NULL
 );
 
 CREATE INDEX idx_auditoria_usuario_id
