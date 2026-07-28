@@ -10,6 +10,7 @@ import com.cdez.sg_cdez_api.repository.specifications.PersonalSpecs;
 import com.cdez.sg_cdez_api.service.*;
 import com.cdez.sg_cdez_api.util.AuthHelper;
 import com.cdez.sg_cdez_api.util.ValidationHelper;
+import com.itextpdf.layout.properties.TextAlignment;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -185,33 +186,24 @@ public class PersonalServiceImpl implements PersonalService {
                             .titulo("Reporte de Personal")
                             .datos(personal)
                             .columnas(List.of(
-                                    new Column<>("Rol", PersonalResponse::rol),
-                                    new Column<>("Especialidad", PersonalResponse::especialidad),
-                                    new Column<>("Tipo Identificación", PersonalResponse::tipoIdentificacion),
-                                    new Column<>("Identificación", PersonalResponse::identificacion),
-                                    new Column<>("Nombre Completo", PersonalResponse::nombreCompleto),
-                                    new Column<>("Dirección", PersonalResponse::direccion),
-                                    new Column<>("Carné", PersonalResponse::carnet),
-                                    new Column<>("Usuario", PersonalResponse::usuario),
+                                    new Column<>("Rol", PersonalResponse::rol, TextAlignment.LEFT, 1f),
+                                    new Column<>("Especialidad", PersonalResponse::especialidad, TextAlignment.LEFT, 1.5f),
+                                    new Column<>("Tipo Identificación", PersonalResponse::tipoIdentificacion, TextAlignment.LEFT, 2f),
+                                    new Column<>("Identificación", PersonalResponse::identificacion, TextAlignment.LEFT, 1.5f),
+                                    new Column<>("Nombre Completo", PersonalResponse::nombreCompleto, TextAlignment.LEFT, 2.5f),
+                                    new Column<>("Dirección", PersonalResponse::direccion, TextAlignment.LEFT, 2.5f),
+                                    new Column<>("Carné", PersonalResponse::carnet, TextAlignment.LEFT, 1f),
+                                    new Column<>("Usuario", PersonalResponse::usuario, TextAlignment.LEFT, 2f),
                                     new Column<>(
                                             "Contactos",
-                                            p -> p.contactos().stream()
+                                            p -> p.contactos().isEmpty()
+                                                    ? "Sin contactos"
+                                                    : p.contactos().stream()
                                                     .map(c -> c.tipoValor() + ": " + c.valor())
-                                                    .collect(Collectors.joining("\n"))
+                                                    .collect(Collectors.joining("\n")),
+                                            TextAlignment.LEFT, 3f
                                     ),
-                                    new Column<>("Estado", PersonalResponse::activo),
-                                    new Column<>("Fecha Creación",   p -> p.createdAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))),
-                                    new Column<>("Creado Por", PersonalResponse::createdBy),
-                                    new Column<>("Fecha Actualización",
-                                            p -> p.updatedAt() == null
-                                                    ? "Sin Actualizaciones"
-                                                    : p.updatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))),
-                                    new Column<>("Actualizado Por",
-                                            p -> p.updatedBy() == null
-                                                    ? "Sin Actualizaciones"
-                                                    : p.updatedBy())
-
-
+                                    new Column<>("Estado", PersonalResponse::activo, TextAlignment.CENTER, 1f)
                             )).build();
 
             return REPORT_SERVICE.generarTablaPDF(reporte);
