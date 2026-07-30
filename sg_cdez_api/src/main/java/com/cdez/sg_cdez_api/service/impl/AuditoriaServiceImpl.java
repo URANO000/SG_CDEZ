@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +37,26 @@ public class AuditoriaServiceImpl implements AuditoriaService {
             String registroAfectadoId,
             String descripcion
     ) {
+        registrarAccion(
+                accion,
+                modulo,
+                entidadAfectada,
+                registroAfectadoId,
+                descripcion,
+                null
+        );
+    }
+
+    @Override
+    @Transactional
+    public void registrarAccion(
+            String accion,
+            String modulo,
+            String entidadAfectada,
+            String registroAfectadoId,
+            String descripcion,
+            Map<String, Object> cambios
+    ) {
         Personal usuarioAutenticado = obtenerUsuarioAutenticado();
 
         Auditoria auditoria = new Auditoria();
@@ -45,6 +66,7 @@ public class AuditoriaServiceImpl implements AuditoriaService {
         auditoria.setEntidadAfectada(entidadAfectada);
         auditoria.setRegistroAfectadoId(registroAfectadoId);
         auditoria.setDescripcion(descripcion);
+        auditoria.setCambios(cambios);
         auditoria.setCreatedAt(LocalDateTime.now());
 
         auditoriaRepository.save(auditoria);
@@ -99,6 +121,7 @@ public class AuditoriaServiceImpl implements AuditoriaService {
                 auditoria.getEntidadAfectada(),
                 auditoria.getRegistroAfectadoId(),
                 auditoria.getDescripcion(),
+                auditoria.getCambios(),
                 auditoria.getCreatedAt()
         );
     }

@@ -6,6 +6,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import java.util.Map;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -37,6 +41,10 @@ public class Auditoria {
 
     @Column(name = "descripcion", length = 500)
     private String descripcion;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "cambios", columnDefinition = "jsonb")
+    private Map<String, Object> cambios;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
