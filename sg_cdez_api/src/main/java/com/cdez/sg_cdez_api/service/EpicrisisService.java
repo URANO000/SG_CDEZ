@@ -18,7 +18,10 @@ public interface EpicrisisService {
             MultipartFile archivo
     );
 
-    List<EpicrisisResponse> listarEpicrisisPorAdulto(UUID adultoId);
+    List<EpicrisisResponse> listarEpicrisisPorAdulto(
+            UUID adultoId,
+            Integer anio
+    );
 
     EpicrisisResponse obtenerEpicrisisPorId(UUID epicrisisId);
 

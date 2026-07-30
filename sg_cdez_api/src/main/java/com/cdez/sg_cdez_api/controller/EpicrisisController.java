@@ -55,10 +55,14 @@ public class EpicrisisController {
 
     @GetMapping("/adultos-mayores/{adultoId}/epicrisis")
     public ResponseEntity<List<EpicrisisResponse>> listarEpicrisisPorAdulto(
-            @PathVariable UUID adultoId
+            @PathVariable UUID adultoId,
+            @RequestParam(required = false) Integer anio
     ) {
         return ResponseEntity.ok(
-                epicrisisService.listarEpicrisisPorAdulto(adultoId)
+                epicrisisService.listarEpicrisisPorAdulto(
+                        adultoId,
+                        anio
+                )
         );
     }
 

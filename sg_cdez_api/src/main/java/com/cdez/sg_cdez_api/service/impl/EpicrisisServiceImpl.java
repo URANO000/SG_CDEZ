@@ -114,17 +114,44 @@ public class EpicrisisServiceImpl implements EpicrisisService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EpicrisisResponse> listarEpicrisisPorAdulto(UUID adultoId) {
+    public List<EpicrisisResponse> listarEpicrisisPorAdulto(
+            UUID adultoId,
+            Integer anio
+    ) {
         if (!adultoMayorRepository.existsById(adultoId)) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
-                    "No se encontró el adulto mayor indicado."
+                    "Adulto mayor no encontrado"
             );
         }
 
-        return epicrisisRepository
-                .findByDocumentoAdultoMayorAdultoIdOrderByFechaEmisionDesc(adultoId)
-                .stream()
+        List<Epicrisis> epicrisis;
+
+        if (anio == null) {
+            epicrisis = epicrisisRepository
+                    .findByDocumentoAdultoMayorAdultoIdOrderByFechaEmisionDesc(
+                            adultoId
+                    );
+        } else {
+            LocalDateTime inicio = LocalDateTime.of(
+                    anio,
+                    1,
+                    1,
+                    0,
+                    0
+            );
+
+            LocalDateTime fin = inicio.plusYears(1);
+
+            epicrisis = epicrisisRepository
+                    .findByDocumentoAdultoMayorAdultoIdAndFechaEmisionGreaterThanEqualAndFechaEmisionLessThanOrderByFechaEmisionDesc(
+                            adultoId,
+                            inicio,
+                            fin
+                    );
+        }
+
+        return epicrisis.stream()
                 .map(this::mapToResponse)
                 .toList();
     }
