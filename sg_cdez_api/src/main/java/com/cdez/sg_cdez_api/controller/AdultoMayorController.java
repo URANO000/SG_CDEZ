@@ -4,9 +4,14 @@ import com.cdez.sg_cdez_api.dto.request.AdultoMayorRequest;
 import com.cdez.sg_cdez_api.dto.request.AdultoMayorUpdateRequest;
 import com.cdez.sg_cdez_api.dto.response.AdultoMayorResponse;
 import com.cdez.sg_cdez_api.service.AdultoMayorService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.cdez.sg_cdez_api.dto.request.AdultoMayorDesactivarRequest;
 import com.cdez.sg_cdez_api.dto.request.AdultoMayorFallecimientoRequest;
+
+import java.io.IOException;
 import java.util.UUID;
 
 import java.util.List;
@@ -76,5 +81,15 @@ public class AdultoMayorController {
             @RequestBody AdultoMayorFallecimientoRequest request
     ) {
         return adultoMayorService.registrarFallecimiento(id, request);
+    }
+
+    @GetMapping("/reporte")
+    public ResponseEntity<byte[]> generarReportePdf() throws IOException {
+        byte[] pdf = adultoMayorService.generarReporteAdultoPDF();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=reporte_de_adultoMayor.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 }

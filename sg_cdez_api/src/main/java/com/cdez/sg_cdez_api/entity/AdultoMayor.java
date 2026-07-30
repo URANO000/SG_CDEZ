@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Getter
 @Setter
@@ -57,4 +59,11 @@ public class AdultoMayor {
             inverseJoinColumns = @JoinColumn(name = "encargado_id")
     )
     private List<EncargadoLegal> encargados = new ArrayList<>();
+
+    // Util para conseguir nombre completo
+    public String getNombreCompleto(){
+        return Stream.of(getPrimerNombre(), getSegundoNombre(), getPrimerApellido(), getSegundoApellido())
+                .filter(s -> s != null && !s.trim().isEmpty())
+                .collect(Collectors.joining(" "));
+    }
 }
