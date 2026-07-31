@@ -207,6 +207,11 @@ public class PersonalServiceImpl implements PersonalService {
         }
     }
 
+    public String obtenerNombrePorId(UUID id){
+        PersonalResponse personalResponse = mapDTO(obtenerPersonalCheck(id));
+        return personalResponse.nombreCompleto();
+    }
+
     //Mapper
     private PersonalResponse mapDTO(Personal personal){
         return new PersonalResponse(

@@ -26,4 +26,5 @@ public interface PersonalService {
     PersonalResponse activarPersonal(UUID id);
     PersonalResponse desactivarPersonal(UUID id);
     byte[] generarReportePersonalPDF() throws IOException;
+    String obtenerNombrePorId(UUID id);
 }
