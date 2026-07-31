@@ -1,0 +1,10 @@
+.user {
+  padding: var(--mantine-spacing-sm);
+  border-radius: var(--mantine-radius-md);
+  color: #f1f1f1;
+  transition: background-color 150ms ease;
+
+  @mixin hover {
+  background-color: var(--color-sidebar-hv);
+  }
+}

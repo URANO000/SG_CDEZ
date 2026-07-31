@@ -1,0 +1,18 @@
+.wrapper {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background-color: var(--color-primary);
+}
+
+.card {
+    width: 100%;
+    max-width: 500px;
+    padding: 2.5rem;
+    border-radius: 12px;
+    background-color: var(--card-bg);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}

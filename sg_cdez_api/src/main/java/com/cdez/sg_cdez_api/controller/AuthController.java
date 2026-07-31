@@ -3,11 +3,14 @@ package com.cdez.sg_cdez_api.controller;
 import com.cdez.sg_cdez_api.dto.request.CambiaContrasenaRequest;
 import com.cdez.sg_cdez_api.dto.request.LoginRequest;
 import com.cdez.sg_cdez_api.dto.response.JwtAuthResponse;
+import com.cdez.sg_cdez_api.dto.response.UserSessionResponse;
+import com.cdez.sg_cdez_api.entity.CustomUserDetails;
 import com.cdez.sg_cdez_api.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
@@ -70,6 +73,26 @@ public class AuthController {
     @PostMapping("/cambiarContrasena/{usuarioId}")
     public ResponseEntity<?> cambiarContrasena(@RequestBody CambiaContrasenaRequest request, @PathVariable(name = "usuarioId") UUID usuarioId){
         return ResponseEntity.ok(SERVICE.cambiarContrasena(request, usuarioId));
+    }
+
+    @GetMapping("/session")
+    public ResponseEntity<UserSessionResponse> session(Authentication authentication){
+
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+
+        String rol = user.getAuthorities()
+                .stream()
+                .findFirst()
+                .map(GrantedAuthority::getAuthority)
+                .orElse(null);
+
+        return ResponseEntity.ok(
+                new UserSessionResponse(
+                        user.getUsuarioId(),
+                        user.getUsuario(),
+                        rol
+                )
+        );
     }
 
     //APIs de prueba para control de roles
