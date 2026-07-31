@@ -1,14 +1,14 @@
 :root {
   --text: #6b6375;
   --color-navbar: #547e72;
-  --color-sidebar: #060e0a;
+  --color-sidebar: #0a1811;
   --color-sidebar-clc: #0f2214;
   --color-sidebar-hv: rgba(10, 121, 47, 0.103);
   --color-sidebar-border: rgba(113, 184, 137, 0.281);
   --color-primary: #c1c98e;
   --color-secondary: #90b6bf;
   --card-bg: #f5f5f5;
-  --bg: #060e0a;
+  --bg: #0a1811;
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 

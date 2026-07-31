@@ -6,6 +6,7 @@ import com.cdez.sg_cdez_api.dto.response.JwtAuthResponse;
 import com.cdez.sg_cdez_api.dto.response.UserSessionResponse;
 import com.cdez.sg_cdez_api.entity.CustomUserDetails;
 import com.cdez.sg_cdez_api.service.AuthService;
+import com.cdez.sg_cdez_api.service.PersonalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -21,6 +22,7 @@ import java.util.UUID;
 public class AuthController {
     @Autowired
     private final AuthService SERVICE;
+    private final PersonalService PERSONAL_SERVICE;
 
     //Login Api
     @PostMapping("/iniciarSesion")
@@ -86,9 +88,12 @@ public class AuthController {
                 .map(GrantedAuthority::getAuthority)
                 .orElse(null);
 
+        String nombre = PERSONAL_SERVICE.obtenerNombrePorId(user.getUsuarioId());
+
         return ResponseEntity.ok(
                 new UserSessionResponse(
                         user.getUsuarioId(),
+                        nombre,
                         user.getUsuario(),
                         rol
                 )

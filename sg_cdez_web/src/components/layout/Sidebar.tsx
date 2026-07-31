@@ -1,24 +1,33 @@
 import { NavLink, ScrollArea, Text } from "@mantine/core";
-import { BsFillHouseDoorFill, BsClipboard2PulseFill, BsFillPeopleFill, BsPersonHeart, BsClipboardDataFill, BsGearFill, BsMapFill} from "react-icons/bs";
+import { BsFillHouseDoorFill, BsClipboard2PulseFill, BsFillPeopleFill, BsPersonHeart, BsClipboardDataFill, BsMapFill } from "react-icons/bs";
 import { Link, useLocation } from "react-router";
 import classes from "./Sidebar.module.css";
 import { UserButton } from "../common/UserButton";
+import { useAuth } from "../../services/authContext";
 
 const links = [
   { label: "Inicio", to: "/", icon: BsFillHouseDoorFill },
   { label: "Consultas", to: "/consultas", icon: BsClipboard2PulseFill },
   { label: "Adultos Mayores", to: "/adultosMayores", icon: BsPersonHeart },
-  { label: "Personal", to: "/personal", icon: BsFillPeopleFill },
-  {label: "Auditoría", to: "/auditoria", icon: BsClipboardDataFill}
+  { label: "Personal", to: "/personal", icon: BsFillPeopleFill, roles: ["ROLE_ADMIN"] },
+  { label: "Auditoría", to: "/auditoria", icon: BsClipboardDataFill, roles: ["ROLE_ADMIN"] }
 ];
 
 const footer = [
-    {label:"Documentación", to: "/documentacion", icon:BsMapFill},
-    {label: "Ajustes", to: "/ajustes", icon: BsGearFill}
+  { label: "Documentación", to: "/documentacion", icon: BsMapFill }
 ];
 
 export function Sidebar() {
   const location = useLocation();
+  const { user } = useAuth();
+
+  if (!user) {
+    return null;
+  }
+
+  const visibleLinks = links.filter(
+    (link) => !link.roles || link.roles.includes(user.rol)
+  );
 
   return (
     <nav className={classes.navbar}>
@@ -28,7 +37,7 @@ export function Sidebar() {
 
       <ScrollArea className={classes.links}>
         <div className={classes.linksInner}>
-          {links.map((link) => (
+          {visibleLinks.map((link) => (
             <NavLink
               key={link.label}
               component={Link}
@@ -43,18 +52,18 @@ export function Sidebar() {
       </ScrollArea>
       <div className={classes.footer}>
         {footer.map((footer) => (
-            <NavLink
+          <NavLink
             key={footer.label}
             component={Link}
             to={footer.to}
             label={footer.label}
             leftSection={<footer.icon size={20} />}
             active={location.pathname === footer.to}
-            classNames={{root: classes.link}}
-            />
+            classNames={{ root: classes.link }}
+          />
         ))
         }
-        <UserButton/>
+        <UserButton />
       </div>
     </nav>
   );

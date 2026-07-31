@@ -11,7 +11,6 @@ import { AdultosMayores } from './pages/adultosMayores/adultosMayores';
 import { Personal } from './pages/personal/personal';
 import { Auditoria } from './pages/auditoria/auditoria';
 import { Documentacion } from './pages/documentacion/documentacion';
-import { Ajustes } from './pages/ajustes/ajustes';
 import { AuthProvider } from './services/authContext';
 import { ProtectedRoute } from './Routes';
 
@@ -23,17 +22,16 @@ function App() {
         <Router>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route element={<Layout />}>
+            <Route element={
+              <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_ADMIN"]}>
+                <Layout />
+              </ProtectedRoute>
+            }>
               <Route path="/" element={<Home />} />
-              <Route path="/consultas" element={
-                <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_ADMIN"]}>
-                  <Consultas />
-                </ProtectedRoute>} />
-              <Route path="/adultosMayores" element={
-                <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_ADMIN"]}>
-                  <AdultosMayores />
-                </ProtectedRoute>
-              } />
+              <Route path="/consultas" element={<Consultas />} />
+              <Route path="/adultosMayores" element={<AdultosMayores />} />
+              <Route path='/documentacion' element={<Documentacion />} />
+
               <Route path="/personal" element={
                 <ProtectedRoute roles={["ROLE_ADMIN"]}>
                   <Personal />
@@ -44,17 +42,6 @@ function App() {
                   <Auditoria />
                 </ProtectedRoute>
               } />
-              <Route path="/documentacion" element={
-                <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_ADMIN"]}>
-                  <Documentacion />
-                </ProtectedRoute>
-              } />
-              <Route path="/ajustes" element={
-                <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_ADMIN"]}>
-                  <Ajustes />
-                </ProtectedRoute>
-              } />
-
             </Route>
           </Routes>
         </Router>

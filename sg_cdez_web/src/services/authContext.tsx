@@ -6,18 +6,8 @@ import {
 } from "react";
 
 import { obtenerSesion } from "./authService";
-
-interface Session {
-    usuarioId: string;
-    usuario: string;
-    rol: string;
-}
-
-interface AuthContextType {
-    user: Session | null;
-    loading: boolean;
-    refreshSession: () => Promise<void>;
-}
+import type { Session } from "./sessionInterface";
+import type { AuthContextType } from "./sessionInterface";
 
 const AuthContext = createContext<AuthContextType>(null!);
 
@@ -27,6 +17,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true);
 
     async function refreshSession() {
+        setLoading(true);
+
         try {
             const session = await obtenerSesion();
             setUser(session);
@@ -35,6 +27,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } finally {
             setLoading(false);
         }
+    }
+
+    function logout() {
+        setUser(null);
     }
 
     useEffect(() => {
@@ -47,6 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 user,
                 loading,
                 refreshSession,
+                logout,
             }}
         >
             {children}

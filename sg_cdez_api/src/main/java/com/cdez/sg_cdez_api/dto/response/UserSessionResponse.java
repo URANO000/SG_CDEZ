@@ -4,6 +4,7 @@ import java.util.UUID;
 
 public record UserSessionResponse(
         UUID usuarioId,
+        String nombreCompleto,
         String usuario,
         String rol
 ) {
