@@ -19,10 +19,16 @@ import com.cdez.sg_cdez_api.dto.request.AdultoMayorDesactivarRequest;
 import com.cdez.sg_cdez_api.dto.request.AdultoMayorFallecimientoRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
+import com.cdez.sg_cdez_api.service.AuditoriaService;
 
 import java.io.IOException;
 import java.util.UUID;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -33,6 +39,41 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
     private final ReportService REPORT_SERVICE;
     private final MiscHelper MISC_HELPER;
     private final AuthHelper AUTH_HELPER;
+    private final AuditoriaService auditoriaService;
+
+
+    // Registra en el historial una acción realizada sobre un adulto mayor.
+    private void registrarAuditoria(
+            String accion,
+            AdultoMayor adultoMayor,
+            String descripcion
+    ) {
+        auditoriaService.registrarAccion(
+                accion,
+                "ADULTO_MAYOR",
+                "AdultoMayor",
+                adultoMayor.getAdultoId().toString(),
+                descripcion
+        );
+    }
+
+    // Agrega al historial únicamente los campos cuyo valor realmente cambió.
+    private void agregarCambio(
+            Map<String, Object> cambios,
+            String campo,
+            Object valorAnterior,
+            Object valorNuevo
+    ) {
+        if (Objects.equals(valorAnterior, valorNuevo)) {
+            return;
+        }
+
+        Map<String, Object> detalle = new LinkedHashMap<>();
+        detalle.put("anterior", valorAnterior);
+        detalle.put("nuevo", valorNuevo);
+
+        cambios.put(campo, detalle);
+    }
 
     @Override
     public List<AdultoMayorResponse> listarAdultosMayoresSinFiltro() {
@@ -101,6 +142,7 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
     }
 
     @Override
+    @Transactional
     public AdultoMayorResponse crearAdultoMayor(AdultoMayorRequest request) {
 
         if (adultoMayorRepository.existsByIdentificacion(request.identificacion())) {
@@ -136,6 +178,12 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
 
         AdultoMayor adultoGuardado = adultoMayorRepository.save(adultoMayor);
 
+        registrarAuditoria(
+                "REGISTRAR_ADULTO_MAYOR",
+                adultoGuardado,
+                "Se registró un adulto mayor."
+        );
+
         return mapToResponse(adultoGuardado);
     }
     @Override
@@ -149,13 +197,53 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         return mapToResponse(adultoMayor);
     }
     @Override
-    public AdultoMayorResponse actualizarAdultoMayor(UUID id, AdultoMayorUpdateRequest request) {
-
+    @Transactional
+    public AdultoMayorResponse actualizarAdultoMayor(
+            UUID id,
+            AdultoMayorUpdateRequest request
+    ) {
         AdultoMayor adultoMayor = adultoMayorRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Adulto mayor no encontrado"
                 ));
+
+        Map<String, Object> cambios = new LinkedHashMap<>();
+
+        agregarCambio(
+                cambios,
+                "direccion",
+                adultoMayor.getDireccion(),
+                request.direccion()
+        );
+
+        agregarCambio(
+                cambios,
+                "escolaridad",
+                adultoMayor.getEscolaridad(),
+                request.escolaridad()
+        );
+
+        agregarCambio(
+                cambios,
+                "grupoFamiliar",
+                adultoMayor.getGrupoFamiliar(),
+                request.grupoFamiliar()
+        );
+
+        agregarCambio(
+                cambios,
+                "funcionalidadFisica",
+                adultoMayor.getFuncionalidadFisica(),
+                request.funcionalidadFisica()
+        );
+
+        agregarCambio(
+                cambios,
+                "ayudaBiomecanica",
+                adultoMayor.isAyudaBiomecanica(),
+                request.ayudaBiomecanica()
+        );
 
         adultoMayor.setDireccion(request.direccion());
         adultoMayor.setEscolaridad(request.escolaridad());
@@ -163,16 +251,31 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         adultoMayor.setFuncionalidadFisica(request.funcionalidadFisica());
         adultoMayor.setAyudaBiomecanica(request.ayudaBiomecanica());
 
-        adultoMayor.setUpdatedAt(java.time.LocalDateTime.now());
+        adultoMayor.setUpdatedAt(LocalDateTime.now());
 
-        Personal usuarioActualizador = AUTH_HELPER.obtenerUsuarioAutenticado();
+        Personal usuarioActualizador =
+                AUTH_HELPER.obtenerUsuarioAutenticado();
+
         adultoMayor.setUpdatedBy(usuarioActualizador);
 
-        AdultoMayor adultoActualizado = adultoMayorRepository.save(adultoMayor);
+        AdultoMayor adultoActualizado =
+                adultoMayorRepository.save(adultoMayor);
+
+        auditoriaService.registrarAccion(
+                "ACTUALIZAR_ADULTO_MAYOR",
+                "ADULTO_MAYOR",
+                "AdultoMayor",
+                adultoActualizado.getAdultoId().toString(),
+                cambios.isEmpty()
+                        ? "Se procesó una actualización sin cambios."
+                        : "Se actualizaron los datos de un adulto mayor.",
+                cambios.isEmpty() ? null : cambios
+        );
 
         return mapToResponse(adultoActualizado);
     }
 
+    @Transactional
     @Override
     public AdultoMayorResponse desactivarAdultoMayor(UUID id, AdultoMayorDesactivarRequest request) {
 
@@ -194,6 +297,11 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
 
         AdultoMayor actualizado = adultoMayorRepository.save(adultoMayor);
 
+        registrarAuditoria(
+                "DESACTIVAR_ADULTO_MAYOR",
+                actualizado,
+                "Se desactivó un adulto mayor."
+        );
         return mapToResponse(actualizado);
     }
     @Override
@@ -222,6 +330,12 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
 
         AdultoMayor actualizado = adultoMayorRepository.save(adultoMayor);
 
+        registrarAuditoria(
+                "ACTIVAR_ADULTO_MAYOR",
+                actualizado,
+                "Se activó un adulto mayor."
+        );
+
         return mapToResponse(actualizado);
     }
     @Override
@@ -242,6 +356,12 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         adultoMayor.setUpdatedBy(usuarioActualizador);
 
         AdultoMayor actualizado = adultoMayorRepository.save(adultoMayor);
+
+        registrarAuditoria(
+                "REGISTRAR_FALLECIMIENTO",
+                actualizado,
+                "Se registró el fallecimiento de un adulto mayor."
+        );
 
         return mapToResponse(actualizado);
     }

@@ -9,6 +9,7 @@ import com.cdez.sg_cdez_api.repository.DocumentoRepository;
 import com.cdez.sg_cdez_api.repository.EpicrisisRepository;
 import com.cdez.sg_cdez_api.repository.PersonalRepository;
 import com.cdez.sg_cdez_api.service.DocumentoService;
+import com.cdez.sg_cdez_api.service.AuditoriaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -32,6 +33,7 @@ public class DocumentoServiceImpl implements DocumentoService {
     private final AdultoMayorRepository adultoMayorRepository;
     private final PersonalRepository personalRepository;
     private final EpicrisisRepository epicrisisRepository;
+    private final AuditoriaService auditoriaService;
 
     @Override
     @Transactional
@@ -70,6 +72,15 @@ public class DocumentoServiceImpl implements DocumentoService {
         }
 
         Documento documentoGuardado = documentoRepository.save(documento);
+
+        //Auditar cuando se sube un documento
+        auditoriaService.registrarAccion(
+                "SUBIR_DOCUMENTO",
+                "DOCUMENTO",
+                "Documento",
+                documentoGuardado.getDocumentoId().toString(),
+                "Se subió un documento al expediente del adulto mayor."
+        );
 
         return mapToResponse(documentoGuardado);
     }
@@ -111,6 +122,14 @@ public class DocumentoServiceImpl implements DocumentoService {
             );
         }
 
+        //Auditar cuando se descarga un documento
+        auditoriaService.registrarAccion(
+                "DESCARGAR_DOCUMENTO",
+                "DOCUMENTO",
+                "Documento",
+                documento.getDocumentoId().toString(),
+                "Se descargó un documento del expediente del adulto mayor."
+        );
         return documento.getArchivo();
     }
 
@@ -144,6 +163,15 @@ public class DocumentoServiceImpl implements DocumentoService {
         documento.setUpdatedAt(LocalDateTime.now());
 
         documentoRepository.save(documento);
+
+        //Auditar cuando se desactiva un documento
+        auditoriaService.registrarAccion(
+                "DESACTIVAR_DOCUMENTO",
+                "DOCUMENTO",
+                "Documento",
+                documento.getDocumentoId().toString(),
+                "Se desactivó un documento del expediente del adulto mayor."
+        );
     }
 
     private Documento buscarDocumentoExpediente(Integer documentoId) {
