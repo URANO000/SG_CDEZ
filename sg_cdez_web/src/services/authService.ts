@@ -13,6 +13,6 @@ export interface Session {
 }
 
 export async function obtenerSesion() {
-    const response = await apiClient.get<Session>("/api/auth/session");
+    const response = await apiClient.get<Session>("/auth/session");
     return response.data;
 }
