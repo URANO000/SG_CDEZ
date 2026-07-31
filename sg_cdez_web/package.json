@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@mantine/charts": "^9.4.0",
+    "@mantine/colors-generator": "^9.5.0",
     "@mantine/core": "^9.4.0",
     "@mantine/dates": "^9.4.0",
     "@mantine/form": "^9.4.0",
@@ -22,6 +23,8 @@
     "dayjs": "^1.11.21",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "react-icons": "^5.7.0",
+    "react-router": "^8.3.0",
     "recharts": "^3.9.0"
   },
   "devDependencies": {
@@ -34,6 +37,9 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
+    "postcss": "^8.5.25",
+    "postcss-preset-mantine": "^1.18.0",
+    "postcss-simple-vars": "^7.0.1",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",
     "vite": "^8.0.10"
