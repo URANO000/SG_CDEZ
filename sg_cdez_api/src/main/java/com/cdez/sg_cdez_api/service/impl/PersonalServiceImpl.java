@@ -41,6 +41,13 @@ public class PersonalServiceImpl implements PersonalService {
 
     @Override
     public PageResponse<PersonalResponse> listarPersonalFiltrado(PersonalFiltro filtros,@PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
+        // Validaciones
+        if(!AUTH_HELPER.isUsuarioAdmin()){
+            throw new RuntimeException("Sólo un usuario administrador puede ver el personal.");
+        }
+
+        AUTH_HELPER.validarUsuarioActivo();
+
         Specification<Personal> spec = Specification.unrestricted();
 
         if(filtros.especialidad() != null){
@@ -76,6 +83,8 @@ public class PersonalServiceImpl implements PersonalService {
         if(!AUTH_HELPER.isUsuarioAdmin()){
             throw new RuntimeException("Sólo un usuario administrador puede crear nuevo personal.");
         }
+        AUTH_HELPER.validarUsuarioActivo();
+
         if(REPOSITORY.existsByUsuario(request.usuario())){
             throw new RuntimeException("Ya existe un usuario con ese correo.");
         }
@@ -99,7 +108,7 @@ public class PersonalServiceImpl implements PersonalService {
         personalNuevo.setCarnet(request.carnet());
         personalNuevo.setUsuario(request.usuario());
         personalNuevo.setContrasena(ENCODER.encode(passwordTemporal));
-        personalNuevo.setActivo(true); // Por defecto
+        personalNuevo.setActivo(false); // Se activa cuando se confirma
         personalNuevo.setCreatedAt(LocalDateTime.now(Clock.systemUTC()));
         personalNuevo.setCreatedBy(AUTH_HELPER.obtenerUsuarioAutenticado());
 
@@ -119,6 +128,8 @@ public class PersonalServiceImpl implements PersonalService {
         if(!AUTH_HELPER.isUsuarioAdmin()){
             throw new RuntimeException("Sólo un usuario administrador puede editar el personal.");
         }
+
+        AUTH_HELPER.validarUsuarioActivo();
 
         Personal personalViejo = obtenerPersonalCheck(id);
 
@@ -147,6 +158,8 @@ public class PersonalServiceImpl implements PersonalService {
             throw new RuntimeException("Sólo un usuario administrador puede activar el personal.");
         }
 
+        AUTH_HELPER.validarUsuarioActivo();
+
         Personal personal = obtenerPersonalCheck(id);
         if(personal.isActivo()){
             throw new RuntimeException("Personal ya es activo.");
@@ -161,6 +174,7 @@ public class PersonalServiceImpl implements PersonalService {
         if(!AUTH_HELPER.isUsuarioAdmin()){
             throw new RuntimeException("Sólo un usuario administrador puede desactivar el personal.");
         }
+        AUTH_HELPER.validarUsuarioActivo();
 
         Personal personal = obtenerPersonalCheck(id);
         if(!personal.isActivo()){
@@ -174,6 +188,12 @@ public class PersonalServiceImpl implements PersonalService {
     @Override
     public byte[] generarReportePersonalPDF() {
         try{
+            if(!AUTH_HELPER.isUsuarioAdmin()){
+                throw new RuntimeException("Sólo un usuario administrador puede generar reportes del personal.");
+            }
+
+            AUTH_HELPER.validarUsuarioActivo();
+
             List<PersonalResponse> personal = listarPersonal();
 
             PdfTableReport<PersonalResponse> reporte =

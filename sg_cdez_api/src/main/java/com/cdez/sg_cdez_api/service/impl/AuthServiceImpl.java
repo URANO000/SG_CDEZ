@@ -8,6 +8,7 @@ import com.cdez.sg_cdez_api.entity.Personal;
 import com.cdez.sg_cdez_api.repository.AuthRepository;
 import com.cdez.sg_cdez_api.service.AuthService;
 import com.cdez.sg_cdez_api.service.JwtService;
+import com.cdez.sg_cdez_api.util.AuthHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,6 +26,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final AuthRepository REPOSITORY;
+    private final AuthHelper AUTH_HELPER;
 
 
     @Override
@@ -38,6 +40,12 @@ public class AuthServiceImpl implements AuthService {
 
         //Si pasa los filtros, entonces las credenciales son válidas
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+        // Validar si el usuario es activo. Si no, entonces no puede iniciar sesión
+        Personal usuario = REPOSITORY.findByPersonalId(userDetails.getUsuarioId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        AUTH_HELPER.validarUsuarioActivo(usuario);
 
         //Generar y retornar JWT
         String jwt = jwtService.generateToken(userDetails);
