@@ -19,3 +19,11 @@ export async function cerrarSesion(){
 export const activarCuenta = async (token:string, contrasena:string, confirmarContrasena:string) => {
     await apiClient.post("/auth/activar", {token, contrasena, confirmarContrasena});
 }
+
+export const cambiarContrasena = async (nuevaContrasena: string, confirmarContrasena:string) => {
+    await apiClient.post("/auth/cambiarContrasena", {nuevaContrasena, confirmarContrasena});
+}
+
+export const restablecerContrasena = async (correo: string) => {
+    await apiClient.post("/auth/restablecerContrasena", {correo})
+}

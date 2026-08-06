@@ -2,11 +2,14 @@ import {
     Container,
     Paper,
     Title,
+    Text
 } from "@mantine/core";
-import classes from "./LoginForm.module.css";
+import classes from "./FormControl.module.css"
 
 interface AuthFormLayoutProps {
     title: string;
+
+    subtitle: string;
 
     onSubmit: React.SubmitEventHandler<HTMLFormElement>;
 
@@ -15,6 +18,7 @@ interface AuthFormLayoutProps {
 
 export function AuthFormLayout({
     title,
+    subtitle,
     onSubmit,
     children,
 }: AuthFormLayoutProps) {
@@ -23,6 +27,9 @@ export function AuthFormLayout({
             <Title ta="center" className={classes.title}>
                 {title}
             </Title>
+            <Text c="dimmed" fz="sm" ta="center">
+                {subtitle}
+            </Text>
 
             <Paper
                 withBorder

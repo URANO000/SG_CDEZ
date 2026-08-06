@@ -1,5 +1,5 @@
-import { LoginForm} from "../../../components/ui/forms/LoginForm";
-import classes from './login.module.css'
+import { LoginForm} from "../../components/ui/forms/LoginForm";
+import classes from "./AuthForm.module.css";
 
 
 export function Login() {

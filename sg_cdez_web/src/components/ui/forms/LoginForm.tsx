@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { Link } from "react-router";
 import {
     Anchor,
     Button,
@@ -37,10 +38,10 @@ export function LoginForm() {
     };
 
     return (
-        <AuthFormLayout title="Bienvenido/a" onSubmit={handleSubmit}>
+        <AuthFormLayout title="Bienvenido/a" onSubmit={handleSubmit} subtitle="Inicia sesión para ingresar al sistema.">
             <TextInput
                 label="Usuario"
-                placeholder="usuario"
+                placeholder="ejemplo@gmail.com"
                 value={usuario}
                 onChange={(e) => setUsuario(e.currentTarget.value)}
                 required
@@ -60,9 +61,11 @@ export function LoginForm() {
             <Group justify="space-between" mt="lg">
                 <Checkbox label="Recordarme" />
 
-                <Anchor component="button" size="sm">
-                    ¿Olvidaste tu contraseña?
-                </Anchor>
+                <Link to="/reestablecer-contrasena">
+                    <Anchor component="button" size="sm">
+                        ¿Olvidaste tu contraseña?
+                    </Anchor>
+                </Link>
             </Group>
 
             <Button

@@ -1,11 +1,12 @@
 import '@mantine/core/styles.css';
 import { zurquiTheme } from './theme';
-import './App.css'
-import { BrowserRouter as Router, Routes, Route } from 'react-router'
-import { Layout } from './components/layout/Layout'
-import { Home } from './pages/home/home'
-import { Login } from "./pages/auth/login/login"
+import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router';
+import { Layout } from './components/layout/Layout';
+import { Home } from './pages/home/home';
+import { Login } from "./pages/auth/login";
 import { Activar } from './pages/auth/activarCuenta';
+import { ForgotPassword } from './pages/auth/forgotPassword';
 import { Consultas } from './pages/consultas/consultas';
 import { MantineProvider } from '@mantine/core';
 import { AdultosMayores } from './pages/adultosMayores/adultosMayores';
@@ -24,6 +25,7 @@ function App() {
           <Routes>
             <Route path="/activar" element={<Activar />}/>
             <Route path="/login" element={<Login />} />
+            <Route path="/reestablecer-contrasena" element={<ForgotPassword />} />
             <Route element={
               <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_ADMIN"]}>
                 <Layout />
