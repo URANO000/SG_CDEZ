@@ -39,7 +39,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void enviarCorreoVerificacion(String usuario, String token) {
 
-        String enlance = "https://localhost:5173/activar?token=" + token;
+        String enlance = "http://localhost:5173/activar?token=" + token;
 
         SimpleMailMessage mensaje = new SimpleMailMessage();
         mensaje.setTo(usuario);

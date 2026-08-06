@@ -4,7 +4,8 @@ import './App.css'
 import { BrowserRouter as Router, Routes, Route } from 'react-router'
 import { Layout } from './components/layout/Layout'
 import { Home } from './pages/home/home'
-import { Login } from './pages/login/login';
+import { Login } from "./pages/auth/login/login"
+import { Activar } from './pages/auth/activarCuenta';
 import { Consultas } from './pages/consultas/consultas';
 import { MantineProvider } from '@mantine/core';
 import { AdultosMayores } from './pages/adultosMayores/adultosMayores';
@@ -21,6 +22,7 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
+            <Route path="/activar" element={<Activar />}/>
             <Route path="/login" element={<Login />} />
             <Route element={
               <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_ADMIN"]}>

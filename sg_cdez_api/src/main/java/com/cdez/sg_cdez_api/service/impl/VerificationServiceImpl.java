@@ -25,7 +25,7 @@ public class VerificationServiceImpl implements VerificationService {
 
     @Override
     public void generarYEnviarToken(Personal personal) {
-        List<EmailVerificationToken> tokens = REPOSITORY.findByPersonalAndUsedFalse(personal);
+        List<EmailVerificationToken> tokens = REPOSITORY.findByPersonalAndUsadoFalse(personal);
         tokens.forEach(token -> token.setUsado(true));
 
         EmailVerificationToken token = new EmailVerificationToken();

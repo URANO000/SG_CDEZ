@@ -4,17 +4,14 @@ import {
     Anchor,
     Button,
     Checkbox,
-    Container,
     Group,
-    Paper,
     PasswordInput,
-    TextInput,
-    Title,
+    TextInput
 } from "@mantine/core";
 
 import { iniciarSesion } from "../../../services/authService";
-import classes from "./LoginForm.module.css";
 import { useAuth } from "../../../services/authContext";
+import { AuthFormLayout } from "./AuthFormLayout";
 
 export function LoginForm() {
     const [usuario, setUsuario] = useState("");
@@ -40,57 +37,43 @@ export function LoginForm() {
     };
 
     return (
-        <Container size={420} my={40}>
-            <Title ta="center" className={classes.title}>
-                Bienvenido/a
-            </Title>
+        <AuthFormLayout title="Bienvenido/a" onSubmit={handleSubmit}>
+            <TextInput
+                label="Usuario"
+                placeholder="usuario"
+                value={usuario}
+                onChange={(e) => setUsuario(e.currentTarget.value)}
+                required
+                radius="md"
+            />
 
-            <Paper
-                component="form"
-                onSubmit={handleSubmit}
-                withBorder
-                shadow="sm"
-                p={22}
-                mt={30}
+            <PasswordInput
+                label="Contraseña"
+                placeholder="Tu contraseña"
+                value={contrasena}
+                onChange={(e) => setContrasena(e.currentTarget.value)}
+                required
+                mt="md"
+                radius="md"
+            />
+
+            <Group justify="space-between" mt="lg">
+                <Checkbox label="Recordarme" />
+
+                <Anchor component="button" size="sm">
+                    ¿Olvidaste tu contraseña?
+                </Anchor>
+            </Group>
+
+            <Button
+                type="submit"
+                loading={loading}
+                fullWidth
+                mt="xl"
                 radius="md"
             >
-                <TextInput
-                    label="Usuario"
-                    placeholder="usuario"
-                    value={usuario}
-                    onChange={(e) => setUsuario(e.currentTarget.value)}
-                    required
-                    radius="md"
-                />
-
-                <PasswordInput
-                    label="Contraseña"
-                    placeholder="Tu contraseña"
-                    value={contrasena}
-                    onChange={(e) => setContrasena(e.currentTarget.value)}
-                    required
-                    mt="md"
-                    radius="md"
-                />
-
-                <Group justify="space-between" mt="lg">
-                    <Checkbox label="Recordarme" />
-
-                    <Anchor component="button" size="sm">
-                        ¿Olvidaste tu contraseña?
-                    </Anchor>
-                </Group>
-
-                <Button
-                    type="submit"
-                    loading={loading}
-                    fullWidth
-                    mt="xl"
-                    radius="md"
-                >
-                    Iniciar Sesión
-                </Button>
-            </Paper>
-        </Container>
+                Iniciar Sesión
+            </Button>
+        </AuthFormLayout>
     );
 }

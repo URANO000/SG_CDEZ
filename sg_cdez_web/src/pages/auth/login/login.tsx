@@ -1,4 +1,4 @@
-import { LoginForm } from "../../components/ui/forms/LoginForm";
+import { LoginForm} from "../../../components/ui/forms/LoginForm";
 import classes from './login.module.css'
 
 
