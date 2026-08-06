@@ -29,7 +29,7 @@ public class PersonalServiceImpl implements PersonalService {
     private final ValidationHelper VALIDATION_HELPER;
     private final RolRepository ROL_REPOSITORY;
     private final PasswordEncoder ENCODER;
-    private final EmailService EMAIL_SERVICE;
+    private final VerificationService VERIFICATION_SERVICE;
     private final ContactoService CONTACTO_SERVICE;
     private final ReportService REPORT_SERVICE;
     private final MiscHelper MISC_HELPER;
@@ -89,13 +89,9 @@ public class PersonalServiceImpl implements PersonalService {
             throw new RuntimeException("Ya existe un usuario con ese correo.");
         }
 
-        // Contraseña temporal
-        String passwordTemporal = AuthHelper.generarPassword(12);
-
         Personal personalNuevo = new Personal();
 
         Rol rol = ROL_REPOSITORY.findById(request.rol()).orElseThrow(() -> new RuntimeException("Rol no encontrado"));
-        System.out.println("Este es el rol" + rol);
         personalNuevo.setRol(rol);
         personalNuevo.setEspecialidad(request.especialidad());
         personalNuevo.setTipoIdentificacion(request.tipoIdentificacion());
@@ -107,18 +103,18 @@ public class PersonalServiceImpl implements PersonalService {
         personalNuevo.setDireccion(request.direccion());
         personalNuevo.setCarnet(request.carnet());
         personalNuevo.setUsuario(request.usuario());
-        personalNuevo.setContrasena(ENCODER.encode(passwordTemporal));
-        personalNuevo.setActivo(false); // Se activa cuando se confirma
+        personalNuevo.setActivo(true);
+        personalNuevo.setEmailVerificado(false);
         personalNuevo.setCreatedAt(LocalDateTime.now(Clock.systemUTC()));
         personalNuevo.setCreatedBy(AUTH_HELPER.obtenerUsuarioAutenticado());
 
         Personal personalGuardado = REPOSITORY.save(personalNuevo);
 
-        //Crear contactos nuevos (o contacto nuevo)
+        // Crear contactos nuevos (o contacto nuevo)
         CONTACTO_SERVICE.crearContactoPersonal(request.contactos(), personalGuardado);
 
-        // Enviar correo con contraseña temporal
-        EMAIL_SERVICE.enviarCredenciales(personalGuardado.getUsuario(), passwordTemporal);
+        // Enviar correo de verificación
+        VERIFICATION_SERVICE.verificacionCrearYEnviar(personalGuardado);
 
         return mapDTO(personalGuardado);
     }

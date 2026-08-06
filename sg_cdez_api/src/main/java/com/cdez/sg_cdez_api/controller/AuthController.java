@@ -1,12 +1,15 @@
 package com.cdez.sg_cdez_api.controller;
 
+import com.cdez.sg_cdez_api.dto.request.ActivateAccountRequest;
 import com.cdez.sg_cdez_api.dto.request.CambiaContrasenaRequest;
 import com.cdez.sg_cdez_api.dto.request.LoginRequest;
+import com.cdez.sg_cdez_api.dto.request.ResendVerificationRequest;
 import com.cdez.sg_cdez_api.dto.response.JwtAuthResponse;
 import com.cdez.sg_cdez_api.dto.response.UserSessionResponse;
 import com.cdez.sg_cdez_api.entity.CustomUserDetails;
 import com.cdez.sg_cdez_api.service.AuthService;
 import com.cdez.sg_cdez_api.service.PersonalService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -100,18 +103,17 @@ public class AuthController {
         );
     }
 
-    //APIs de prueba para control de roles
-    @GetMapping("/adminAPI")
-    public String adminAPI(){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    @PostMapping("/activar")
+    public ResponseEntity<Void> activarCuenta(@RequestBody ActivateAccountRequest request){
+        SERVICE.activarCuenta(request);
 
-        System.out.println(auth);
-        System.out.println(auth.getAuthorities());
-        return "Hellom I am an ADMIN user";
+        return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/personalAPI")
-    public String personalAPI(){
-        return "Hello, I am a PERSONAL user, admin can also access this too :0";
+    @PostMapping("/resend-verification")
+    public ResponseEntity<Void> resendVerificationEmail(@RequestBody @Valid ResendVerificationRequest request){
+        SERVICE.reenviarVerificacion(request);
+
+        return ResponseEntity.ok().build();
     }
 }

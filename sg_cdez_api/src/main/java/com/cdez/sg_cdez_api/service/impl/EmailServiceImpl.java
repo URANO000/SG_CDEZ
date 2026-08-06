@@ -35,4 +35,31 @@ public class EmailServiceImpl implements EmailService {
 
         MAIL_SENDER.send(mensaje);
     }
+
+    @Override
+    public void enviarCorreoVerificacion(String usuario, String token) {
+
+        String enlance = "https://localhost:5173/activar?token=" + token;
+
+        SimpleMailMessage mensaje = new SimpleMailMessage();
+        mensaje.setTo(usuario);
+        mensaje.setSubject("Activación de cuenta");
+
+        mensaje.setText("""
+                        Bienvenido/a.
+                                
+                        Se ha creado una cuenta para usted.
+                                
+                        Antes de utilizar el sistema debe activar su cuenta.
+                                
+                        Haga clic en el siguiente enlace:
+                                
+                        %s
+                                
+                        Este enlace expirará en 24 horas.
+                
+                """.formatted(enlance));
+
+        MAIL_SENDER.send(mensaje);
+    }
 }
