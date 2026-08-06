@@ -39,6 +39,7 @@ public class AuthServiceImpl implements AuthService {
     private final PersonalRepository PERSONAL_REPOSITORY;
     private final EmailVerificationTokenRepository VERIFICATION_REPOSITORY;
     private final VerificationService VERIFICATION_SERVICE;
+    private final AuthHelper AUTH_HELPER;
 
 
     @Override
@@ -65,25 +66,9 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String cambiarContrasena(CambiaContrasenaRequest request, UUID usuarioId){
-        //Verificar que los passwords no son los mismos
-        Personal usuario = REPOSITORY.findByPersonalId(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        //Validar que las contrasenas coinciden
-        if(!request.getNuevaContransena().equals(request.getConfirmarContrasena())){
-            throw new RuntimeException("Las contraseñas no coinciden");
-        }
-
-        //No reutilizar la misma contrasena
-        if(passwordEncoder.matches(request.getNuevaContransena(), usuario.getContrasena())){
-            throw new RuntimeException("La nueva contraseña no puede ser igual a la actual");
-        }
-
-        //Encriptar nueva contraseña
-        String nuevaContrasenaEncriptada = passwordEncoder.encode(request.getNuevaContransena());
-
-        usuario.setContrasena(nuevaContrasenaEncriptada);
+    public String cambiarContrasena(CambiaContrasenaRequest request){
+        Personal usuario = AUTH_HELPER.obtenerUsuarioAutenticado();
+        AUTH_HELPER.actualizarContrasena(usuario, request.getNuevaContransena(), request.getConfirmarContrasena());
         REPOSITORY.save(usuario);
         return "La contraseña ha sido actualizada";
     }
@@ -101,13 +86,9 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("El token ha expirado.");
         }
 
-        if (!request.contrasena().equals(request.confirmarContrasena())) {
-            throw new RuntimeException("Las contraseñas no coinciden.");
-        }
-
         Personal personal = verificationToken.getPersonal();
+        AUTH_HELPER.actualizarContrasena(personal, request.contrasena(), request.confirmarContrasena());
 
-        personal.setContrasena(passwordEncoder.encode(request.contrasena()));
         personal.setEmailVerificado(true);
 
         verificationToken.setUsado(true);
@@ -135,4 +116,5 @@ public class AuthServiceImpl implements AuthService {
         VERIFICATION_SERVICE.generarYEnviarToken(personal);
 
     }
+
 }

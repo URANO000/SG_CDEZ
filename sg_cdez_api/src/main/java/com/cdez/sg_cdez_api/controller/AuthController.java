@@ -75,9 +75,9 @@ public class AuthController {
     }
 
     //Cambiar contraseña API
-    @PostMapping("/cambiarContrasena/{usuarioId}")
-    public ResponseEntity<?> cambiarContrasena(@RequestBody CambiaContrasenaRequest request, @PathVariable(name = "usuarioId") UUID usuarioId){
-        return ResponseEntity.ok(SERVICE.cambiarContrasena(request, usuarioId));
+    @PostMapping("/cambiarContrasena")
+    public ResponseEntity<?> cambiarContrasena(@RequestBody CambiaContrasenaRequest request){
+        return ResponseEntity.ok(SERVICE.cambiarContrasena(request));
     }
 
     @GetMapping("/session")

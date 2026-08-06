@@ -6,6 +6,7 @@ import com.cdez.sg_cdez_api.repository.PersonalRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -16,6 +17,7 @@ import java.util.UUID;
 public class AuthHelper {
     private final AuthRepository REPOSITORY;
     private final PersonalRepository PERSONAL_REPOSITORY;
+    private final PasswordEncoder PASSWORD_ENCODER;
 
     // Para password
     private static final String CHARS =
@@ -65,6 +67,20 @@ public class AuthHelper {
         }
 
         return sb.toString();
+    }
+
+    public void actualizarContrasena(Personal usuario, String nueva, String confirmar){
+        if (!nueva.equals(confirmar)) {
+            throw new RuntimeException("Las contraseñas no coinciden.");
+        }
+
+        if (PASSWORD_ENCODER.matches(nueva, usuario.getContrasena())) {
+            throw new RuntimeException("La nueva contraseña no puede ser igual a la actual.");
+        }
+
+        usuario.setContrasena(
+                PASSWORD_ENCODER.encode(nueva)
+        );
     }
 
 }

@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface AuthService {
     JwtAuthResponse iniciarSesion(LoginRequest request);
-    String cambiarContrasena(CambiaContrasenaRequest request, UUID usuarioId);
+    String cambiarContrasena(CambiaContrasenaRequest request);
 
     void activarCuenta(ActivateAccountRequest request);
     void reenviarVerificacion(ResendVerificationRequest request);
