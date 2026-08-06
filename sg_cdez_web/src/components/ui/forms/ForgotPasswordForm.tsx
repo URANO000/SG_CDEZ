@@ -1,4 +1,4 @@
-import { Button, TextInput, Anchor, Center, Box } from "@mantine/core";
+import { Button, TextInput, Anchor, Box, Group } from "@mantine/core";
 import { AuthFormLayout } from "./AuthFormLayout";
 import { useState } from "react";
 import { useForm } from "@mantine/form";
@@ -52,10 +52,10 @@ export function ForgotPasswordForm() {
 
             <Link to="/login">
                 <Anchor component="button" c="dimmed" size="xs" mt={8}>
-                    <Center inline>
+                    <Group justify="center" gap={1}>
                         <BsArrowLeftShort size={12} />
-                        <Box ml={5}>Regresar a pantalla de inicio de sesión</Box>
-                    </Center>
+                        <Box ml={5}>Regresar a inicio de sesión</Box>
+                    </Group>
                 </Anchor>
             </Link>
         </AuthFormLayout>
