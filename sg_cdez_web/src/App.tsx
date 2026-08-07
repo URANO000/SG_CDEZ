@@ -1,10 +1,13 @@
 import '@mantine/core/styles.css';
 import { zurquiTheme } from './theme';
-import './App.css'
-import { BrowserRouter as Router, Routes, Route } from 'react-router'
-import { Layout } from './components/layout/Layout'
-import { Home } from './pages/home/home'
-import { Login } from './pages/login/login';
+import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router';
+import { Layout } from './components/layout/Layout';
+import { Home } from './pages/home/home';
+import { Login } from "./pages/auth/login";
+import { Activar } from './pages/auth/activarCuenta';
+import { ForgotPassword } from './pages/auth/forgotPassword';
+import { ResendVerification} from "./pages/auth/resendVerification";
 import { Consultas } from './pages/consultas/consultas';
 import { MantineProvider } from '@mantine/core';
 import { AdultosMayores } from './pages/adultosMayores/adultosMayores';
@@ -13,6 +16,7 @@ import { Auditoria } from './pages/auditoria/auditoria';
 import { Documentacion } from './pages/documentacion/documentacion';
 import { AuthProvider } from './services/authContext';
 import { ProtectedRoute } from './Routes';
+import { RestablecerContrasena } from './pages/auth/restablecerContrasena';
 
 function App() {
 
@@ -21,7 +25,11 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
+            <Route path="/activar" element={<Activar />}/>
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/restablecer-contrasena" element={<RestablecerContrasena />} />
+            <Route path="/reenviar-verificacion" element={<ResendVerification />} />
             <Route element={
               <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_ADMIN"]}>
                 <Layout />

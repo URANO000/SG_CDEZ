@@ -34,6 +34,9 @@ public class Personal {
     private String usuario;
     private String contrasena;
     private boolean activo;
+    private boolean emailVerificado = false;
+    private boolean cuentaBloqueada = false;
+    private boolean credencialesExpiradas = false;
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = true)
     private Personal createdBy;
@@ -42,6 +45,7 @@ public class Personal {
     @JoinColumn(name = "updated_by", nullable = true)
     private Personal updatedBy;
     private LocalDateTime updatedAt;
+
 
 
     //Relaciones
@@ -62,6 +66,12 @@ public class Personal {
 
     @OneToMany(mappedBy = "personal")
     private List<Documento> documentos = new ArrayList<>();
+
+    @OneToMany(mappedBy = "personal")
+    private List<EmailVerificationToken> verificationTokens = new ArrayList<>();
+
+    @OneToMany(mappedBy = "personal")
+    private List<PasswordResetToken> resetTokens = new ArrayList<>();
 
     // Util para conseguir nombre completo
     public String getNombreCompleto(){
