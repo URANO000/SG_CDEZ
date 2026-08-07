@@ -39,7 +39,8 @@ public class VerificationServiceImpl implements VerificationService {
 
         EMAIL_SERVICE.enviarCorreoVerificacion(
                 personal.getUsuario(),
-                token.getToken()
+                token.getToken(),
+                personal.getNombreCompleto()
         );
     }
 

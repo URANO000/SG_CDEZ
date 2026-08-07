@@ -24,9 +24,10 @@ export function ForgotPasswordForm() {
         setLoading(true);
         try {
             await restablecerContrasena(values.email);
+            alert("Si el correo ingresado está registrado, recibirá un enlace para restablecer su contraseña.");
 
         } catch (error) {
-
+            alert("Error :(");
         } finally {
             setLoading(false);
         }
