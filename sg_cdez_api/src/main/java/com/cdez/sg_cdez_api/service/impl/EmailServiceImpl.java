@@ -45,10 +45,10 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void enviarCorreoVerificacion(String usuario, String token, String nombre) {
 
-        String enlance = "http://localhost:5173/activar?token=" + token;
+        String enlace = "http://localhost:5173/activar?token=" + token;
 
         Context context = new Context();
-        context.setVariable("enlance", enlance);
+        context.setVariable("enlace", enlace);
         context.setVariable("nombre", nombre);
 
         String html = TEMPLATE_ENGINE.process("activacion-email", context);
