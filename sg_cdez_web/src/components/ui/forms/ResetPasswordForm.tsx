@@ -1,7 +1,7 @@
 import { AuthFormLayout } from "./AuthFormLayout";
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { cambiarContrasena } from "../../../services/authService";
+import {restablecerContrasena } from "../../../services/authService";
 import { useForm } from "@mantine/form";
 import {
     Button,
@@ -9,7 +9,7 @@ import {
 } from "@mantine/core";
 
 
-export function ResetPasswordForm() {
+export function ResetPasswordForm({token }: { token: string }) {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -37,7 +37,7 @@ export function ResetPasswordForm() {
     const handleSubmit = async (values: typeof form.values) => {
         setLoading(true);
         try{
-            await cambiarContrasena(values.contrasena, values.confirmarContrasena);
+            await restablecerContrasena(token, values.contrasena, values.confirmarContrasena);
             navigate("/")
         }catch(error){
             alert("Error genérico...manejo de errores pronto");

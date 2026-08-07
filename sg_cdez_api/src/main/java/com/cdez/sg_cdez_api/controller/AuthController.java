@@ -1,9 +1,6 @@
 package com.cdez.sg_cdez_api.controller;
 
-import com.cdez.sg_cdez_api.dto.request.ActivateAccountRequest;
-import com.cdez.sg_cdez_api.dto.request.CambiaContrasenaRequest;
-import com.cdez.sg_cdez_api.dto.request.LoginRequest;
-import com.cdez.sg_cdez_api.dto.request.ResendVerificationRequest;
+import com.cdez.sg_cdez_api.dto.request.*;
 import com.cdez.sg_cdez_api.dto.response.JwtAuthResponse;
 import com.cdez.sg_cdez_api.dto.response.UserSessionResponse;
 import com.cdez.sg_cdez_api.entity.CustomUserDetails;
@@ -113,6 +110,20 @@ public class AuthController {
     @PostMapping("/resend-verification")
     public ResponseEntity<Void> resendVerificationEmail(@RequestBody @Valid ResendVerificationRequest request){
         SERVICE.reenviarVerificacion(request);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@RequestBody ForgotPasswordRequest request){
+        SERVICE.forgotPassword(request);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/restablecer-contrasena")
+    public ResponseEntity<Void> restablecerContrasena(@RequestBody ResetPasswordRequest request){
+        SERVICE.resetContrasena(request);
 
         return ResponseEntity.ok().build();
     }

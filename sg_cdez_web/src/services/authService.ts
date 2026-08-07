@@ -24,6 +24,14 @@ export const cambiarContrasena = async (nuevaContrasena: string, confirmarContra
     await apiClient.post("/auth/cambiarContrasena", {nuevaContrasena, confirmarContrasena});
 }
 
-export const restablecerContrasena = async (correo: string) => {
-    await apiClient.post("/auth/restablecerContrasena", {correo})
+export const forgotPassword = async (correo: string) => {
+    await apiClient.post("/auth/forgot-password", {correo})
+}
+
+export const reenviarVerificacion = async (correo: string) => {
+    await apiClient.post("/auth/resend-verification", {correo})
+}
+
+export const restablecerContrasena = async (token: string, contrasena:string, confirmarContrasena:string) => {
+    await apiClient.post("auth/restablecer-contrasena", {token, contrasena, confirmarContrasena})
 }

@@ -29,7 +29,7 @@ public class PersonalServiceImpl implements PersonalService {
     private final ValidationHelper VALIDATION_HELPER;
     private final RolRepository ROL_REPOSITORY;
     private final PasswordEncoder ENCODER;
-    private final VerificationService VERIFICATION_SERVICE;
+    private final TokenService VERIFICATION_SERVICE;
     private final ContactoService CONTACTO_SERVICE;
     private final ReportService REPORT_SERVICE;
     private final MiscHelper MISC_HELPER;

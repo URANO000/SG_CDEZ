@@ -39,6 +39,8 @@ public class SecurityConfig {
                 //Configurar reglas de autorización
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/iniciarSesion").permitAll()
+                        .requestMatchers("/api/auth/forgot-password").permitAll()
+                        .requestMatchers("/api/auth/restablecer-contrasena").permitAll()
                         .requestMatchers("/api/auth/cambiarContrasena/**").hasAnyRole("PERSONAL", "ADMIN")
                         .requestMatchers("/api/auth/session").hasAnyRole("PERSONAL", "ADMIN")
                         .requestMatchers("/api/auth/activar").permitAll()

@@ -1,13 +1,12 @@
-import { Button, TextInput, Anchor, Box, Group } from "@mantine/core";
+import { Button, TextInput} from "@mantine/core";
 import { AuthFormLayout } from "./AuthFormLayout";
 import { useState } from "react";
 import { useForm } from "@mantine/form";
-import { forgotPassword } from "../../../services/authService";
-import { BsArrowLeftShort } from "react-icons/bs";
-import { Link } from "react-router";
+import { reenviarVerificacion } from "../../../services/authService";
 
 
-export function ForgotPasswordForm() {
+
+export function ResendVerificationForm(){
     const [loading, setLoading] = useState(false);
 
     const form = useForm({
@@ -23,8 +22,8 @@ export function ForgotPasswordForm() {
     const handleSubmit = async (values: typeof form.values) => {
         setLoading(true);
         try {
-            await forgotPassword(values.email);
-            alert("Si el correo ingresado está registrado, recibirá un enlace para restablecer su contraseña.");
+            await reenviarVerificacion(values.email);
+            alert("Si el correo ingresado está registrado, recibirá un enlace para activar su cuenta.");
 
         } catch (error) {
             alert("Error :(");
@@ -34,7 +33,7 @@ export function ForgotPasswordForm() {
     }
 
     return (
-        <AuthFormLayout title="¿Olvidaste tu contraseña?" onSubmit={form.onSubmit(handleSubmit)} subtitle="Introduce tu usuario para obtener un enlace de restablecimiento.">
+        <AuthFormLayout title="Reenviar verificación de correo" onSubmit={form.onSubmit(handleSubmit)} subtitle="Introduce tu usuario para obtener un enlace de verificación.">
             <TextInput
                 required
                 label="Usuario"
@@ -48,17 +47,9 @@ export function ForgotPasswordForm() {
                 loading={loading}
                 mt="lg"
                 radius="md">
-                Restablecer contraseña
+                Reenviar verificación
             </Button>
-
-            <Link to="/login">
-                <Anchor component="button" c="dimmed" size="xs" mt={8}>
-                    <Group justify="center" gap={1}>
-                        <BsArrowLeftShort size={12} />
-                        <Box ml={5}>Regresar a inicio de sesión</Box>
-                    </Group>
-                </Anchor>
-            </Link>
         </AuthFormLayout>
     )
+
 }

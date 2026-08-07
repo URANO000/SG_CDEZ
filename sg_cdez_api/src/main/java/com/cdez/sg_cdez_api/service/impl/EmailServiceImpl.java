@@ -64,4 +64,27 @@ public class EmailServiceImpl implements EmailService {
             throw new RuntimeException("Error enviando correo de verificación", e);
         }
     }
+
+    @Override
+    public void enviarCorreoReset(String usuario, String token, String nombre) {
+        String enlace = "http://localhost:5173/restablecer-contrasena?token=" + token;
+
+        Context context = new Context();
+        context.setVariable("enlace", enlace);
+        context.setVariable("nombre", nombre);
+
+        String html = TEMPLATE_ENGINE.process("restablecer-contrasena", context);
+
+        try{
+            MimeMessage mensaje = MAIL_SENDER.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mensaje, "UTF-8");
+            helper.setTo(usuario);
+            helper.setSubject("Restablecer contraseña");
+            helper.setText(html, true);
+            MAIL_SENDER.send(mensaje);
+        }catch (MessagingException e) {
+            throw new RuntimeException("Error enviando correo de restablecimiento de contraseña", e);
+        }
+
+    }
 }
