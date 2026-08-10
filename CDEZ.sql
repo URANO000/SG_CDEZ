@@ -1,6 +1,6 @@
 --06/05/2026 
 DROP DATABASE IF EXISTS Anaconda;
-CREATE DATABASE Anaconda;
+CREATE DATABASE Anaconda; 
 
 --Tablas iniciales (08/05/2026)
 CREATE TABLE Rol(
@@ -22,12 +22,16 @@ CREATE TABLE Personal (
 	direccion VARCHAR(200) NULL,
 	carnet VARCHAR(100) NULL,
 	usuario VARCHAR(80) NOT NULL,
-	contrasena VARCHAR(255) NOT NULL,
+	contrasena VARCHAR(255),
 	activo BOOL NOT NULL,
 	created_by UUID REFERENCES Personal(personal_id),
 	created_at TIMESTAMP NOT NULL,
 	updated_by UUID REFERENCES Personal(personal_id) NULL,
-	updated_at TIMESTAMP NULL
+	updated_at TIMESTAMP NULL,
+
+	email_verificado BOOL,
+	cuenta_bloqueada BOOL,
+	credenciales_expiradas BOOL
 );
 
 
@@ -145,10 +149,10 @@ CREATE TABLE EncargadoAdulto(
 INSERT INTO Rol (nombre)
 VALUES ('ADMIN'), ('PERSONAL');
 
-INSERT INTO Personal (rol_id, especialidad, tipo_identificacion, identificacion,
-direccion, carnet, usuario, contrasena, activo, created_at)
-VALUES (2, 'Programador', 'cédula', '402250833', 'Avenida 123', '123456789', 'hello@gmail.com', '$2a$12$xiiXfivq.xywYjmXbFxg6.BbptpYUiUcZO6zACscQA79OqXGXGjT2',
-true, NOW());
+INSERT INTO Personal (primer_nombre, primer_apellido, rol_id, especialidad, tipo_identificacion, identificacion,
+direccion, carnet, usuario, contrasena, activo, created_at, credenciales_expiradas, cuenta_bloqueada, email_verificado)
+VALUES ('Default','User',1, 'Programador', 'cédula', '402250833', 'Avenida 123', '123456789', 'hello@gmail.com', '$2a$12$xiiXfivq.xywYjmXbFxg6.BbptpYUiUcZO6zACscQA79OqXGXGjT2',
+true, NOW(), false, false, true);
 
 /* Tabla e índices relacionados al modelo de epicrisis documental (17/07/2026)*/
 CREATE TABLE Epicrisis(
@@ -202,3 +206,21 @@ ON Auditoria(modulo);
 
 CREATE INDEX idx_auditoria_created_at
 ON Auditoria(created_at);
+
+-- 5/8/2026
+CREATE TABLE EmailVerificationToken(
+	token_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	personal_id UUID NOT NULL REFERENCES Personal(personal_id),
+	expires_at TIMESTAMP NOT NULL,
+	token VARCHAR(255) NOT NULL,
+	usado BOOL NOT NULL
+
+);
+
+CREATE TABLE PasswordResetToken(
+	token_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	personal_id UUID NOT NULL REFERENCES Personal(personal_id),
+	expires_at TIMESTAMP NOT NULL,
+	token VARCHAR(255) NOT NULL,
+	usado BOOL NOT NULL
+);

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es-CR" xmlns:th="http://www.thymeleaf.org" xmlns:v="urn:schemas-microsoft-com:vml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style>
+        /* Hover only fires in clients that support it (Gmail, Apple Mail, Outlook.com).
+           Outlook desktop and older clients just ignore this block — no breakage. */
+        .btn-activate:hover {
+            background-color: #7a8440 !important;
+        }
+        .btn-activate {
+            transition: background-color 0.2s ease-in-out;
+        }
+        @media only screen and (max-width: 480px) {
+            .container { width: 100% !important; }
+            .padded { padding: 24px !important; }
+        }
+    </style>
+</head>
+<body style="margin:0; padding:0; background-color:#f4f4f7; font-family:Arial, Helvetica, sans-serif;">
+
+<!-- Preheader: Como texto de preview en el inbox -->
+<div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">
+    Su cuenta está lista — actívela antes de que expire el enlace.
+</div>
+
+<table style="background-color:#f4f4f7; padding:40px 0; width: 100%">
+    <tr>
+        <td align="center">
+            <table class="container"  style="width:480px; background-color:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+                <tr>
+                    <td style="background-color:transparent; padding:28px 24px; text-align:center;">
+                        <img src="../static/zurqui-logo.png" th:src="|cid:${imageResourceName}|" alt="Zurqui" style="width:56px; margin-bottom:12px; display:block; margin-left:auto; margin-right:auto;" />
+                        <span style="color:#000000; font-size:20px; font-weight:bold;">Bienvenido/a</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="padded" style="padding:32px; color:#333333; font-size:15px; line-height:1.6;">
+                        <p>Hola <b th:text="${nombre}">Usuario,</b></p>
+                        <p>Se ha creado una cuenta para usted. Antes de utilizar el sistema debe activarla haciendo clic en el siguiente botón:</p>
+
+                        <table style="margin:24px auto;">
+                            <tr>
+                                <td style="border-radius:6px; background-color=#8F9A48;">
+                                    <!--[if mso]>
+                                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml"
+                                                 xmlns:w="urn:schemas-microsoft-com:office:word" th:href="${enlace}"
+                                                 style="height:48px;v-text-anchor:middle;width:220px;" arcsize="12%"
+                                                 strokecolor="#8F9A48" fillcolor="#8F9A48">
+                                        <w:anchorlock/>
+                                        <div style="color:#ffffff;text-align: center;">
+                                            Activar cuenta
+                                        </div>
+                                    </v:roundrect>
+                                    <![endif]-->
+                                    <!--[if !mso]><!-->
+                                    <a href="#" th:href="${enlace}" class="btn-activate" style="display:inline-block; padding:14px 28px; color:#ffffff; text-decoration:none; font-weight:bold; font-size:15px; border-radius:6px; background-color:#8F9A48;">
+                                        Activar cuenta
+                                    </a>
+                                    <!--<![endif]-->
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="color:#888888; font-size:13px; margin-bottom:4px;">Este enlace expirará en 24 horas.</p>
+                        <p style="color:#888888; font-size:13px; margin-bottom:4px;">Si el botón no funciona, copie y pegue este enlace en su navegador:</p>
+                        <p style="word-break:break-all; font-size:12px;"><a th:href="${enlace}" th:text="${enlace}" style="color:#2f6feb;">enlace</a></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:16px 24px; text-align:center; border-top:1px solid #eeeeee;">
+                        <span style="color:#aaaaaa; font-size:11px;">Si usted no solicitó esta cuenta, puede ignorar este correo.</span>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

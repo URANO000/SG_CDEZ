@@ -1,12 +1,12 @@
 package com.cdez.sg_cdez_api.controller;
 
-import com.cdez.sg_cdez_api.dto.request.CambiaContrasenaRequest;
-import com.cdez.sg_cdez_api.dto.request.LoginRequest;
+import com.cdez.sg_cdez_api.dto.request.*;
 import com.cdez.sg_cdez_api.dto.response.JwtAuthResponse;
 import com.cdez.sg_cdez_api.dto.response.UserSessionResponse;
 import com.cdez.sg_cdez_api.entity.CustomUserDetails;
 import com.cdez.sg_cdez_api.service.AuthService;
 import com.cdez.sg_cdez_api.service.PersonalService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -72,9 +72,9 @@ public class AuthController {
     }
 
     //Cambiar contraseña API
-    @PostMapping("/cambiarContrasena/{usuarioId}")
-    public ResponseEntity<?> cambiarContrasena(@RequestBody CambiaContrasenaRequest request, @PathVariable(name = "usuarioId") UUID usuarioId){
-        return ResponseEntity.ok(SERVICE.cambiarContrasena(request, usuarioId));
+    @PostMapping("/cambiarContrasena")
+    public ResponseEntity<?> cambiarContrasena(@RequestBody CambiaContrasenaRequest request){
+        return ResponseEntity.ok(SERVICE.cambiarContrasena(request));
     }
 
     @GetMapping("/session")
@@ -100,18 +100,31 @@ public class AuthController {
         );
     }
 
-    //APIs de prueba para control de roles
-    @GetMapping("/adminAPI")
-    public String adminAPI(){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    @PostMapping("/activar")
+    public ResponseEntity<Void> activarCuenta(@RequestBody ActivateAccountRequest request){
+        SERVICE.activarCuenta(request);
 
-        System.out.println(auth);
-        System.out.println(auth.getAuthorities());
-        return "Hellom I am an ADMIN user";
+        return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/personalAPI")
-    public String personalAPI(){
-        return "Hello, I am a PERSONAL user, admin can also access this too :0";
+    @PostMapping("/resend-verification")
+    public ResponseEntity<Void> resendVerificationEmail(@RequestBody @Valid ResendVerificationRequest request){
+        SERVICE.reenviarVerificacion(request);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@RequestBody ForgotPasswordRequest request){
+        SERVICE.forgotPassword(request);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/restablecer-contrasena")
+    public ResponseEntity<Void> restablecerContrasena(@RequestBody ResetPasswordRequest request){
+        SERVICE.resetContrasena(request);
+
+        return ResponseEntity.ok().build();
     }
 }

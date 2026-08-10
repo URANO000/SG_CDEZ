@@ -1,13 +1,11 @@
 package com.cdez.sg_cdez_api.entity;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -19,11 +17,19 @@ public class CustomUserDetails implements UserDetails {
     private final String usuario;
     private final String contrasena;
     private final Collection<? extends GrantedAuthority> authorities;
+    private final boolean isEmailVerificado;
+    private final boolean isCuentaBloqueada;
+    private final boolean isCredencialesExpiradas;
+    private final boolean isActivo;
 
     public CustomUserDetails(Personal usuario){
         this.usuarioId = usuario.getPersonalId();
         this.usuario = usuario.getUsuario();
         this.contrasena = usuario.getContrasena();
+        this.isEmailVerificado = usuario.isEmailVerificado();
+        this.isCuentaBloqueada = usuario.isCuentaBloqueada();
+        this.isCredencialesExpiradas = usuario.isCredencialesExpiradas();
+        this.isActivo = usuario.isActivo();
 
         this.authorities = List.of(
                 new SimpleGrantedAuthority("ROLE_" + usuario.getRol().getNombre())
@@ -46,23 +52,23 @@ public class CustomUserDetails implements UserDetails {
     }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
+    public boolean isEnabled() {
+        return isEmailVerificado();
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !isCuentaBloqueada();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return isActivo();
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
+        return !isCredencialesExpiradas();
     }
 
 }

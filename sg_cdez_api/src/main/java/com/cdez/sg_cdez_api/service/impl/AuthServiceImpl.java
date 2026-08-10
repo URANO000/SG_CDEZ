@@ -1,30 +1,32 @@
 package com.cdez.sg_cdez_api.service.impl;
 
-import com.cdez.sg_cdez_api.dto.request.CambiaContrasenaRequest;
-import com.cdez.sg_cdez_api.dto.request.LoginRequest;
+import com.cdez.sg_cdez_api.dto.request.*;
 import com.cdez.sg_cdez_api.dto.response.JwtAuthResponse;
-import com.cdez.sg_cdez_api.entity.CustomUserDetails;
-import com.cdez.sg_cdez_api.entity.Personal;
-import com.cdez.sg_cdez_api.repository.AuthRepository;
-import com.cdez.sg_cdez_api.service.AuthService;
-import com.cdez.sg_cdez_api.service.JwtService;
+import com.cdez.sg_cdez_api.entity.*;
+import com.cdez.sg_cdez_api.repository.*;
+import com.cdez.sg_cdez_api.service.*;
+import com.cdez.sg_cdez_api.util.AuthHelper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
-    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final AuthRepository REPOSITORY;
+    private final PersonalRepository PERSONAL_REPOSITORY;
+    private final EmailVerificationTokenRepository VERIFICATION_REPOSITORY;
+    private final PasswordResetTokenRepository RESET_REPOSITORY;
+    private final TokenService TOKEN_SERVICE;
+    private final AuthHelper AUTH_HELPER;
 
 
     @Override
@@ -39,6 +41,9 @@ public class AuthServiceImpl implements AuthService {
         //Si pasa los filtros, entonces las credenciales son válidas
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
+        Personal usuario = REPOSITORY.findByPersonalId(userDetails.getUsuarioId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
         //Generar y retornar JWT
         String jwt = jwtService.generateToken(userDetails);
         JwtAuthResponse response = new JwtAuthResponse();
@@ -48,26 +53,96 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String cambiarContrasena(CambiaContrasenaRequest request, UUID usuarioId){
-        //Verificar que los passwords no son los mismos
-        Personal usuario = REPOSITORY.findByPersonalId(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        //Validar que las contrasenas coinciden
-        if(!request.getNuevaContransena().equals(request.getConfirmarContrasena())){
-            throw new RuntimeException("Las contraseñas no coinciden");
-        }
-
-        //No reutilizar la misma contrasena
-        if(passwordEncoder.matches(request.getNuevaContransena(), usuario.getContrasena())){
-            throw new RuntimeException("La nueva contraseña no puede ser igual a la actual");
-        }
-
-        //Encriptar nueva contraseña
-        String nuevaContrasenaEncriptada = passwordEncoder.encode(request.getNuevaContransena());
-
-        usuario.setContrasena(nuevaContrasenaEncriptada);
+    public String cambiarContrasena(CambiaContrasenaRequest request){
+        Personal usuario = AUTH_HELPER.obtenerUsuarioAutenticado();
+        AUTH_HELPER.actualizarContrasena(usuario, request.getNuevaContransena(), request.getConfirmarContrasena());
         REPOSITORY.save(usuario);
         return "La contraseña ha sido actualizada";
     }
+
+    @Override
+    public void activarCuenta(ActivateAccountRequest request) {
+        EmailVerificationToken verificationToken = VERIFICATION_REPOSITORY.findByToken(request.token())
+                .orElseThrow(() -> new RuntimeException("Token Inválido."));
+
+        if (verificationToken.isUsado()){
+            throw new RuntimeException("El token ya fue utilizado.");
+        }
+
+        if (verificationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("El token ha expirado.");
+        }
+
+        Personal personal = verificationToken.getPersonal();
+        AUTH_HELPER.actualizarContrasena(personal, request.contrasena(), request.confirmarContrasena());
+
+        personal.setEmailVerificado(true);
+
+        verificationToken.setUsado(true);
+        PERSONAL_REPOSITORY.save(personal);
+        VERIFICATION_REPOSITORY.save(verificationToken);
+
+    }
+
+    @Transactional
+    @Override
+    public void reenviarVerificacion(ResendVerificationRequest request) {
+        Optional<Personal> personalOptional =
+                PERSONAL_REPOSITORY.findByUsuario(request.email());
+
+        if (personalOptional.isEmpty()) {
+            return;
+        }
+
+        Personal personal = personalOptional.get();
+
+        if (personal.isEmailVerificado()) {
+            return;
+        }
+
+        TOKEN_SERVICE.generarYEnviarVerificacionToken(personal);
+
+    }
+
+    public void forgotPassword(ForgotPasswordRequest request) {
+        String correo = request.correo();
+        correo = correo.trim().toLowerCase();
+
+        Optional<Personal> personal = REPOSITORY.findByUsuario(correo);
+
+        if (personal.isEmpty()) {
+            return;
+        }
+
+        TOKEN_SERVICE.generarYEnviarResetToken(personal.get());
+    }
+
+    @Override
+    public void resetContrasena(ResetPasswordRequest request) {
+        PasswordResetToken resetToken = RESET_REPOSITORY.findByToken(request.token())
+                .orElseThrow(() -> new RuntimeException("Token inválido."));
+
+        if(resetToken.isUsado()){
+            throw new RuntimeException("El token ya fue utilizado.");
+        }
+
+        if(resetToken.getExpiresAt().isBefore(LocalDateTime.now())){
+            throw new RuntimeException("El token ha expirado.");
+        }
+
+        Personal personal = resetToken.getPersonal();
+
+        AUTH_HELPER.actualizarContrasena(
+                personal,
+                request.contrasena(),
+                request.confirmarContrasena()
+        );
+
+        resetToken.setUsado(true);
+
+        PERSONAL_REPOSITORY.save(personal);
+        RESET_REPOSITORY.save(resetToken);
+
+    }
+
 }
