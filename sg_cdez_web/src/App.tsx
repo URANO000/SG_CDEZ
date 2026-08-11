@@ -18,6 +18,7 @@ import { AuthProvider } from './services/authContext';
 import { ProtectedRoute } from './Routes';
 import { RestablecerContrasena } from './pages/auth/restablecerContrasena';
 import { NotFound } from './pages/error/404';
+import {ServerError} from "./pages/error/500";
 
 function App() {
 
@@ -32,6 +33,7 @@ function App() {
             <Route path="/restablecer-contrasena" element={<RestablecerContrasena />} />
             <Route path="/reenviar-verificacion" element={<ResendVerification />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="/500" element={<ServerError />} />
             <Route element={
               <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_ADMIN"]}>
                 <Layout />
