@@ -13,6 +13,7 @@ import {
 import { iniciarSesion } from "../../../services/authService";
 import { useAuth } from "../../../services/authContext";
 import { AuthFormLayout } from "./AuthFormLayout";
+import axios from "axios";
 
 export function LoginForm() {
     const [usuario, setUsuario] = useState("");
@@ -31,7 +32,16 @@ export function LoginForm() {
             await refreshSession();
             navigate("/");
         } catch (error) {
-            alert("Error :(");
+
+            if (axios.isAxiosError(error) && error.response?.status === 429) {
+                alert(
+                    "Demasiados intentos de inicio de sesión. " +
+                    "Intente nuevamente más tarde."
+                );
+            } else {
+                alert("Usuario o contraseña incorrectos");
+            }
+
         } finally {
             setLoading(false);
         }

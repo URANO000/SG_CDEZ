@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/cambiarContrasena/**").hasAnyRole("PERSONAL", "ADMIN")
                         .requestMatchers("/api/auth/session").hasAnyRole("PERSONAL", "ADMIN")
                         .requestMatchers("/api/auth/activar").permitAll()
+                        .requestMatchers("/api/auth/reenviar-verificacion").permitAll()
 
                         .requestMatchers("/api/perfil/**").hasAnyRole("PERSONAL", "ADMIN")
 

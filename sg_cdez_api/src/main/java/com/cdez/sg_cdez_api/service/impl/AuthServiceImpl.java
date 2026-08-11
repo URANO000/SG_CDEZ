@@ -6,6 +6,8 @@ import com.cdez.sg_cdez_api.entity.*;
 import com.cdez.sg_cdez_api.repository.*;
 import com.cdez.sg_cdez_api.service.*;
 import com.cdez.sg_cdez_api.util.AuthHelper;
+import com.cdez.sg_cdez_api.util.Exceptions.TokenExpiradoException;
+import com.cdez.sg_cdez_api.util.Exceptions.TooManyRequestsException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.*;
@@ -13,7 +15,9 @@ import org.springframework.security.core.Authentication;
 
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -27,10 +31,33 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordResetTokenRepository RESET_REPOSITORY;
     private final TokenService TOKEN_SERVICE;
     private final AuthHelper AUTH_HELPER;
+    private final RateLimiterService RATE_LIMITER_SERVICE;
 
 
     @Override
-    public JwtAuthResponse iniciarSesion(LoginRequest loginRequest) {
+    public JwtAuthResponse iniciarSesion(LoginRequest loginRequest, String ip) {
+        // Primero rate limiting
+        boolean ipPermitida = RATE_LIMITER_SERVICE.permitir(
+                "login:ip:" + ip,
+                10,
+                Duration.ofMinutes(1)
+        );
+
+        String usuarioReq = loginRequest.getUsuario()
+                .trim()
+                .toLowerCase(Locale.ROOT);
+
+        boolean usuarioPermitido = RATE_LIMITER_SERVICE.permitir(
+                "login:usuario:" + usuarioReq,
+                5,
+                Duration.ofMinutes(5)
+        );
+
+        if(!ipPermitida || !usuarioPermitido){
+            throw new TooManyRequestsException("Demasiados intentos de inicio de sesión. Intente nuevamente más tarde.");
+        }
+
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsuario(),
@@ -40,10 +67,6 @@ public class AuthServiceImpl implements AuthService {
 
         //Si pasa los filtros, entonces las credenciales son válidas
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
-        Personal usuario = REPOSITORY.findByPersonalId(userDetails.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
         //Generar y retornar JWT
         String jwt = jwtService.generateToken(userDetails);
         JwtAuthResponse response = new JwtAuthResponse();
@@ -70,7 +93,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (verificationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("El token ha expirado.");
+            throw new TokenExpiradoException();
         }
 
         Personal personal = verificationToken.getPersonal();
@@ -87,14 +110,14 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     @Override
     public void reenviarVerificacion(ResendVerificationRequest request) {
-        Optional<Personal> personalOptional =
-                PERSONAL_REPOSITORY.findByUsuario(request.email());
+        EmailVerificationToken token = VERIFICATION_REPOSITORY.findByToken(request.token())
+                .orElseThrow(() -> new RuntimeException("Token no encontrado."));
 
-        if (personalOptional.isEmpty()) {
+        Personal personal = token.getPersonal();
+
+        if (personal == null) {
             return;
         }
-
-        Personal personal = personalOptional.get();
 
         if (personal.isEmailVerificado()) {
             return;

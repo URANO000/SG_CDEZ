@@ -1,20 +1,17 @@
 package com.cdez.sg_cdez_api.controller;
 
 import com.cdez.sg_cdez_api.dto.request.*;
-import com.cdez.sg_cdez_api.dto.response.JwtAuthResponse;
-import com.cdez.sg_cdez_api.dto.response.UserSessionResponse;
+import com.cdez.sg_cdez_api.dto.response.*;
 import com.cdez.sg_cdez_api.entity.CustomUserDetails;
-import com.cdez.sg_cdez_api.service.AuthService;
-import com.cdez.sg_cdez_api.service.PersonalService;
+import com.cdez.sg_cdez_api.service.*;
+import com.cdez.sg_cdez_api.util.Exceptions.TokenExpiradoException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.*;
 import org.springframework.web.bind.annotation.*;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -26,10 +23,10 @@ public class AuthController {
 
     //Login Api
     @PostMapping("/iniciarSesion")
-    public ResponseEntity<Void> iniciarSesion(@RequestBody LoginRequest request){
+    public ResponseEntity<Void> iniciarSesion(@RequestBody LoginRequest loginRequest, HttpServletRequest request){
 
         JwtAuthResponse authResponse =
-                SERVICE.iniciarSesion(request);
+                SERVICE.iniciarSesion(loginRequest, request.getRemoteAddr());
 
         ResponseCookie cookie = ResponseCookie.from(
                 "access_token",
@@ -101,13 +98,18 @@ public class AuthController {
     }
 
     @PostMapping("/activar")
-    public ResponseEntity<Void> activarCuenta(@RequestBody ActivateAccountRequest request){
-        SERVICE.activarCuenta(request);
-
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> activarCuenta(@RequestBody ActivateAccountRequest request){
+        try{
+            SERVICE.activarCuenta(request);
+            return ResponseEntity.ok().build();
+        }catch(TokenExpiradoException ex){
+            return ResponseEntity
+                    .status(HttpStatus.GONE)
+                    .body("TOKEN_EXPIRADO");
+        }
     }
 
-    @PostMapping("/resend-verification")
+    @PostMapping("/reenviar-verificacion")
     public ResponseEntity<Void> resendVerificationEmail(@RequestBody @Valid ResendVerificationRequest request){
         SERVICE.reenviarVerificacion(request);
 

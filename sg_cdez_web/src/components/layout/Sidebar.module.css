@@ -45,3 +45,10 @@
    padding: 1rem 0.75rem;
   border-top: 1px solid var(--color-sidebar-border);
 }
+
+.logo{
+  width: 9dvh;
+  text-align: center;
+  margin: auto;
+  display: block;
+}
