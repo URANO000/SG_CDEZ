@@ -1,14 +1,14 @@
 import { Container, Title, Text, Group, Button} from "@mantine/core";
 import classes from "./404.module.css";
 import { NotFoundIllustration } from "../../components/ui/imgs/404Illustration";
-import { Link, useNavigate } from "react-router";
+import { Link} from "react-router";
 
 
 export function NotFound(){
     return (
         <Container className={classes.root}>
             <div className={classes.inner}>
-                <NotFoundIllustration className={classes.illustration} />
+                <NotFoundIllustration className={classes.image} />
                 <div className={classes.content}>
                     <Title className={classes.title}>Página No Encontrada</Title>
                     <Text c="dimmed" size="lg" ta="center" className={classes.description}>
