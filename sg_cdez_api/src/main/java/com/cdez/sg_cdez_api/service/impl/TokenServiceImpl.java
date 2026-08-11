@@ -1,12 +1,8 @@
 package com.cdez.sg_cdez_api.service.impl;
 
-import com.cdez.sg_cdez_api.entity.EmailVerificationToken;
-import com.cdez.sg_cdez_api.entity.PasswordResetToken;
-import com.cdez.sg_cdez_api.entity.Personal;
-import com.cdez.sg_cdez_api.repository.EmailVerificationTokenRepository;
-import com.cdez.sg_cdez_api.repository.PasswordResetTokenRepository;
-import com.cdez.sg_cdez_api.service.EmailService;
-import com.cdez.sg_cdez_api.service.TokenService;
+import com.cdez.sg_cdez_api.entity.*;
+import com.cdez.sg_cdez_api.repository.*;
+import com.cdez.sg_cdez_api.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
