@@ -1,4 +1,4 @@
-import { NavLink, ScrollArea, Text } from "@mantine/core";
+import { NavLink, ScrollArea} from "@mantine/core";
 import { BsFillHouseDoorFill, BsClipboard2PulseFill, BsFillPeopleFill, BsPersonHeart, BsClipboardDataFill, BsMapFill } from "react-icons/bs";
 import { Link, useLocation } from "react-router";
 import classes from "./Sidebar.module.css";
@@ -32,7 +32,7 @@ export function Sidebar() {
   return (
     <nav className={classes.navbar}>
       <div className={classes.header}>
-        <Text fw={700} size="lg" c="white">El logo va acá</Text>
+        <img src="/zurqui-logo.png" alt="logo" className={classes.logo} />
       </div>
 
       <ScrollArea className={classes.links}>

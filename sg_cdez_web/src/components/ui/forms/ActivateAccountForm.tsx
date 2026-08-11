@@ -3,11 +3,13 @@ import { AuthFormLayout } from "./AuthFormLayout";
 import { Button } from "@mantine/core";
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { activarCuenta } from "../../../services/authService";
-import {useForm} from "@mantine/form";
+import { activarCuenta, reenviarVerificacion } from "../../../services/authService";
+import { useForm } from "@mantine/form";
 
 export function ActivateAccountForm({ token }: { token: string }) {
     const [loading, setLoading] = useState(false);
+    const [tokenExpired, setTokenExpired] = useState(false);
+    const [resending, setResending] = useState(false);
     const navigate = useNavigate();
 
     const form = useForm({
@@ -17,14 +19,14 @@ export function ActivateAccountForm({ token }: { token: string }) {
         },
         validate: {
             contrasena: (val) => {
-                if(val.length < 8) return 'La contraseña debe tener al menos 8 caracteres';
+                if (val.length < 8) return 'La contraseña debe tener al menos 8 caracteres';
                 if (!/[A-Z]/.test(val)) return 'La contraseña debe contener al menos una letra mayúscula';
-                if(!/[a-z]/.test(val)) return 'La contraseña debe contener al menos una letra minúscula';
-                if(!/[0-9]/.test(val)) return 'La contaseña debe contener al menos un número';
-                if(!/[^A-Za-z0-9]/.test(val)) return 'La contraseña debe contener al menos un carácter especial';
+                if (!/[a-z]/.test(val)) return 'La contraseña debe contener al menos una letra minúscula';
+                if (!/[0-9]/.test(val)) return 'La contaseña debe contener al menos un número';
+                if (!/[^A-Za-z0-9]/.test(val)) return 'La contraseña debe contener al menos un carácter especial';
                 return null;
             },
-            confirmarContrasena: (val, values) => 
+            confirmarContrasena: (val, values) =>
                 val !== values.contrasena ? 'Las contaseñas no coinciden' : null,
         },
 
@@ -32,13 +34,18 @@ export function ActivateAccountForm({ token }: { token: string }) {
 
     const handleSubmit = async (values: typeof form.values) => {
         setLoading(true);
+        setTokenExpired(false);
 
         try {
             await activarCuenta(token, values.contrasena, values.confirmarContrasena);
             navigate("/login");
 
-        } catch (error) {
-            alert("Error al activar la cuenta/ voy a cambiar esto a un modal");
+        } catch (error: any) {
+            if (error.response?.status === 410) {
+                setTokenExpired(true);
+            } else {
+                alert("Error al activar la cuenta/ voy a cambiar esto a un modal");
+            }
 
         } finally {
             setLoading(false);
@@ -83,6 +90,33 @@ export function ActivateAccountForm({ token }: { token: string }) {
             >
                 Activar cuenta
             </Button>
+
+            {
+                tokenExpired && (
+                    <>
+                        <Anchor c="red" size="sm" mt="md">
+                            El código de verificación ha expirado.
+                        </Anchor>
+
+                        <Button type="button" variant="light" fullWidth loading={resending} mt="sm" radius="md" onClick={async () => {
+                            setResending(true);
+
+                            try {
+                                await reenviarVerificacion(token);
+
+                                alert("Se ha enviado un nuevo correo de verificación. Por favor revisa tu bandeja de entrada.");
+                                setTokenExpired(false);
+                            } catch (error) {
+                                alert("No se puedo reenviar el código.");
+                            } finally {
+                                setResending(false);
+                            }
+                        }}>
+                            Reenviar código
+                        </Button>
+                    </>
+                )
+            }
 
 
         </AuthFormLayout>

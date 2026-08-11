@@ -28,8 +28,8 @@ export const forgotPassword = async (correo: string) => {
     await apiClient.post("/auth/forgot-password", {correo})
 }
 
-export const reenviarVerificacion = async (correo: string) => {
-    await apiClient.post("/auth/resend-verification", {correo})
+export const reenviarVerificacion = async (token: string) => {
+    await apiClient.post("/auth/reenviar-verificacion", {token})
 }
 
 export const restablecerContrasena = async (token: string, contrasena:string, confirmarContrasena:string) => {

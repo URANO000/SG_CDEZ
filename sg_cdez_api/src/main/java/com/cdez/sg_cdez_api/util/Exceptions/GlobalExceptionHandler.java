@@ -3,10 +3,12 @@ package com.cdez.sg_cdez_api.util.Exceptions;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(PageOutOfBoundsException.class)
@@ -15,6 +17,16 @@ public class GlobalExceptionHandler {
         return new ErrorResponse("PÁGINA_INVÁLIDA", ex.getMessage());
     }
 
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<Map<String, String>> handleTooManyRequests(
+            TooManyRequestsException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(Map.of(
+                        "message", ex.getMessage()
+                ));
+    }
 
 
     @Getter
