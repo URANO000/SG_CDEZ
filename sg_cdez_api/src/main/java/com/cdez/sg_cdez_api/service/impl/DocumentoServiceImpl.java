@@ -10,6 +10,7 @@ import com.cdez.sg_cdez_api.repository.EpicrisisRepository;
 import com.cdez.sg_cdez_api.repository.PersonalRepository;
 import com.cdez.sg_cdez_api.service.DocumentoService;
 import com.cdez.sg_cdez_api.service.AuditoriaService;
+import com.cdez.sg_cdez_api.service.PersonalService;
 import com.cdez.sg_cdez_api.util.AuthHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,7 @@ public class DocumentoServiceImpl implements DocumentoService {
     private final DocumentoRepository documentoRepository;
     private final AdultoMayorRepository adultoMayorRepository;
     private final PersonalRepository personalRepository;
+    private final PersonalService PERSONAL_SERVICE;
     private final EpicrisisRepository epicrisisRepository;
     private final AuditoriaService auditoriaService;
     private final AuthHelper AUTH_HELPER;
@@ -90,15 +92,9 @@ public class DocumentoServiceImpl implements DocumentoService {
 
     @Override
     @Transactional
-    public void registrarDocumentoPersonal(List<MultipartFile> archivos, Personal personal) throws IOException {
+    public void registrarDocumentoPersonal(List<MultipartFile> archivos, UUID personalId) throws IOException {
         Personal usuarioActual = AUTH_HELPER.obtenerUsuarioAutenticado();
-        if(!personalRepository.existsById(personal.getPersonalId())){
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "No se encontró el personal indicado."
-            );
-        }
-
+        Personal personal = PERSONAL_SERVICE.obtenerPersonalCheck(personalId);
         for (MultipartFile archivo : archivos){
             validarArchivo(archivo);
 
@@ -137,13 +133,8 @@ public class DocumentoServiceImpl implements DocumentoService {
     }
 
     @Override
-    public List<DocumentoResponse> listarDocumentosPorPersonal(Personal personal) {
-        if(!personalRepository.existsById(personal.getPersonalId())){
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "No se encontró el personal indicado."
-            );
-        }
+    public List<DocumentoResponse> listarDocumentosPorPersonal(UUID personalId) {
+        Personal personal = PERSONAL_SERVICE.obtenerPersonalCheck(personalId);
 
         return documentoRepository.findByPersonalOrderByCreatedAtDesc(personal.getPersonalId())
                 .stream().map(this::mapToResponse).toList();

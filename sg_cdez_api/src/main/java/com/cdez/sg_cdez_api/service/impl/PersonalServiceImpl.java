@@ -14,7 +14,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.io.IOException;
 import java.time.*;
 import java.util.*;
@@ -113,7 +116,7 @@ public class PersonalServiceImpl implements PersonalService {
         CONTACTO_SERVICE.crearContactoPersonal(request.contactos(), personalGuardado);
 
         // Crear documentos nuevos (o documento nuevo)
-        DOCUMENTO_SERVICE.registrarDocumentoPersonal(request.documentos(), personalGuardado);
+        DOCUMENTO_SERVICE.registrarDocumentoPersonal(request.documentos(), personalGuardado.getPersonalId());
 
         // Enviar correo de verificación
         VERIFICATION_SERVICE.verificacionCrearYEnviar(personalGuardado);
@@ -249,13 +252,16 @@ public class PersonalServiceImpl implements PersonalService {
                 personal.getUpdatedAt(),
 
                 CONTACTO_SERVICE.listarContactoPorPersonal(personal),
-                DOCUMENTO_SERVICE.listarDocumentosPorPersonal(personal)
+                DOCUMENTO_SERVICE.listarDocumentosPorPersonal(personal.getPersonalId())
         );
     }
 
     //Personal existe?
-    private Personal obtenerPersonalCheck(UUID id){
+    public Personal obtenerPersonalCheck(UUID id){
         return REPOSITORY.findById(id)
-                .orElseThrow(()-> new RuntimeException("Personal no encontrado."));
+                .orElseThrow(()-> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Personal indicado no existe."
+                ));
     }
 }

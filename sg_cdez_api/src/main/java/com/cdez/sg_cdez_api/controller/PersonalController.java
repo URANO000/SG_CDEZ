@@ -26,11 +26,6 @@ import java.util.UUID;
 public class PersonalController {
     private final PersonalService SERVICE;
 
-//    @GetMapping("/listarPersonal")
-//    public PageResponse<PersonalResponse> listarPersonal(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
-//        return SERVICE.listarPersonal(pageable);
-//    }
-
     @PostMapping("/listarPersonalFiltrado")
     public PageResponse<PersonalResponse> listarPersonalFiltrado(@RequestBody PersonalFiltro filtros,@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
         return SERVICE.listarPersonalFiltrado(filtros, pageable);
@@ -42,7 +37,7 @@ public class PersonalController {
     }
 
     @PostMapping("/crearPersonal")
-    public PersonalResponse crearPersonal(@RequestBody PersonalCreateRequest request){
+    public PersonalResponse crearPersonal(@RequestBody PersonalCreateRequest request) throws IOException {
         return SERVICE.crearPersonal(request);
     }
 

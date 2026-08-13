@@ -12,11 +12,11 @@ public interface DocumentoService {
 
     DocumentoResponse registrarDocumentoExpediente(UUID adultoId, MultipartFile archivo);
 
-    void registrarDocumentoPersonal(List<MultipartFile> archivos, Personal personal) throws IOException;
+    void registrarDocumentoPersonal(List<MultipartFile> archivos, UUID personalId) throws IOException;
 
     List<DocumentoResponse> listarDocumentosPorAdulto(UUID adultoId);
 
-    List<DocumentoResponse> listarDocumentosPorPersonal(Personal personal);
+    List<DocumentoResponse> listarDocumentosPorPersonal(UUID personalId);
 
     DocumentoResponse obtenerDocumentoPorId(Integer documentoId);
 
