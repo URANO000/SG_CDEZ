@@ -21,7 +21,7 @@ public interface PersonalService {
     List<PersonalResponse> listarPersonal();
     PageResponse<PersonalResponse> listarPersonalFiltrado(PersonalFiltro filtros,@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable);
     PersonalResponse obtenerPersonalPorId(UUID id);
-    PersonalResponse crearPersonal(PersonalCreateRequest request);
+    PersonalResponse crearPersonal(PersonalCreateRequest request) throws IOException;
     PersonalResponse actualizarPersonal(UUID id, PersonalActualizarRequest request);
     PersonalResponse activarPersonal(UUID id);
     PersonalResponse desactivarPersonal(UUID id);

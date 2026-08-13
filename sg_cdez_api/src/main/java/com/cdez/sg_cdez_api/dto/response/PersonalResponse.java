@@ -19,6 +19,7 @@ public record PersonalResponse(
         String updatedBy,
         LocalDateTime updatedAt,
 
-        List<ContactoResponse> contactos
+        List<ContactoResponse> contactos,
+        List<DocumentoResponse> documentos
 ) {
 }

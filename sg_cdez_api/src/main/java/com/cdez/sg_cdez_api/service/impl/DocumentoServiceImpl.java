@@ -10,6 +10,7 @@ import com.cdez.sg_cdez_api.repository.EpicrisisRepository;
 import com.cdez.sg_cdez_api.repository.PersonalRepository;
 import com.cdez.sg_cdez_api.service.DocumentoService;
 import com.cdez.sg_cdez_api.service.AuditoriaService;
+import com.cdez.sg_cdez_api.util.AuthHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -21,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -34,6 +36,7 @@ public class DocumentoServiceImpl implements DocumentoService {
     private final PersonalRepository personalRepository;
     private final EpicrisisRepository epicrisisRepository;
     private final AuditoriaService auditoriaService;
+    private final AuthHelper AUTH_HELPER;
 
     @Override
     @Transactional
@@ -46,7 +49,7 @@ public class DocumentoServiceImpl implements DocumentoService {
 
         validarArchivo(archivo);
 
-        Personal usuarioAutenticado = obtenerUsuarioAutenticado();
+        Personal usuarioAutenticado = AUTH_HELPER.obtenerUsuarioAutenticado();
         LocalDateTime ahora = LocalDateTime.now();
 
         Documento documento = new Documento();
@@ -86,6 +89,36 @@ public class DocumentoServiceImpl implements DocumentoService {
     }
 
     @Override
+    @Transactional
+    public void registrarDocumentoPersonal(List<MultipartFile> archivos, Personal personal) throws IOException {
+        Personal usuarioActual = AUTH_HELPER.obtenerUsuarioAutenticado();
+        if(!personalRepository.existsById(personal.getPersonalId())){
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "No se encontró el personal indicado."
+            );
+        }
+
+        for (MultipartFile archivo : archivos){
+            validarArchivo(archivo);
+
+            Documento documento = new Documento();
+
+            documento.setPersonal(personal);
+            documento.setNombreArchivo(archivo.getOriginalFilename());
+            documento.setTipoArchivo(archivo.getContentType());
+            documento.setTamanoArchivo(archivo.getSize());
+            documento.setArchivo(archivo.getBytes());
+            documento.setActivo(true);
+
+            documento.setCreatedBy(usuarioActual);
+            documento.setCreatedAt(LocalDateTime.now(Clock.systemUTC()));
+
+            documentoRepository.save(documento);
+        }
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<DocumentoResponse> listarDocumentosPorAdulto(UUID adultoId) {
         if (!adultoMayorRepository.existsById(adultoId)) {
@@ -101,6 +134,19 @@ public class DocumentoServiceImpl implements DocumentoService {
                 .filter(documento -> !epicrisisRepository.existsByDocumentoDocumentoId(documento.getDocumentoId()))
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    @Override
+    public List<DocumentoResponse> listarDocumentosPorPersonal(Personal personal) {
+        if(!personalRepository.existsById(personal.getPersonalId())){
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "No se encontró el personal indicado."
+            );
+        }
+
+        return documentoRepository.findByPersonalOrderByCreatedAtDesc(personal.getPersonalId())
+                .stream().map(this::mapToResponse).toList();
     }
 
     @Override

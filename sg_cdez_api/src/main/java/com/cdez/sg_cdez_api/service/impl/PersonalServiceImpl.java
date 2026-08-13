@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.*;
@@ -28,11 +27,11 @@ public class PersonalServiceImpl implements PersonalService {
     private final AuthHelper AUTH_HELPER;
     private final ValidationHelper VALIDATION_HELPER;
     private final RolRepository ROL_REPOSITORY;
-    private final PasswordEncoder ENCODER;
     private final TokenService VERIFICATION_SERVICE;
     private final ContactoService CONTACTO_SERVICE;
     private final ReportService REPORT_SERVICE;
     private final MiscHelper MISC_HELPER;
+    private final DocumentoService DOCUMENTO_SERVICE;
 
     @Override
     public List<PersonalResponse> listarPersonal() {
@@ -78,7 +77,7 @@ public class PersonalServiceImpl implements PersonalService {
 
     @Transactional
     @Override
-    public PersonalResponse crearPersonal(PersonalCreateRequest request){
+    public PersonalResponse crearPersonal(PersonalCreateRequest request) throws IOException {
         // Validaciones
         if(!AUTH_HELPER.isUsuarioAdmin()){
             throw new RuntimeException("Sólo un usuario administrador puede crear nuevo personal.");
@@ -112,6 +111,9 @@ public class PersonalServiceImpl implements PersonalService {
 
         // Crear contactos nuevos (o contacto nuevo)
         CONTACTO_SERVICE.crearContactoPersonal(request.contactos(), personalGuardado);
+
+        // Crear documentos nuevos (o documento nuevo)
+        DOCUMENTO_SERVICE.registrarDocumentoPersonal(request.documentos(), personalGuardado);
 
         // Enviar correo de verificación
         VERIFICATION_SERVICE.verificacionCrearYEnviar(personalGuardado);
@@ -246,7 +248,8 @@ public class PersonalServiceImpl implements PersonalService {
                 personal.getUpdatedBy() != null ? personal.getUpdatedBy().getUsuario() : null ,
                 personal.getUpdatedAt(),
 
-                CONTACTO_SERVICE.listarContactoPorPersonal(personal)
+                CONTACTO_SERVICE.listarContactoPorPersonal(personal),
+                DOCUMENTO_SERVICE.listarDocumentosPorPersonal(personal)
         );
     }
 
