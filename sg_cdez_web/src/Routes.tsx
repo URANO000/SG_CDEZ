@@ -1,4 +1,5 @@
 import { Navigate } from "react-router";
+import { Loader } from "@mantine/core";
 import { useAuth } from "./services/authContext";
 import type { JSX } from "react";
 
@@ -15,7 +16,17 @@ export function ProtectedRoute({
     const { user, loading } = useAuth();
 
     if (loading) {
-        return <div>Loading...</div>;
+        return (
+            <div style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "100vh",
+                backgroundColor: "var(--bg)",
+            }}>
+                <Loader color="var(--color-primary)" size="lg" />
+            </div>
+        );
     }
 
     if (!user) {
