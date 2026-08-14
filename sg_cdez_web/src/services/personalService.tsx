@@ -17,17 +17,17 @@ export const listarPersonalFiltrado = async (
     return response.data;
 };
 
-export const obtenerPersonalPorId = async (personalId:string) => {
-    const response = await apiClient.get(`personal/obtenerPersonalPorId/${personalId}`);
+export const obtenerPersonalPorId = async (personalId:string): Promise<PersonalResponse> => {
+    const response = await apiClient.get(`/personal/obtenerPersonalPorId/${personalId}`);
     return response.data;
 }
 
 export const desactivarPersonal = async (personalId:string) => {
-    const response = await apiClient.post(`personal/desactivarPersonal/${personalId}`);
+    const response = await apiClient.post(`/personal/desactivarPersonal/${personalId}`);
     return response.data;
 }
 
 export const activarPersonal = async (personalId:string) => {
-    const response = await apiClient.post(`personal/activarPersonal/${personalId}`);
+    const response = await apiClient.post(`/personal/activarPersonal/${personalId}`);
     return response.data;
 }

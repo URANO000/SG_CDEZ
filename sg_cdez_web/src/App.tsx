@@ -7,7 +7,7 @@ import { Home } from './pages/home/home';
 import { Login } from "./pages/auth/login";
 import { Activar } from './pages/auth/activarCuenta';
 import { ForgotPassword } from './pages/auth/forgotPassword';
-import { ResendVerification} from "./pages/auth/resendVerification";
+import { ResendVerification } from "./pages/auth/resendVerification";
 import { Consultas } from './pages/consultas/consultas';
 import { MantineProvider } from '@mantine/core';
 import { AdultosMayores } from './pages/adultosMayores/adultosMayores';
@@ -18,7 +18,8 @@ import { AuthProvider } from './services/authContext';
 import { ProtectedRoute } from './Routes';
 import { RestablecerContrasena } from './pages/auth/restablecerContrasena';
 import { NotFound } from './pages/error/404';
-import {ServerError} from "./pages/error/500";
+import { ServerError } from "./pages/error/500";
+import { PersonalDetalle } from './pages/personal/personalDetalle';
 
 function App() {
 
@@ -27,7 +28,7 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            <Route path="/activar" element={<Activar />}/>
+            <Route path="/activar" element={<Activar />} />
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/restablecer-contrasena" element={<RestablecerContrasena />} />
@@ -49,6 +50,12 @@ function App() {
                   <Personal />
                 </ProtectedRoute>
               } />
+              <Route path="/personal/:personalId/detalle" element={
+                <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                  <PersonalDetalle />
+                </ProtectedRoute>
+              }
+              />
               <Route path="/auditoria" element={
                 <ProtectedRoute roles={["ROLE_ADMIN"]}>
                   <Auditoria />

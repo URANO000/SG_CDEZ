@@ -79,3 +79,19 @@
     padding: 10px 8px;
   }
 }
+
+.actionView {
+  color: var(--color-secondary);
+}
+
+.actionView:hover {
+  background-color: var(--color-sidebar-hv);
+}
+
+.actionEdit {
+  color: var(--color-navbar);
+}
+
+.actionEdit:hover {
+  background-color: var(--color-sidebar-hv);
+}

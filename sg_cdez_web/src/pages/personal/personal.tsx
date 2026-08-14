@@ -47,7 +47,7 @@ export function Personal() {
                         { value: "Medicina", label: "Medicina" },
                         { value: "Enfermería", label: "Enfermería" },
                         { value: "Psicología", label: "Psicología" },
-                        { value: "Nutricionista", label: "Nutricionista" },
+                        { value: "Nutrición", label: "Nutrición" },
                         { value: "Trabajo Social", label: "Trabajo Social" },
                         { value: "Terapia Física", label: "Terapia Física" },
                         { value: "Terapia Respiratoria", label: "Terapia Respiratoria" },
@@ -69,7 +69,7 @@ export function Personal() {
                     classNames={{ input: classes.input, root: classes.field }}
                 />
 
-                <Button onClick={() => cargarPersonal(0)} className={classes.searchButton}>
+                <Button onClick={() => cargarPersonal(0)} className={classes.searchButton} aria-label="Buscar">
                     Buscar
                 </Button>
             </div>
