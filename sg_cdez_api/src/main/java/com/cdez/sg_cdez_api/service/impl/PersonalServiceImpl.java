@@ -33,7 +33,6 @@ public class PersonalServiceImpl implements PersonalService {
     private final TokenService VERIFICATION_SERVICE;
     private final ContactoService CONTACTO_SERVICE;
     private final ReportService REPORT_SERVICE;
-    private final MiscHelper MISC_HELPER;
     private final DocumentoService DOCUMENTO_SERVICE;
 
     @Override
@@ -83,12 +82,18 @@ public class PersonalServiceImpl implements PersonalService {
     public PersonalResponse crearPersonal(PersonalCreateRequest request) throws IOException {
         // Validaciones
         if(!AUTH_HELPER.isUsuarioAdmin()){
-            throw new RuntimeException("Sólo un usuario administrador puede crear nuevo personal.");
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Sólo un usuario administrador puede crear nuevo personal."
+            );
         }
         AUTH_HELPER.validarUsuarioActivo();
 
         if(REPOSITORY.existsByUsuario(request.usuario())){
-            throw new RuntimeException("Ya existe un usuario con ese correo.");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Ya existe un usuario con ese correo."
+            );
         }
 
         Personal personalNuevo = new Personal();
@@ -112,11 +117,9 @@ public class PersonalServiceImpl implements PersonalService {
 
         Personal personalGuardado = REPOSITORY.save(personalNuevo);
 
-        // Crear contactos nuevos (o contacto nuevo)
+        // Crear contactos
         CONTACTO_SERVICE.crearContactoPersonal(request.contactos(), personalGuardado);
-
-        // Crear documentos nuevos (o documento nuevo)
-        DOCUMENTO_SERVICE.registrarDocumentoPersonal(request.documentos(), personalGuardado.getPersonalId());
+        DOCUMENTO_SERVICE.registrarDocumentoPersonal(request.documentos(), personalGuardado);
 
         // Enviar correo de verificación
         VERIFICATION_SERVICE.verificacionCrearYEnviar(personalGuardado);
@@ -125,16 +128,23 @@ public class PersonalServiceImpl implements PersonalService {
     }
 
     @Override
-    public PersonalResponse actualizarPersonal(UUID id, PersonalActualizarRequest request){
+    @Transactional
+    public PersonalResponse actualizarPersonal(UUID id, PersonalActualizarRequest request) throws IOException {
         if(!AUTH_HELPER.isUsuarioAdmin()){
-            throw new RuntimeException("Sólo un usuario administrador puede editar el personal.");
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Sólo un usuario administrador puede editar el personal."
+            );
         }
 
         AUTH_HELPER.validarUsuarioActivo();
 
         Personal personalViejo = obtenerPersonalCheck(id);
 
-        Rol rol = ROL_REPOSITORY.findById(request.rol()).orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+        Rol rol = ROL_REPOSITORY.findById(request.rol()).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Rol no encontrado"
+        ));
         personalViejo.setRol(rol);
         personalViejo.setEspecialidad(request.especialidad());
         personalViejo.setTipoIdentificacion(request.tipoIdentificacion());
@@ -150,20 +160,42 @@ public class PersonalServiceImpl implements PersonalService {
         personalViejo.setUpdatedAt(LocalDateTime.now(Clock.systemUTC()));
 
         Personal personalNuevo = REPOSITORY.save(personalViejo);
+
+        // Actualizar contactos
+        CONTACTO_SERVICE.actualizarContacto(request.contactosActualizar(), personalNuevo);
+
+        // Desactivar contactos (si aplica)
+        CONTACTO_SERVICE.desactivarContactosPersonal(request.contactosDesactivar(), personalNuevo);
+
+        // Crear contactos (si aplica)
+        CONTACTO_SERVICE.crearContactoPersonal(request.contactosCrear(), personalNuevo);
+
+        // Desactivar documentos (si aplica)
+        DOCUMENTO_SERVICE.desactivarDocumentosPersonal(request.documentosDesactivar(), personalNuevo);
+
+        // Crear documentos nuevos (si aplica)
+        DOCUMENTO_SERVICE.registrarDocumentoPersonal(request.documentosCrear(), personalNuevo);
+
         return mapDTO(personalNuevo);
     }
 
     @Override
     public PersonalResponse activarPersonal(UUID id){
         if(!AUTH_HELPER.isUsuarioAdmin()){
-            throw new RuntimeException("Sólo un usuario administrador puede activar el personal.");
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Sólo un usuario administrador puede activar el personal."
+            );
         }
 
         AUTH_HELPER.validarUsuarioActivo();
 
         Personal personal = obtenerPersonalCheck(id);
         if(personal.isActivo()){
-            throw new RuntimeException("Personal ya es activo.");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Personal ya es activo."
+            );
         }
         personal.setActivo(true);
         REPOSITORY.save(personal);
@@ -173,13 +205,19 @@ public class PersonalServiceImpl implements PersonalService {
     @Override
     public PersonalResponse desactivarPersonal(UUID id){
         if(!AUTH_HELPER.isUsuarioAdmin()){
-            throw new RuntimeException("Sólo un usuario administrador puede desactivar el personal.");
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Sólo un usuario administrador puede desactivar el personal."
+            );
         }
         AUTH_HELPER.validarUsuarioActivo();
 
         Personal personal = obtenerPersonalCheck(id);
         if(!personal.isActivo()){
-            throw  new RuntimeException("Personal ya es inactivo.");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Personal ya es inactivo."
+            );
         }
         personal.setActivo(false);
         REPOSITORY.save(personal);
@@ -190,7 +228,10 @@ public class PersonalServiceImpl implements PersonalService {
     public byte[] generarReportePersonalPDF() {
         try{
             if(!AUTH_HELPER.isUsuarioAdmin()){
-                throw new RuntimeException("Sólo un usuario administrador puede generar reportes del personal.");
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "Sólo un usuario administrador puede generar reportes del personal."
+                );
             }
 
             AUTH_HELPER.validarUsuarioActivo();
@@ -245,14 +286,14 @@ public class PersonalServiceImpl implements PersonalService {
                 personal.getDireccion(),
                 personal.getCarnet(),
                 personal.getUsuario(),
-                MISC_HELPER.activoConversion(personal.isActivo()),
+                personal.isActivo() ? "Activo" : "Inactivo",
                 personal.getCreatedBy() != null ? personal.getCreatedBy().getUsuario() : null,
                 personal.getCreatedAt(),
                 personal.getUpdatedBy() != null ? personal.getUpdatedBy().getUsuario() : null ,
                 personal.getUpdatedAt(),
 
                 CONTACTO_SERVICE.listarContactoPorPersonal(personal),
-                DOCUMENTO_SERVICE.listarDocumentosPorPersonal(personal.getPersonalId())
+                DOCUMENTO_SERVICE.listarDocumentosPorPersonal(personal)
         );
     }
 

@@ -1,8 +1,9 @@
 package com.cdez.sg_cdez_api.dto.request;
 
+
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
+import java.util.List;
 
 public record PersonalCreateRequest(
         int rol,

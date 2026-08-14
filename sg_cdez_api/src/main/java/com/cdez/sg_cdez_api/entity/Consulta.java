@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class Consulta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int consultaId;
+    private Integer consultaId;
     @ManyToOne
     @JoinColumn(name = "adulto_id", nullable = false)
     private AdultoMayor adultoMayor;

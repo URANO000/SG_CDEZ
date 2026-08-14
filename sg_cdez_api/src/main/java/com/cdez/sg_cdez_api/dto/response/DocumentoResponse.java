@@ -9,7 +9,7 @@ public record DocumentoResponse(
         String nombreArchivo,
         String tipoArchivo,
         Long tamanoArchivo,
-        Boolean activo,
+        String activo,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

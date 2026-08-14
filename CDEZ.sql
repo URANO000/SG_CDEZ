@@ -84,7 +84,12 @@ CREATE TABLE Contacto(
 	personal_id UUID NULL REFERENCES Personal(personal_id),
 	encargado_id UUID NULL REFERENCES EncargadoLegal(encargado_id),
 	valor VARCHAR(100) NOT NULL,
-	tipo_valor VARCHAR(50) NULL
+	tipo_valor VARCHAR(50) NULL,
+	activo BOOL NOT NUll,
+	created_by UUID REFERENCES Personal(personal_id) NOT NULL,
+	created_at TIMESTAMP NOT NULL,
+	updated_by UUID REFERENCES Personal(personal_id) NULL,
+	updated_at TIMESTAMP NULL
 );
 
 /** Modified (17/7/2026) **/
