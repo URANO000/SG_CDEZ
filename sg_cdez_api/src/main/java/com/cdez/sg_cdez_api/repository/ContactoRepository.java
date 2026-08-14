@@ -6,8 +6,11 @@ import com.cdez.sg_cdez_api.entity.Personal;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public interface ContactoRepository extends JpaRepository<Contacto, Integer> {
-    List<Contacto> findByPersonal(Personal personal);
+    List<Contacto> findByPersonalAndActivoTrue(Personal personal);
     List<Contacto> findByEncargado(EncargadoLegal encargadoLegal);
+    Optional<Contacto> findByContactoIdAndPersonalPersonalId(Integer contactoId, UUID personalId);
 }

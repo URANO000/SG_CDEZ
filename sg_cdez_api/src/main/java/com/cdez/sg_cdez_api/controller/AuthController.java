@@ -8,7 +8,6 @@ import com.cdez.sg_cdez_api.util.Exceptions.TokenExpiradoException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.security.core.*;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    @Autowired
     private final AuthService SERVICE;
     private final PersonalService PERSONAL_SERVICE;
 

@@ -4,16 +4,14 @@ import com.cdez.sg_cdez_api.dto.request.EncargadoLegalRequest;
 import com.cdez.sg_cdez_api.dto.request.EncargadoLegalUpdateRequest;
 import com.cdez.sg_cdez_api.dto.response.EncargadoLegalResponse;
 import com.cdez.sg_cdez_api.entity.AdultoMayor;
-import com.cdez.sg_cdez_api.entity.CustomUserDetails;
 import com.cdez.sg_cdez_api.entity.EncargadoLegal;
 import com.cdez.sg_cdez_api.entity.Personal;
 import com.cdez.sg_cdez_api.repository.AdultoMayorRepository;
-import com.cdez.sg_cdez_api.repository.AuthRepository;
 import com.cdez.sg_cdez_api.repository.EncargadoLegalRepository;
 import com.cdez.sg_cdez_api.service.ContactoService;
 import com.cdez.sg_cdez_api.service.EncargadoLegalService;
+import com.cdez.sg_cdez_api.util.AuthHelper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,8 +24,8 @@ public class EncargadoLegalServiceImpl implements EncargadoLegalService {
 
     private final EncargadoLegalRepository encargadoLegalRepository;
     private final AdultoMayorRepository adultoMayorRepository;
-    private final AuthRepository authRepository;
     private final ContactoService CONTACTO_SERVICE;
+    private final AuthHelper AUTH_HELPER;
 
     /**
      * Registra un nuevo encargado legal y establece
@@ -39,6 +37,8 @@ public class EncargadoLegalServiceImpl implements EncargadoLegalService {
         AdultoMayor adultoMayor = adultoMayorRepository.findById(adultoId)
                 .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
 
+        Personal personalActual = AUTH_HELPER.obtenerUsuarioAutenticado();
+
         EncargadoLegal encargado = new EncargadoLegal();
         encargado.setTipoIdentificacion(request.tipoIdentificacion());
         encargado.setIdentificacion(request.identificacion());
@@ -49,7 +49,7 @@ public class EncargadoLegalServiceImpl implements EncargadoLegalService {
         encargado.setDireccion(request.direccion());
         encargado.setActivo(true);
         encargado.setCreatedAt(LocalDateTime.now());
-        encargado.setCreatedBy(obtenerUsuarioAutenticado());
+        encargado.setCreatedBy(personalActual);
 
         EncargadoLegal guardado = encargadoLegalRepository.save(encargado);
 
@@ -73,20 +73,20 @@ public class EncargadoLegalServiceImpl implements EncargadoLegalService {
 
     @Override
     public EncargadoLegalResponse obtenerEncargadoPorId(UUID encargadoId) {
-        EncargadoLegal encargado = encargadoLegalRepository.findById(encargadoId)
-                .orElseThrow(() -> new RuntimeException("Encargado legal no encontrado"));
+        EncargadoLegal encargado = obtenerEncargadoCheck(encargadoId);
 
         return mapToResponse(encargado);
     }
 
     @Override
     public EncargadoLegalResponse actualizarEncargado(UUID encargadoId, EncargadoLegalUpdateRequest request) {
-        EncargadoLegal encargado = encargadoLegalRepository.findById(encargadoId)
-                .orElseThrow(() -> new RuntimeException("Encargado legal no encontrado"));
+        EncargadoLegal encargado = obtenerEncargadoCheck(encargadoId);
+
+        Personal personalActual = AUTH_HELPER.obtenerUsuarioAutenticado();
 
         encargado.setDireccion(request.direccion());
         encargado.setUpdatedAt(LocalDateTime.now());
-        encargado.setUpdatedBy(obtenerUsuarioAutenticado());
+        encargado.setUpdatedBy(personalActual);
 
         EncargadoLegal actualizado = encargadoLegalRepository.save(encargado);
 
@@ -109,16 +109,9 @@ public class EncargadoLegalServiceImpl implements EncargadoLegalService {
         );
     }
 
-    private Personal obtenerUsuarioAutenticado() {
-        Object principal = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-
-        if (!(principal instanceof CustomUserDetails userDetails)) {
-            throw new RuntimeException("Usuario autenticado no válido");
-        }
-
-        return authRepository.findByPersonalId(userDetails.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado"));
+    public EncargadoLegal obtenerEncargadoCheck(UUID encargadoId){
+        return encargadoLegalRepository.findById(encargadoId)
+                .orElseThrow(() -> new RuntimeException("Encargado legal no encontrado"));
     }
+
 }

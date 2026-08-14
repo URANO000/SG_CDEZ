@@ -13,18 +13,18 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
 public interface PersonalService {
     List<PersonalResponse> listarPersonal();
-    PageResponse<PersonalResponse> listarPersonalFiltrado(PersonalFiltro filtros,@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable);
+    PageResponse<PersonalResponse> listarPersonalFiltrado(PersonalFiltro filtros,@PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable);
     PersonalResponse obtenerPersonalPorId(UUID id);
-    PersonalResponse crearPersonal(PersonalCreateRequest request);
-    PersonalResponse actualizarPersonal(UUID id, PersonalActualizarRequest request);
+    PersonalResponse crearPersonal(PersonalCreateRequest request) throws IOException;
+    PersonalResponse actualizarPersonal(UUID id, PersonalActualizarRequest request) throws IOException;
     PersonalResponse activarPersonal(UUID id);
     PersonalResponse desactivarPersonal(UUID id);
     byte[] generarReportePersonalPDF() throws IOException;
     String obtenerNombrePorId(UUID id);
+    Personal obtenerPersonalCheck(UUID id);
 }

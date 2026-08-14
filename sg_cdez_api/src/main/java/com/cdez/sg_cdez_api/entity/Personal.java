@@ -67,6 +67,11 @@ public class Personal {
     @OneToMany(mappedBy = "personal")
     private List<Documento> documentos = new ArrayList<>();
 
+    @OneToMany(mappedBy = "createdBy")
+    private List<Contacto> contactos = new ArrayList<>();
+    @OneToMany(mappedBy = "updatedBy")
+    private List<Contacto> contactosU = new ArrayList<>();
+
     @OneToMany(mappedBy = "personal")
     private List<EmailVerificationToken> verificationTokens = new ArrayList<>();
 

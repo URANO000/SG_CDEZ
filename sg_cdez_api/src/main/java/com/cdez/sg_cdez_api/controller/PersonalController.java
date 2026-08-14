@@ -7,7 +7,6 @@ import com.cdez.sg_cdez_api.dto.response.PageResponse;
 import com.cdez.sg_cdez_api.dto.response.PersonalResponse;
 import com.cdez.sg_cdez_api.service.PersonalService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -17,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -26,13 +24,8 @@ import java.util.UUID;
 public class PersonalController {
     private final PersonalService SERVICE;
 
-//    @GetMapping("/listarPersonal")
-//    public PageResponse<PersonalResponse> listarPersonal(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
-//        return SERVICE.listarPersonal(pageable);
-//    }
-
     @PostMapping("/listarPersonalFiltrado")
-    public PageResponse<PersonalResponse> listarPersonalFiltrado(@RequestBody PersonalFiltro filtros,@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
+    public PageResponse<PersonalResponse> listarPersonalFiltrado(@RequestBody PersonalFiltro filtros,@PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
         return SERVICE.listarPersonalFiltrado(filtros, pageable);
     }
 
@@ -42,12 +35,12 @@ public class PersonalController {
     }
 
     @PostMapping("/crearPersonal")
-    public PersonalResponse crearPersonal(@RequestBody PersonalCreateRequest request){
+    public PersonalResponse crearPersonal(@RequestBody PersonalCreateRequest request) throws IOException{
         return SERVICE.crearPersonal(request);
     }
 
     @PostMapping("/actualizarPersonal/{id}")
-    public PersonalResponse actualizarPersonal(@PathVariable(name = "id") UUID id,@RequestBody PersonalActualizarRequest request){
+    public PersonalResponse actualizarPersonal(@PathVariable(name = "id") UUID id,@RequestBody PersonalActualizarRequest request) throws IOException {
         return SERVICE.actualizarPersonal(id,request);
     }
 
