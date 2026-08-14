@@ -1,0 +1,81 @@
+.wrapper {
+  background: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.table thead tr {
+  background-color: var(--color-navbar);
+}
+
+.table thead th {
+  color: #ffffff;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  padding: 14px 16px;
+  border: none;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid rgba(107, 99, 117, 0.12);
+  transition: background-color 0.15s ease;
+}
+
+.table tbody tr:hover {
+  background-color: var(--color-sidebar-hv);
+}
+
+.table tbody td {
+  padding: 12px 16px;
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.badgeActive,
+.badgeInactive {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badgeActive {
+  background-color: var(--color-primary);
+  color: var(--color-sidebar);
+}
+
+.badgeInactive {
+  background-color: var(--color-secondary);
+  color: var(--color-sidebar);
+  opacity: 0.7;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 32px 16px !important;
+  color: var(--text);
+  opacity: 0.6;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .table {
+    font-size: 0.8rem;
+  }
+
+  .table thead th,
+  .table tbody td {
+    padding: 10px 8px;
+  }
+}

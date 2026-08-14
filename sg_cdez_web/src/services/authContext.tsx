@@ -6,8 +6,8 @@ import {
 } from "react";
 
 import { obtenerSesion } from "./authService";
-import type { Session } from "./sessionInterface";
-import type { AuthContextType } from "./sessionInterface";
+import type { Session } from "./interfaces/sessionInterface";
+import type { AuthContextType } from "./interfaces/sessionInterface";
 
 const AuthContext = createContext<AuthContextType>(null!);
 
