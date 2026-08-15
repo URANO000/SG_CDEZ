@@ -7,6 +7,7 @@ import type { PageResponse } from "../../services/interfaces/pageResponse";
 import classes from '../../components/ui/tables/Filter.module.css';
 import { Group, Title, Select, Button, TextInput, Pagination } from "@mantine/core";
 import { AiOutlineSearch } from "react-icons/ai";
+import { Link } from "react-router";
 
 export function Personal() {
     const [filtros, setFiltros] = useState<PersonalFiltro>({
@@ -32,9 +33,11 @@ export function Personal() {
             </div>
 
             <div className={classes.subpg}>
-                <Button className={classes.createBtn}>
-                    Registrar Personal
-                </Button>
+                <Link to={'/personal/registrar'} className={classes.createBtn}>
+                    <Button>
+                        Registrar Personal
+                    </Button>
+                </Link>
                 <div className={classes.filterBar}>
                     <TextInput
                         placeholder="Buscar..."

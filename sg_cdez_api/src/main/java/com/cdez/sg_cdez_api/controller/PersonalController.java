@@ -14,8 +14,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -34,14 +36,21 @@ public class PersonalController {
         return SERVICE.obtenerPersonalPorId(id);
     }
 
-    @PostMapping("/crearPersonal")
-    public PersonalResponse crearPersonal(@RequestBody PersonalCreateRequest request) throws IOException{
-        return SERVICE.crearPersonal(request);
+    @PostMapping(value = "/crearPersonal", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public PersonalResponse crearPersonal(
+            @RequestPart("personal") PersonalCreateRequest request,
+            @RequestPart(value = "documentos", required = false) List<MultipartFile> documentos
+    ) throws IOException {
+
+        return SERVICE.crearPersonal(request, documentos);
     }
 
-    @PostMapping("/actualizarPersonal/{id}")
-    public PersonalResponse actualizarPersonal(@PathVariable(name = "id") UUID id,@RequestBody PersonalActualizarRequest request) throws IOException {
-        return SERVICE.actualizarPersonal(id,request);
+    @PostMapping(value= "/actualizarPersonal/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public PersonalResponse actualizarPersonal(
+            @PathVariable(name = "id") UUID id,
+            @RequestPart("personal") PersonalActualizarRequest request,
+            @RequestPart(value = "documentosCrear", required = false) List<MultipartFile> documentosCrear) throws IOException {
+        return SERVICE.actualizarPersonal(id,request, documentosCrear);
     }
 
     @PostMapping("/activarPersonal/{id}")

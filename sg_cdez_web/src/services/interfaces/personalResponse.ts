@@ -22,13 +22,21 @@ export interface DocumentoResponse {
     updatedAt: string;
 }
 
+export interface RolResponse {
+    id: number;
+    nombre: string;
+}
+
 export interface PersonalResponse {
     personalId: string;
-    rol: string;
+    rol: RolResponse;
     especialidad: string;
     tipoIdentificacion: string;
     identificacion: string;
-    nombreCompleto: string;
+    primerNombre: string;
+    segundoNombre: string;
+    primerApellido: string;
+    segundoApellido: string;
     direccion: string;
     carnet: string;
     usuario: string;

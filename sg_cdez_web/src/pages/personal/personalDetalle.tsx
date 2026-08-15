@@ -18,6 +18,15 @@ export function PersonalDetalle() {
     const [downloadingId, setDownloadingId] = useState<number | null>(null);
     const isActive = personal?.activo === "Activo";
 
+    const nombreCompleto = [
+        personal?.primerNombre,
+        personal?.segundoNombre,
+        personal?.primerApellido,
+        personal?.segundoApellido
+    ]
+        .filter(Boolean)
+        .join(" ");
+
     useEffect(() => {
         if (!personalId) return;
 
@@ -95,8 +104,8 @@ export function PersonalDetalle() {
                 <Group justify="space-between" wrap="wrap">
                     <div>
                         <Text className={classes.label}> Personal </Text>
-                        <Title order={2} className={classes.name}>{personal.nombreCompleto}</Title>
-                        <Text size="sm" className={classes.subText}>{personal.rol}</Text>
+                        <Title order={2} className={classes.name}>{nombreCompleto}</Title>
+                        <Text size="sm" className={classes.subText}>{personal.rol.nombre}</Text>
                     </div>
 
                     <Badge size="lg"

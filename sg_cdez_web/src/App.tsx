@@ -22,6 +22,7 @@ import { NotFound } from "./pages/error/404";
 import { ServerError } from "./pages/error/500";
 import { PersonalDetalle } from './pages/personal/personalDetalle';
 import { PersonalEditar } from './pages/personal/personalEditar';
+import { PersonalRegistrar } from './pages/personal/personalRegistrar';
 
 function App() {
   return (
@@ -75,14 +76,17 @@ function App() {
                 </ProtectedRoute>
               }
               />
-              <Route
-                path="/auditoria"
-                element={
-                  <ProtectedRoute roles={["ROLE_ADMIN"]}>
-                    <Auditoria />
-                  </ProtectedRoute>
-                }
+              <Route path="/personal/registrar" element={
+                <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                  <PersonalRegistrar />
+                </ProtectedRoute>
+              }
               />
+              <Route path="/auditoria" element={
+                <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                  <Auditoria />
+                </ProtectedRoute>
+              } />
             </Route>
           </Routes>
         </Router>
