@@ -1,18 +1,29 @@
 import { useParams } from "react-router";
 import { useNavigate } from "react-router";
-import { PersonalForm } from "../../components/ui/forms/PersonalRegistrarForm";
+import { PersonalForm } from "../../components/ui/forms/PersonalForm";
 import type { ContactoResponse } from "../../services/interfaces/personalResponse";
 import type { ContactoCreateRequest } from "../../services/interfaces/personalCreateRequest";
 import type { DocumentoResponse } from "../../services/interfaces/personalResponse";
 import React, { useEffect, useState } from "react";
 import { actualizarPersonal, obtenerPersonalPorId } from "../../services/personalService";
-import { Button } from "@mantine/core";
+import { Paper, Title, Text, Group, Stack, Button, ActionIcon } from "@mantine/core";
+import { BsPlus, BsTrash, BsPersonCheck, BsUpload, BsFileEarmarkText, BsX } from "react-icons/bs";
+import classes from "../../components/ui/forms/PersonalForm.module.css";
+import { useRef } from "react";
+
+function formatBytes(bytes: number): string {
+    if (bytes === 0) return "0 KB";
+    const kb = bytes / 1024;
+    if (kb < 1024) return `${kb.toFixed(0)} KB`;
+    return `${(kb / 1024).toFixed(1)} MB`;
+}
 
 export function PersonalEditar() {
     const { personalId } = useParams();
     const navigate = useNavigate();
     const [loadingData, setLoadingData] = useState(true);
     const [loading, setLoading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [contactosExistentes, setContactosExistentes] = useState<ContactoResponse[]>([]);
     const [contactosCrear, setContactosCrear] = useState<ContactoCreateRequest[]>([]);
@@ -163,6 +174,10 @@ export function PersonalEditar() {
         );
     };
 
+    const usarComoUsuario = (correo: string) => {
+        actualizarCampo("usuario", correo);
+    };
+
     const eliminarDocumentoExistente = (
         documentoId: number
     ) => {
@@ -184,13 +199,21 @@ export function PersonalEditar() {
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
 
-        if (!e.target.files) return;
+        const files = e.currentTarget.files;
 
-        setDocumentosCrear(
-            Array.from(e.target.files)
-        );
+        if (!files || files.length === 0) return;
+
+        const nuevosArchivos = Array.from(files);
+
+        setDocumentosCrear(prev => {
+            const resultado = [...prev, ...nuevosArchivos];
+
+
+            return resultado;
+        });
+
+        e.currentTarget.value = "";
     };
-
     const eliminarDocumentoNuevo = (
         index: number
     ) => {
@@ -200,7 +223,7 @@ export function PersonalEditar() {
         );
     };
 
-    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (!personalId) return;
@@ -268,226 +291,401 @@ export function PersonalEditar() {
     };
 
     if (loadingData) {
-
         return (
-            <div>
-                Cargando información...
+            <div className={classes.container}>
+                <Paper className={classes.card}>
+                    <Text className={classes.emptyText}>Cargando información...</Text>
+                </Paper>
             </div>
         );
-
     }
 
-
     return (
+        <PersonalForm
+            title="Editar Personal"
+            subtitle="Edición de personal y sus componentes."
+            onSubmit={handleSubmit}>
 
-        <div>
-            <PersonalForm title="Editar Personal" subtitle="Edición de personal y sus componentes." onSubmit={handleSubmit}>
-                <label>Primer Nombre</label>
-                <input type="text" value={formData.primerNombre} onChange={e => actualizarCampo("primerNombre", e.target.value)} required />
-                <label>Segundo Nombre</label>
-                <input type="text" value={formData.segundoNombre} onChange={e => actualizarCampo("segundoNombre", e.target.value)} />
-                <label>Primer Apellido</label>
-                <input type="text" value={formData.primerApellido} onChange={e => actualizarCampo("primerApellido", e.target.value)} required />
+            {/* INFORMACIÓN GENERAL */}
+            <Paper className={classes.card}>
+                <Group className={classes.sectionHeader}>
+                    <Title order={4} className={classes.sectionTitle}>Información general</Title>
+                </Group>
 
-                <label>Tipo Identificacion</label>
-                <select value={formData.tipoIdentificacion} onChange={e => actualizarCampo("tipoIdentificacion", e.target.value)} required>
-                    <option value="" disabled>Tipo de Identificación</option>
-                    <option value="CIC">CIC</option>
-                    <option value="CRP">CRP</option>
-                    <option value="CRR">CRR</option>
-                    <option value="RE">RE</option>
-                    <option value="APO">APO</option>
-                    <option value="CRT">CRT</option>
-                    <option value="CRE">CRE</option>
-                    <option value="PEX">PEX</option>
-                </select>
-                <label>Identificación</label>
-                <input type="text" value={formData.identificacion} onChange={e => actualizarCampo("identificacion", e.target.value)} required />
+                <div className={classes.formGrid}>
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Primer nombre<span className={classes.required}>*</span></label>
+                        <input
+                            className={classes.input}
+                            type="text"
+                            value={formData.primerNombre}
+                            onChange={e => actualizarCampo("primerNombre", e.target.value)}
+                            required
+                        />
+                    </div>
 
-                <label>Carné</label>
-                <input type="text" value={formData.carnet} onChange={e => actualizarCampo("carnet", e.target.value)} />
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Segundo nombre</label>
+                        <input
+                            className={classes.input}
+                            type="text"
+                            value={formData.segundoNombre}
+                            onChange={e => actualizarCampo("segundoNombre", e.target.value)}
+                        />
+                    </div>
 
-                <label>Dirección</label>
-                <input type="text" value={formData.direccion} onChange={e => actualizarCampo("direccion", e.target.value)} />
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Primer apellido<span className={classes.required}>*</span></label>
+                        <input
+                            className={classes.input}
+                            type="text"
+                            value={formData.primerApellido}
+                            onChange={e => actualizarCampo("primerApellido", e.target.value)}
+                            required
+                        />
+                    </div>
 
-                <label>Usuario</label>
-                <input type="text" value={formData.usuario} onChange={e => actualizarCampo("usuario", e.target.value)} />
+                    {/* Was missing in the original edit form — segundoApellido had no input. */}
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Segundo apellido</label>
+                        <input
+                            className={classes.input}
+                            type="text"
+                            value={formData.segundoApellido}
+                            onChange={e => actualizarCampo("segundoApellido", e.target.value)}
+                        />
+                    </div>
 
-                <hr />
-                <h3>Contactos</h3>
-                <button type="button" onClick={agregarContacto}>
-                    + Nuevo Contacto
-                </button>
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Tipo de identificación<span className={classes.required}>*</span></label>
+                        <select
+                            className={classes.select}
+                            value={formData.tipoIdentificacion}
+                            onChange={e => actualizarCampo("tipoIdentificacion", e.target.value)}
+                            required>
+                            <option value="" disabled>Tipo de identificación</option>
+                            <option value="CIC">CIC</option>
+                            <option value="CRP">CRP</option>
+                            <option value="CRR">CRR</option>
+                            <option value="RE">RE</option>
+                            <option value="APO">APO</option>
+                            <option value="CRT">CRT</option>
+                            <option value="CRE">CRE</option>
+                            <option value="PEX">PEX</option>
+                        </select>
+                    </div>
 
-                {
-                    contactosExistentes.map(
-                        (contacto, index) => (
-                            <div key={contacto.contactoId}>
-                                <h4>Contacto {index + 1}</h4>
-                                <label>Tipo</label>
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Identificación<span className={classes.required}>*</span></label>
+                        <input
+                            className={classes.input}
+                            type="text"
+                            value={formData.identificacion}
+                            onChange={e => actualizarCampo("identificacion", e.target.value)}
+                            required
+                        />
+                    </div>
 
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Carné</label>
+                        <input
+                            className={classes.input}
+                            type="text"
+                            value={formData.carnet}
+                            onChange={e => actualizarCampo("carnet", e.target.value)}
+                        />
+                    </div>
+
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Dirección</label>
+                        <input
+                            className={classes.input}
+                            type="text"
+                            value={formData.direccion}
+                            onChange={e => actualizarCampo("direccion", e.target.value)}
+                        />
+                    </div>
+
+                    <div className={`${classes.fieldGroup} ${classes.fieldFull}`}>
+                        <label className={classes.fieldLabel}>Usuario</label>
+                        <input
+                            className={classes.input}
+                            type="text"
+                            value={formData.usuario}
+                            onChange={e => actualizarCampo("usuario", e.target.value)}
+                            placeholder="Puede completarse desde un contacto de correo abajo"
+                        />
+                    </div>
+                </div>
+            </Paper>
+
+            {/* ROLES */}
+            <Paper className={classes.card}>
+                <Group className={classes.sectionHeader}>
+                    <Title order={4} className={classes.sectionTitle}>Roles en el centro</Title>
+                </Group>
+
+                <div className={classes.formGrid}>
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Rol<span className={classes.required}>*</span></label>
+                        <select
+                            className={classes.select}
+                            value={formData.rol || ""}
+                            onChange={e => actualizarCampo("rol", e.target.value)}
+                            required>
+                            <option value="" disabled>Seleccionar rol</option>
+                            <option value="1">Administrador</option>
+                            <option value="2">Usuario Normal</option>
+                        </select>
+                    </div>
+
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Especialidad<span className={classes.required}>*</span></label>
+                        <select
+                            className={classes.select}
+                            value={formData.especialidad}
+                            onChange={e => actualizarCampo("especialidad", e.target.value)}
+                            required>
+                            <option value="" disabled>Seleccionar especialidad</option>
+                            <option value="Medicina">Medicina</option>
+                            <option value="Enfermería">Enfermería</option>
+                            <option value="Psicología">Psicología</option>
+                            <option value="Nutrición">Nutrición</option>
+                            <option value="Trabajo Social">Trabajo Social</option>
+                            <option value="Terapia Física">Terapia Física</option>
+                            <option value="Terapia Respiratoria">Terapia Respiratoria</option>
+                            <option value="Terapia de Lenguaje">Terapia de Lenguaje</option>
+                        </select>
+                    </div>
+                </div>
+            </Paper>
+
+            {/* CONTACTOS */}
+            <Paper className={classes.card}>
+                <Group justify="space-between" className={classes.sectionHeader}>
+                    <Title order={4} className={classes.sectionTitle}>Contactos</Title>
+                    <Button
+                        type="button"
+                        size="xs"
+                        variant="light"
+                        leftSection={<BsPlus size={16} />}
+                        onClick={agregarContacto}>
+                        Agregar contacto
+                    </Button>
+                </Group>
+
+                {contactosExistentes.length === 0 && contactosCrear.length === 0 ? (
+                    <Text className={classes.emptyText}>Sin contactos agregados.</Text>
+                ) : (
+                    <Stack gap="sm">
+                        {contactosExistentes.map((contacto, index) => (
+                            <div key={contacto.contactoId} className={classes.contactRow}>
                                 <select
-                                    value={
-                                        contacto.tipoValor
-                                    }
+                                    className={classes.select}
+                                    value={contacto.tipoValor}
                                     onChange={e =>
-                                        actualizarContactoExistente(
-                                            index,
-                                            "tipoValor",
-                                            e.target.value
-                                        )
+                                        actualizarContactoExistente(index, "tipoValor", e.target.value)
                                     }
                                     required>
-                                    <option value="" disabled>Seleccionar</option>
-                                    <option value="TELEFONO"> Número Telefónico</option>
+                                    <option value="" disabled>Tipo</option>
+                                    <option value="TELEFONO">Número Telefónico</option>
                                     <option value="CORREO">Correo Electrónico</option>
                                 </select>
 
-                                <label>Contacto</label>
                                 <input
-                                    type="text"
-                                    value={
-                                        contacto.valor
-                                    }
+                                    className={classes.input}
+                                    type={contacto.tipoValor === "CORREO" ? "email" : "text"}
+                                    placeholder={contacto.tipoValor === "CORREO" ? "correo@ejemplo.com" : "Número de teléfono"}
+                                    value={contacto.valor}
                                     onChange={e =>
-                                        actualizarContactoExistente(
-                                            index,
-                                            "valor",
-                                            e.target.value
-                                        )
+                                        actualizarContactoExistente(index, "valor", e.target.value)
                                     }
                                     required
                                 />
 
+                                <Group gap={4} wrap="nowrap" className={classes.contactActions}>
+                                    {contacto.tipoValor === "CORREO" && contacto.valor && (
+                                        <ActionIcon
+                                            variant="subtle"
+                                            className={classes.actionEmail}
+                                            title="Usar como usuario"
+                                            aria-label="Usar como usuario"
+                                            onClick={() => usarComoUsuario(contacto.valor)}>
+                                            <BsPersonCheck size={16} />
+                                        </ActionIcon>
+                                    )}
 
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        eliminarContactoExistente(
-                                            contacto.contactoId
-                                        )
-                                    }
-                                >
-                                    X
-                                </button>
+                                    <ActionIcon
+                                        variant="subtle"
+                                        color="red"
+                                        aria-label="Eliminar contacto"
+                                        onClick={() => eliminarContactoExistente(contacto.contactoId)}>
+                                        <BsTrash size={16} />
+                                    </ActionIcon>
+                                </Group>
                             </div>
-                        )
-                    )
-                }
-                {contactosCrear.map(
-                    (contacto, index) => (
+                        ))}
 
-                        <div key={`nuevo-${index}`}>
+                        {contactosCrear.map((contacto, index) => (
+                            <div key={`nuevo-${index}`} className={classes.contactRow}>
+                                <select
+                                    className={classes.select}
+                                    value={contacto.tipoValor}
+                                    onChange={e =>
+                                        actualizarContactoNuevo(index, "tipoValor", e.target.value)
+                                    }
+                                    required>
+                                    <option value="" disabled>Tipo</option>
+                                    <option value="TELEFONO">Número Telefónico</option>
+                                    <option value="CORREO">Correo Electrónico</option>
+                                </select>
 
-                            <h4>
-                                Nuevo contacto
-                            </h4>
+                                <input
+                                    className={classes.input}
+                                    type={contacto.tipoValor === "CORREO" ? "email" : "text"}
+                                    placeholder={contacto.tipoValor === "CORREO" ? "correo@ejemplo.com" : "Número de teléfono"}
+                                    value={contacto.valor}
+                                    onChange={e =>
+                                        actualizarContactoNuevo(index, "valor", e.target.value)
+                                    }
+                                    required
+                                />
 
+                                <Group gap={4} wrap="nowrap" className={classes.contactActions}>
+                                    {contacto.tipoValor === "CORREO" && contacto.valor && (
+                                        <ActionIcon
+                                            variant="subtle"
+                                            className={classes.actionEmail}
+                                            title="Usar como usuario"
+                                            aria-label="Usar como usuario"
+                                            onClick={() => usarComoUsuario(contacto.valor)}>
+                                            <BsPersonCheck size={16} />
+                                        </ActionIcon>
+                                    )}
 
-                            <label>
-                                Tipo
-                            </label>
-
-                            <select
-                                value={
-                                    contacto.tipoValor
-                                }
-                                onChange={e =>
-                                    actualizarContactoNuevo(
-                                        index,
-                                        "tipoValor",
-                                        e.target.value
-                                    )
-                                }
-                                required>
-
-                                <option value="" disabled>Seleccionar </option>
-
-                                <option value="TELEFONO">
-                                    Número Telefónico
-                                </option>
-
-                                <option value="CORREO">
-                                    Correo Electrónico
-                                </option>
-
-                            </select>
-
-
-                            <label> Contacto </label>
-
-                            <input
-                                type="text"
-                                value={
-                                    contacto.valor
-                                }
-                                onChange={e =>
-                                    actualizarContactoNuevo(
-                                        index,
-                                        "valor",
-                                        e.target.value
-                                    )
-                                }
-                                required />
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    eliminarContactoNuevo(
-                                        index
-                                    )
-                                }
-                            >
-                                X
-                            </button>
-
-                        </div>
-
-                    )
+                                    <ActionIcon
+                                        variant="subtle"
+                                        color="red"
+                                        aria-label="Eliminar contacto"
+                                        onClick={() => eliminarContactoNuevo(index)}>
+                                        <BsTrash size={16} />
+                                    </ActionIcon>
+                                </Group>
+                            </div>
+                        ))}
+                    </Stack>
                 )}
-                <hr />
-                <h3>Documentos Adjuntos</h3>
-                <h4>Documentos Actuales</h4>
-                {documentosExistentes.map(
-                    documento => (
+            </Paper>
 
-                        <div key={documento.documentoId}>
-                            <span>{documento.nombreArchivo}</span>
-                            <button type="button" onClick={() => documento.documentoId != null && eliminarDocumentoExistente(documento.documentoId)}> X </button>
-                        </div>
-                    )
-                )}
+            {/* DOCUMENTOS */}
+            <Paper className={classes.card}>
+                <Group className={classes.sectionHeader}>
+                    <Title order={4} className={classes.sectionTitle}>Documentos adjuntos</Title>
+                </Group>
 
-                <h4>Agregar documentos</h4>
-                <input type="file" multiple accept=".png, .jpg, .jpeg, .pdf" onChange={manejarDocumentos} />
-                {documentosCrear.length > 0 && (
+                {documentosExistentes.length > 0 && (
+                    <Stack gap="xs" mb="md">
+                        {documentosExistentes.map(documento => (
+                            <Group
+                                key={documento.documentoId}
+                                justify="space-between"
+                                className={classes.listRow}>
+                                <Group gap="xs">
+                                    <BsFileEarmarkText size={16} className={classes.docIcon} />
+                                    <Text className={classes.value}>{documento.nombreArchivo}</Text>
+                                </Group>
 
-                    <div>
-                        <h4> Nuevos documentos</h4>
-                        {documentosCrear.map(
-                            (documento, index) => (
-
-                                <div key={index}>
-
-                                    <span>
-                                        {documento.name}
-                                    </span>
-
-                                    <button type="button" onClick={() => eliminarDocumentoNuevo(index)}> X </button>
-
-                                </div>
-
-                            )
-                        )}
-
-                    </div>
-
+                                <ActionIcon
+                                    variant="subtle"
+                                    color="red"
+                                    aria-label="Quitar documento"
+                                    onClick={() =>
+                                        documento.documentoId != null &&
+                                        eliminarDocumentoExistente(documento.documentoId)
+                                    }>
+                                    <BsX size={18} />
+                                </ActionIcon>
+                            </Group>
+                        ))}
+                    </Stack>
                 )}
 
-                <Button type="submit" loading={loading}>Guardar cambios</Button>
+                <Text className={classes.helperText}>
+                    Se pueden elegir múltiples documentos. PNG, JPG, JPEG, PDF.
+                </Text>
 
-            </PersonalForm>
+                <div
+                    className={classes.dropzone}
+                    onClick={() => fileInputRef.current?.click()}
+                    role="button"
+                    tabIndex={0}>
+                    <BsUpload
+                        size={18}
+                        className={classes.dropzoneIcon} />
 
-        </div>
-    )
+                    <span>Hacé clic para seleccionar archivos</span>
+
+                    <input
+                        ref={fileInputRef}
+                        className={classes.hiddenFileInput}
+                        type="file"
+                        multiple
+                        accept=".png,.jpg,.jpeg,.pdf"
+                        onChange={manejarDocumentos}
+                    />
+                </div>
+
+                {documentosCrear.length > 0 ? (
+                    <Stack gap="xs">
+                        {documentosCrear.map((documento, index) => (
+                            <Group
+                                key={`${documento.name}-${documento.lastModified}-${index}`}
+                                justify="space-between"
+                                className={classes.listRow}>
+                                <Group gap="xs">
+                                    <BsFileEarmarkText
+                                        size={16}
+                                        className={classes.docIcon} />
+
+                                    <div>
+                                        <Text className={classes.value}>
+                                            {documento.name}
+                                        </Text>
+
+                                        <Text size="xs" className={classes.fileSize}>
+                                            {formatBytes(documento.size)}
+                                        </Text>
+                                    </div>
+                                </Group>
+
+                                <ActionIcon
+                                    variant="subtle"
+                                    color="red"
+                                    aria-label="Quitar archivo"
+                                    onClick={() => eliminarDocumentoNuevo(index)}
+                                >
+                                    <BsX size={18} />
+                                </ActionIcon>
+                            </Group>
+                        ))}
+                    </Stack>
+                ) : (
+                    <Text className={classes.emptyText}>
+                        Sin documentos nuevos seleccionados.
+                    </Text>
+                )}
+            </Paper>
+
+            {/* SUBMIT */}
+            <Group justify="flex-end" className={classes.submitBar}>
+                <Button type="button" variant="default" onClick={() => navigate(-1)} disabled={loading}>
+                    Cancelar
+                </Button>
+                <Button type="submit" loading={loading}>
+                    Guardar cambios
+                </Button>
+            </Group>
+
+        </PersonalForm>
+    );
 }

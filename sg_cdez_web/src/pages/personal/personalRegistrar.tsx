@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { Paper, Title, Text, Group, Stack, Button, ActionIcon, Tooltip } from "@mantine/core";
 import { BsPlus, BsTrash, BsPersonCheck, BsUpload, BsFileEarmarkText, BsX } from "react-icons/bs";
-import { PersonalForm } from "../../components/ui/forms/PersonalRegistrarForm";
+import { PersonalForm } from "../../components/ui/forms/PersonalForm";
 import classes from "../../components/ui/forms/PersonalForm.module.css";
 import type { ContactoCreateRequest } from "../../services/interfaces/personalCreateRequest";
 import type { PersonalCreateRequest } from "../../services/interfaces/personalCreateRequest";
@@ -352,12 +352,10 @@ export function PersonalRegistrar() {
                     className={classes.dropzone}
                     onClick={() => fileInputRef.current?.click()}
                     role="button"
-                    tabIndex={0}
-                >
+                    tabIndex={0}>
                     <BsUpload
                         size={18}
-                        className={classes.dropzoneIcon}
-                    />
+                        className={classes.dropzoneIcon}/>
 
                     <span>Hacé clic para seleccionar archivos</span>
 
