@@ -21,10 +21,10 @@
     flex-wrap: wrap;
     justify-content: end;
     margin-bottom: 20px;
+    text-decoration: none;
 }
 
 .createBtn a {
-    text-decoration: none;
     color: #ffffff;
 }
 

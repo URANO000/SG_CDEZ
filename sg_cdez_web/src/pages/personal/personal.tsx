@@ -33,11 +33,11 @@ export function Personal() {
             </div>
 
             <div className={classes.subpg}>
-                <Button className={classes.createBtn}>
-                    <Link to={'/personal/registrar'}>
+                <Link to={'/personal/registrar'} className={classes.createBtn}>
+                    <Button>
                         Registrar Personal
-                    </Link>
-                </Button>
+                    </Button>
+                </Link>
                 <div className={classes.filterBar}>
                     <TextInput
                         placeholder="Buscar..."

@@ -16,6 +16,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
@@ -71,7 +72,6 @@ public class PersonalServiceImpl implements PersonalService {
 
     }
 
-
     @Override
     public PersonalResponse obtenerPersonalPorId(UUID id) {
         return mapDTO(obtenerPersonalCheck(id));
@@ -79,7 +79,7 @@ public class PersonalServiceImpl implements PersonalService {
 
     @Transactional
     @Override
-    public PersonalResponse crearPersonal(PersonalCreateRequest request) throws IOException {
+    public PersonalResponse crearPersonal(PersonalCreateRequest request, List<MultipartFile> documentos) throws IOException {
         // Validaciones
         if(!AUTH_HELPER.isUsuarioAdmin()){
             throw new ResponseStatusException(
@@ -119,7 +119,7 @@ public class PersonalServiceImpl implements PersonalService {
 
         // Crear contactos
         CONTACTO_SERVICE.crearContactoPersonal(request.contactos(), personalGuardado);
-        DOCUMENTO_SERVICE.registrarDocumentoPersonal(request.documentos(), personalGuardado);
+        DOCUMENTO_SERVICE.registrarDocumentoPersonal(documentos, personalGuardado);
 
         // Enviar correo de verificación
         VERIFICATION_SERVICE.verificacionCrearYEnviar(personalGuardado);
@@ -129,7 +129,7 @@ public class PersonalServiceImpl implements PersonalService {
 
     @Override
     @Transactional
-    public PersonalResponse actualizarPersonal(UUID id, PersonalActualizarRequest request) throws IOException {
+    public PersonalResponse actualizarPersonal(UUID id, PersonalActualizarRequest request, List<MultipartFile> documentosCrear) throws IOException {
         if(!AUTH_HELPER.isUsuarioAdmin()){
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,
@@ -162,19 +162,27 @@ public class PersonalServiceImpl implements PersonalService {
         Personal personalNuevo = REPOSITORY.save(personalViejo);
 
         // Actualizar contactos
-        CONTACTO_SERVICE.actualizarContacto(request.contactosActualizar(), personalNuevo);
+        if(request.contactosActualizar() != null){
+            CONTACTO_SERVICE.actualizarContacto(request.contactosActualizar(), personalNuevo);
+        }
 
         // Desactivar contactos (si aplica)
-        CONTACTO_SERVICE.desactivarContactosPersonal(request.contactosDesactivar(), personalNuevo);
+        if(request.contactosDesactivar() != null){
+            CONTACTO_SERVICE.desactivarContactosPersonal(request.contactosDesactivar(), personalNuevo);
+        }
 
         // Crear contactos (si aplica)
-        CONTACTO_SERVICE.crearContactoPersonal(request.contactosCrear(), personalNuevo);
-
+        if(request.contactosCrear() != null){
+            CONTACTO_SERVICE.crearContactoPersonal(request.contactosCrear(), personalNuevo);
+        }
         // Desactivar documentos (si aplica)
-        DOCUMENTO_SERVICE.desactivarDocumentosPersonal(request.documentosDesactivar(), personalNuevo);
-
+        if(request.documentosDesactivar() != null){
+            DOCUMENTO_SERVICE.desactivarDocumentosPersonal(request.documentosDesactivar(), personalNuevo);
+        }
         // Crear documentos nuevos (si aplica)
-        DOCUMENTO_SERVICE.registrarDocumentoPersonal(request.documentosCrear(), personalNuevo);
+        if(documentosCrear != null){
+            DOCUMENTO_SERVICE.registrarDocumentoPersonal(documentosCrear, personalNuevo);
+        }
 
         return mapDTO(personalNuevo);
     }
@@ -243,11 +251,20 @@ public class PersonalServiceImpl implements PersonalService {
                             .titulo("Reporte de Personal")
                             .datos(personal)
                             .columnas(List.of(
-                                    new Column<>("Rol", PersonalResponse::rol, TextAlignment.LEFT, 1f),
+                                    new Column<>("Rol", p -> p.rol().nombre(), TextAlignment.LEFT, 1f),
                                     new Column<>("Especialidad", PersonalResponse::especialidad, TextAlignment.LEFT, 1.5f),
                                     new Column<>("Tipo Identificación", PersonalResponse::tipoIdentificacion, TextAlignment.LEFT, 2f),
                                     new Column<>("Identificación", PersonalResponse::identificacion, TextAlignment.LEFT, 1.5f),
-                                    new Column<>("Nombre Completo", PersonalResponse::nombreCompleto, TextAlignment.LEFT, 2.5f),
+                                    new Column<>( "Nombre Completo",
+                                            p -> {
+                                                List<String> parts = new ArrayList<>();
+                                                if (p.primerNombre() != null && !p.primerNombre().isBlank()) parts.add(p.primerNombre());
+                                                if (p.segundoNombre() != null && !p.segundoNombre().isBlank()) parts.add(p.segundoNombre());
+                                                if (p.primerApellido() != null && !p.primerApellido().isBlank()) parts.add(p.primerApellido());
+                                                if (p.segundoApellido() != null && !p.segundoApellido().isBlank()) parts.add(p.segundoApellido());
+                                                return String.join(" ", parts);
+                                            },
+                                            TextAlignment.LEFT, 2.5f),
                                     new Column<>("Dirección", PersonalResponse::direccion, TextAlignment.LEFT, 2.5f),
                                     new Column<>("Carné", PersonalResponse::carnet, TextAlignment.LEFT, 1f),
                                     new Column<>("Usuario", PersonalResponse::usuario, TextAlignment.LEFT, 2f),
@@ -270,19 +287,26 @@ public class PersonalServiceImpl implements PersonalService {
     }
 
     public String obtenerNombrePorId(UUID id){
-        PersonalResponse personalResponse = mapDTO(obtenerPersonalCheck(id));
-        return personalResponse.nombreCompleto();
+        Personal personal = obtenerPersonalCheck(id);
+        return personal.getNombreCompleto();
     }
 
     //Mapper
     private PersonalResponse mapDTO(Personal personal){
+        Rol rol = personal.getRol();
         return new PersonalResponse(
                 personal.getPersonalId(),
-                personal.getRol().getNombre(),
+                new RolResponse(
+                        rol.getRolId(),
+                        rol.getNombre()
+                ),
                 personal.getEspecialidad(),
                 personal.getTipoIdentificacion(),
                 personal.getIdentificacion(),
-                personal.getNombreCompleto(),
+                personal.getPrimerNombre(),
+                personal.getSegundoNombre(),
+                personal.getPrimerApellido(),
+                personal.getSegundoApellido(),
                 personal.getDireccion(),
                 personal.getCarnet(),
                 personal.getUsuario(),

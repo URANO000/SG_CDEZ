@@ -29,6 +29,7 @@ export function PersonalTable({ personal }: PersonalTableProps) {
                     <Table.Tbody>
                         {hasData ? (
                             personal.map((persona) => (
+
                                 <Table.Tr key={persona.personalId}>
                                     <Table.Td>
                                         <Group gap={4} wrap="nowrap">
@@ -54,10 +55,19 @@ export function PersonalTable({ personal }: PersonalTableProps) {
                                             </Tooltip>
                                         </Group>
                                     </Table.Td>
-                                    <Table.Td>{persona.nombreCompleto}</Table.Td>
+                                    <Table.Td>
+                                        {[
+                                            persona.primerNombre,
+                                            persona.segundoNombre,
+                                            persona.primerApellido,
+                                            persona.segundoApellido
+                                        ]
+                                            .filter(Boolean)
+                                            .join(" ")}
+                                    </Table.Td>
                                     <Table.Td>{persona.identificacion}</Table.Td>
                                     <Table.Td>{persona.especialidad}</Table.Td>
-                                    <Table.Td>{persona.rol}</Table.Td>
+                                    <Table.Td>{persona.rol.nombre}</Table.Td>
                                     <Table.Td>{persona.usuario}</Table.Td>
                                     <Table.Td>
                                         <span className={persona.activo ? classes.badgeActive : classes.badgeInactive}>

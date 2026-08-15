@@ -78,7 +78,7 @@ public class ContactoServiceImpl implements ContactoService {
     public List<ContactoResponse> actualizarContacto(List<ContactoUpdateRequest> requests, Personal personal) {
         List<ContactoResponse> contactosActualizados = new ArrayList<>();
         for(var request : requests){
-            Contacto contactoAnterior = CONTACTO_REPOSITORY.findByContactoIdAndPersonalPersonalId(request.id(), personal.getPersonalId())
+            Contacto contactoAnterior = CONTACTO_REPOSITORY.findByContactoIdAndPersonalPersonalId(request.contactoId(), personal.getPersonalId())
                     .orElseThrow(() -> new ResponseStatusException(
                             HttpStatus.NOT_FOUND,
                             "El contacto indicado no fue encontrado"

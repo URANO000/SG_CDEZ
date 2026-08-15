@@ -91,6 +91,9 @@ public class DocumentoServiceImpl implements DocumentoService {
     @Override
     @Transactional
     public void registrarDocumentoPersonal(List<MultipartFile> archivos, Personal personal) throws IOException {
+        if (archivos == null || archivos.isEmpty()) {
+            return;
+        }
         Personal usuarioActual = AUTH_HELPER.obtenerUsuarioAutenticado();
         for (MultipartFile archivo : archivos){
             validarArchivo(archivo);
@@ -131,7 +134,7 @@ public class DocumentoServiceImpl implements DocumentoService {
 
     @Override
     public List<DocumentoResponse> listarDocumentosPorPersonal(Personal personal) {
-        return documentoRepository.findByPersonalPersonalIdOrderByCreatedAtDesc(personal.getPersonalId())
+        return documentoRepository.findByPersonalPersonalIdAndActivoTrueOrderByCreatedAtDesc(personal.getPersonalId())
                 .stream().map(this::mapToResponse).toList();
     }
 

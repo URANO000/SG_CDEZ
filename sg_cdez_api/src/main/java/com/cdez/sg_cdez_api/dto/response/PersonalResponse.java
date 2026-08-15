@@ -5,11 +5,14 @@ import java.util.*;
 
 public record PersonalResponse(
         UUID personalId,
-        String rol,
+        RolResponse rol,
         String especialidad,
         String tipoIdentificacion,
         String identificacion,
-        String nombreCompleto,
+        String primerNombre,
+        String segundoNombre,
+        String primerApellido,
+        String segundoApellido,
         String direccion,
         String carnet,
         String usuario,

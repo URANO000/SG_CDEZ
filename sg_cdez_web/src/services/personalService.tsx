@@ -1,5 +1,5 @@
-import {apiClient} from "../utils/helper";
-import type {PersonalFiltro} from './interfaces/personalFiltroInterface';
+import { apiClient } from "../utils/helper";
+import type { PersonalFiltro } from './interfaces/personalFiltroInterface';
 import type { PageResponse } from "./interfaces/pageResponse";
 import type { PersonalResponse } from "./interfaces/personalResponse";
 
@@ -17,17 +17,29 @@ export const listarPersonalFiltrado = async (
     return response.data;
 };
 
-export const obtenerPersonalPorId = async (personalId:string): Promise<PersonalResponse> => {
+export const obtenerPersonalPorId = async (personalId: string): Promise<PersonalResponse> => {
     const response = await apiClient.get(`/personal/obtenerPersonalPorId/${personalId}`);
     return response.data;
 }
 
-export const desactivarPersonal = async (personalId:string) => {
+export const desactivarPersonal = async (personalId: string) => {
     const response = await apiClient.post(`/personal/desactivarPersonal/${personalId}`);
     return response.data;
 }
 
-export const activarPersonal = async (personalId:string) => {
+export const activarPersonal = async (personalId: string) => {
     const response = await apiClient.post(`/personal/activarPersonal/${personalId}`);
     return response.data;
 }
+
+export const registrarPersonal = async (formData: FormData) => {
+    await apiClient.post("/personal/crearPersonal",formData);
+};
+
+export const actualizarPersonal = async (personalId: string,formData: FormData): Promise<PersonalResponse> => {
+    const response = await apiClient.post(
+        `/personal/actualizarPersonal/${personalId}`,
+        formData
+    );
+    return response.data;
+};
