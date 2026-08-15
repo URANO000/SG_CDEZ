@@ -3,6 +3,8 @@ package com.cdez.sg_cdez_api.service;
 import com.cdez.sg_cdez_api.dto.request.EpicrisisUpdateRequest;
 import com.cdez.sg_cdez_api.dto.response.EpicrisisResponse;
 import org.springframework.web.multipart.MultipartFile;
+import com.cdez.sg_cdez_api.dto.response.PageResponse;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +23,12 @@ public interface EpicrisisService {
     List<EpicrisisResponse> listarEpicrisisPorAdulto(
             UUID adultoId,
             Integer anio
+    );
+
+    PageResponse<EpicrisisResponse> listarHistorialEpicrisis(
+            UUID adultoId,
+            Integer anio,
+            Pageable pageable
     );
 
     EpicrisisResponse obtenerEpicrisisPorId(UUID epicrisisId);

@@ -8,10 +8,17 @@ import {
   Loader,
   Paper,
   SimpleGrid,
+  Stack,
   Tabs,
   Text,
   Title,
 } from "@mantine/core";
+
+import axios from "axios";
+
+import { obtenerEpicrisisVigente } from "../../services/epicrisisService";
+
+import type { EpicrisisResponse } from "../../services/interfaces/epicrisisInterface";
 
 import { BsArrowLeft } from "react-icons/bs";
 
@@ -20,6 +27,10 @@ import { useNavigate, useParams } from "react-router";
 import { obtenerAdultoMayorPorId } from "../../services/adultoMayorService";
 
 import type { AdultoMayorResponse } from "../../services/interfaces/adultoMayorInterface";
+
+import { listarEncargadosPorAdulto } from "../../services/encargadoLegalService";
+
+import type { EncargadoLegalResponse } from "../../services/interfaces/encargadoLegalInterface";
 
 import classes from "./Expediente.module.css";
 
@@ -70,6 +81,19 @@ export function AdultoMayorExpediente() {
 
   const [error, setError] = useState(false);
 
+  const [encargados, setEncargados] = useState<EncargadoLegalResponse[]>([]);
+
+  const [encargadosLoading, setEncargadosLoading] = useState(true);
+
+  const [encargadosError, setEncargadosError] = useState(false);
+
+  const [epicrisisVigente, setEpicrisisVigente] =
+    useState<EpicrisisResponse | null>(null);
+
+  const [epicrisisLoading, setEpicrisisLoading] = useState(true);
+
+  const [epicrisisError, setEpicrisisError] = useState(false);
+
   useEffect(() => {
     const id = adultoId;
 
@@ -85,6 +109,39 @@ export function AdultoMayorExpediente() {
       .finally(() => {
         setLoading(false);
       });
+
+    listarEncargadosPorAdulto(id)
+      .then(setEncargados)
+      .catch(() => {
+        setEncargadosError(true);
+      })
+      .finally(() => {
+        setEncargadosLoading(false);
+      });
+  }, [adultoId]);
+
+  useEffect(() => {
+    if (!adultoId) return;
+
+    async function cargarEpicrisisVigente() {
+      try {
+        setEpicrisisLoading(true);
+        setEpicrisisError(false);
+
+        const epicrisis = await obtenerEpicrisisVigente(adultoId!);
+        setEpicrisisVigente(epicrisis);
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+          setEpicrisisVigente(null);
+        } else {
+          setEpicrisisError(true);
+        }
+      } finally {
+        setEpicrisisLoading(false);
+      }
+    }
+
+    void cargarEpicrisisVigente();
   }, [adultoId]);
 
   if (!adultoId) {
@@ -282,12 +339,151 @@ export function AdultoMayorExpediente() {
           </SimpleGrid>
         </Tabs.Panel>
 
-        <Tabs.Panel value="encargados" className={classes.panelPlaceholder}>
-          La información de encargados legales se integrará posteriormente.
+        <Tabs.Panel value="encargados" className={classes.panel}>
+          {encargadosLoading ? (
+            <div className={classes.loadingState}>
+              <Loader color="var(--color-primary)" />
+            </div>
+          ) : encargadosError ? (
+            <Alert color="red">
+              No se pudieron cargar los encargados legales.
+            </Alert>
+          ) : encargados.length === 0 ? (
+            <Text className={classes.emptyState}>
+              No hay un encargado No hay un encargado legal asociado a este
+              adulto mayor.
+            </Text>
+          ) : (
+            <Stack gap="md" className={classes.encargadosList}>
+              {encargados.map((encargado) => {
+                const contactosActivos = encargado.contactos.filter(
+                  (contacto) => contacto.activo === "Activo",
+                );
+
+                const nombreCompleto = [
+                  encargado.primerNombre,
+                  encargado.segundoNombre,
+                  encargado.primerApellido,
+                  encargado.segundoApellido,
+                ]
+                  .filter(Boolean)
+                  .join(" ");
+
+                return (
+                  <Paper
+                    key={encargado.encargadoId}
+                    className={classes.encargadoCard}
+                  >
+                    <Title order={4} className={classes.encargadoName}>
+                      {nombreCompleto}
+                    </Title>
+
+                    <SimpleGrid
+                      cols={{
+                        base: 1,
+                        sm: 2,
+                      }}
+                      spacing="lg"
+                    >
+                      <Campo
+                        etiqueta={"Tipo de identificación"}
+                        valor={encargado.tipoIdentificacion}
+                      />
+
+                      <Campo
+                        etiqueta="Identificación"
+                        valor={encargado.identificacion}
+                      />
+
+                      <Campo etiqueta="Dirección" valor={encargado.direccion} />
+
+                      <Campo
+                        etiqueta="Estado"
+                        valor={encargado.activo ? "Activo" : "Inactivo"}
+                      />
+                    </SimpleGrid>
+
+                    <div className={classes.contactosSection}>
+                      <Text className={classes.label}>Contactos</Text>
+
+                      {contactosActivos.length > 0 ? (
+                        <div className={classes.contactosList}>
+                          {contactosActivos.map((contacto) => (
+                            <div
+                              key={contacto.contactoId}
+                              className={classes.contactoRow}
+                            >
+                              <Text className={classes.contactoType}>
+                                {contacto.tipoValor}
+                              </Text>
+
+                              <Text className={classes.value}>
+                                {contacto.valor}
+                              </Text>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <Text className={classes.emptyState}>
+                          Sin contactos activos registrados.
+                        </Text>
+                      )}
+                    </div>
+                  </Paper>
+                );
+              })}
+            </Stack>
+          )}
         </Tabs.Panel>
 
-        <Tabs.Panel value="epicrisis" className={classes.panelPlaceholder}>
-          El historial de epicrisis se integrará posteriormente.
+        <Tabs.Panel value="epicrisis" className={classes.panel}>
+          {epicrisisLoading ? (
+            <div className={classes.loadingSection}>
+              <Loader color="var(--color-primary)" />
+            </div>
+          ) : epicrisisError ? (
+            <Alert color="red">No se pudo cargar la epicrisis vigente.</Alert>
+          ) : !epicrisisVigente ? (
+            <div className={classes.emptyState}>
+              No existe una epicrisis vigente registrada.
+            </div>
+          ) : (
+            <Paper className={classes.epicrisisCard}>
+              <Group justify="space-between" mb="lg">
+                <div>
+                  <Text className={classes.label}>Epicrisis vigente</Text>
+
+                  <Title order={4} className={classes.personName}>
+                    {epicrisisVigente.centroSalud}
+                  </Title>
+                </div>
+
+                <Badge className={classes.badgeActive}>Vigente</Badge>
+              </Group>
+
+              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xl">
+                <Campo
+                  etiqueta="Fecha de emisión"
+                  valor={mostrarFecha(epicrisisVigente.fechaEmision)}
+                />
+
+                <Campo
+                  etiqueta="Fecha de recepción"
+                  valor={mostrarFecha(epicrisisVigente.fechaRecepcion)}
+                />
+
+                <Campo
+                  etiqueta="Nombre del archivo"
+                  valor={epicrisisVigente.nombreArchivo}
+                />
+
+                <Campo
+                  etiqueta="Tipo de archivo"
+                  valor={epicrisisVigente.tipoArchivo}
+                />
+              </SimpleGrid>
+            </Paper>
+          )}
         </Tabs.Panel>
 
         <Tabs.Panel value="documentos" className={classes.panelPlaceholder}>
