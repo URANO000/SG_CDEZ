@@ -19,6 +19,7 @@ export function Personal() {
 
     const [pageSize] = useState(10);
     const [pageData, setPageData] = useState<PageResponse<PersonalResponse> | null>(null);
+    const [currentPage, setCurrentPage] = useState(0);
 
     const handleGenerateReport = async () => {
         const blob = await generarReportePDF();
@@ -35,9 +36,14 @@ export function Personal() {
     const cargarPersonal = async (page: number) => {
         const response = await listarPersonalFiltrado(filtros, page, pageSize);
         setPageData(response);
+        setCurrentPage(page);
     }
 
     useEffect(() => { cargarPersonal(0); }, []);
+
+    const handleRefresh = () => {
+        cargarPersonal(currentPage);
+    };
 
     return (
         <div className={classes.mainpg}>
@@ -101,7 +107,7 @@ export function Personal() {
                     </Button>
                 </div>
 
-                <PersonalTable personal={pageData?.content ?? []} />
+                <PersonalTable personal={pageData?.content ?? []}  onRefresh={handleRefresh}/>
 
                 <Group justify="center" className={classes.paginationBar}>
                     <Pagination
