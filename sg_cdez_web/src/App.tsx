@@ -1,30 +1,30 @@
-import '@mantine/core/styles.css';
-import { zurquiTheme } from './theme';
-import './App.css';
-import { BrowserRouter as Router, Routes, Route } from 'react-router';
-import { Layout } from './components/layout/Layout';
-import { Home } from './pages/home/home';
+import "@mantine/core/styles.css";
+import { zurquiTheme } from "./theme";
+import "./App.css";
+import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { Layout } from "./components/layout/Layout";
+import { Home } from "./pages/home/home";
 import { Login } from "./pages/auth/login";
-import { Activar } from './pages/auth/activarCuenta';
-import { ForgotPassword } from './pages/auth/forgotPassword';
+import { Activar } from "./pages/auth/activarCuenta";
+import { ForgotPassword } from "./pages/auth/forgotPassword";
 import { ResendVerification } from "./pages/auth/resendVerification";
-import { Consultas } from './pages/consultas/consultas';
-import { MantineProvider } from '@mantine/core';
-import { AdultosMayores } from './pages/adultosMayores/adultosMayores';
-import { Personal } from './pages/personal/personal';
-import { Auditoria } from './pages/auditoria/auditoria';
-import { Documentacion } from './pages/documentacion/documentacion';
-import { AuthProvider } from './services/authContext';
-import { ProtectedRoute } from './Routes';
-import { RestablecerContrasena } from './pages/auth/restablecerContrasena';
-import { NotFound } from './pages/error/404';
+import { Consultas } from "./pages/consultas/consultas";
+import { MantineProvider } from "@mantine/core";
+import { AdultosMayores } from "./pages/adultosMayores/adultosMayores";
+import { AdultoMayorExpediente } from "./pages/adultosMayores/adultoMayorExpediente";
+import { Personal } from "./pages/personal/personal";
+import { Auditoria } from "./pages/auditoria/auditoria";
+import { Documentacion } from "./pages/documentacion/documentacion";
+import { AuthProvider } from "./services/authContext";
+import { ProtectedRoute } from "./Routes";
+import { RestablecerContrasena } from "./pages/auth/restablecerContrasena";
+import { NotFound } from "./pages/error/404";
 import { ServerError } from "./pages/error/500";
 import { PersonalDetalle } from './pages/personal/personalDetalle';
 import { PersonalEditar } from './pages/personal/personalEditar';
 import { PersonalRegistrar } from './pages/personal/personalRegistrar';
 
 function App() {
-
   return (
     <MantineProvider theme={zurquiTheme}>
       <AuthProvider>
@@ -33,19 +33,31 @@ function App() {
             <Route path="/activar" element={<Activar />} />
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/restablecer-contrasena" element={<RestablecerContrasena />} />
-            <Route path="/reenviar-verificacion" element={<ResendVerification />} />
+            <Route
+              path="/restablecer-contrasena"
+              element={<RestablecerContrasena />}
+            />
+            <Route
+              path="/reenviar-verificacion"
+              element={<ResendVerification />}
+            />
             <Route path="*" element={<NotFound />} />
             <Route path="/500" element={<ServerError />} />
-            <Route element={
-              <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_ADMIN"]}>
-                <Layout />
-              </ProtectedRoute>
-            }>
+            <Route
+              element={
+                <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_ADMIN"]}>
+                  <Layout />
+                </ProtectedRoute>
+              }
+            >
               <Route path="/" element={<Home />} />
               <Route path="/consultas" element={<Consultas />} />
               <Route path="/adultosMayores" element={<AdultosMayores />} />
-              <Route path='/documentacion' element={<Documentacion />} />
+              <Route
+                path="/adultosMayores/:adultoId/expediente"
+                element={<AdultoMayorExpediente />}
+              />
+              <Route path="/documentacion" element={<Documentacion />} />
 
               <Route path="/personal" element={
                 <ProtectedRoute roles={["ROLE_ADMIN"]}>
@@ -80,7 +92,7 @@ function App() {
         </Router>
       </AuthProvider>
     </MantineProvider>
-  )
+  );
 }
 
-export default App
+export default App;

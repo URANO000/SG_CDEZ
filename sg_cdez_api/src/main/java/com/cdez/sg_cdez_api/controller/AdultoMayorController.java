@@ -10,6 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.cdez.sg_cdez_api.dto.request.AdultoMayorDesactivarRequest;
 import com.cdez.sg_cdez_api.dto.request.AdultoMayorFallecimientoRequest;
+import com.cdez.sg_cdez_api.dto.request.AdultoMayorFiltro;
+import com.cdez.sg_cdez_api.dto.response.PageResponse;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -30,6 +36,25 @@ public class AdultoMayorController {
     public List<AdultoMayorResponse> listarAdultosMayores() {
         return adultoMayorService.listarAdultosMayores();
     }
+
+    @PostMapping("/listarFiltrado")
+    public PageResponse<AdultoMayorResponse>
+    listarAdultosMayoresFiltrados(
+            @RequestBody AdultoMayorFiltro filtros,
+
+            @PageableDefault(
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable
+    ) {
+        return adultoMayorService
+                .listarAdultosMayoresFiltrados(
+                        filtros,
+                        pageable
+                );
+    }
+
     @GetMapping("/buscar")
     public List<AdultoMayorResponse> buscarAdultosMayores(
             @RequestParam(required = false) String texto
