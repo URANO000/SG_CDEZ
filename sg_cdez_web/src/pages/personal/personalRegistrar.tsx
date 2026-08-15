@@ -1,17 +1,25 @@
-import type React from "react";
-import { PersonalForm } from "../../components/ui/forms/PersonalRegistrarForm";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { Button } from "@mantine/core";
-import { registrarPersonal } from "../../services/personalService";
+import { Paper, Title, Text, Group, Stack, Button, ActionIcon, Tooltip } from "@mantine/core";
+import { BsPlus, BsTrash, BsPersonCheck, BsUpload, BsFileEarmarkText, BsX } from "react-icons/bs";
+import { PersonalForm } from "../../components/ui/forms/PersonalRegistrarForm";
+import classes from "../../components/ui/forms/PersonalForm.module.css";
 import type { ContactoCreateRequest } from "../../services/interfaces/personalCreateRequest";
 import type { PersonalCreateRequest } from "../../services/interfaces/personalCreateRequest";
+import { registrarPersonal } from "../../services/personalService";
 
+function formatBytes(bytes: number): string {
+    if (bytes === 0) return "0 KB";
+    const kb = bytes / 1024;
+    if (kb < 1024) return `${kb.toFixed(0)} KB`;
+    return `${(kb / 1024).toFixed(1)} MB`;
+}
 
 export function PersonalRegistrar() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const [documentos, setDocumentos] = useState<File[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [contactos, setContactos] = useState<ContactoCreateRequest[]>([
         {
             tipoValor: "",
@@ -19,6 +27,7 @@ export function PersonalRegistrar() {
         }
     ]);
 
+    const usuarioInputRef = useRef<HTMLInputElement>(null);
 
     const eliminarContacto = (index: number) => {
         setContactos(
@@ -50,12 +59,26 @@ export function PersonalRegistrar() {
         );
     };
 
+    const usarComoUsuario = (correo: string) => {
+        if (usuarioInputRef.current) {
+            usuarioInputRef.current.value = correo;
+            usuarioInputRef.current.focus();
+        }
+    };
+
     const manejarDocumentos = (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
-        if (!e.target.files) return;
+        const files = e.currentTarget.files;
 
-        setDocumentos(Array.from(e.target.files));
+        if (!files || files.length === 0) return;
+
+        setDocumentos(prev => [
+            ...prev,
+            ...Array.from(files)
+        ]);
+
+        e.currentTarget.value = "";
     };
 
     const eliminarDocumento = (index: number) => {
@@ -64,7 +87,7 @@ export function PersonalRegistrar() {
         );
     };
 
-    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         setLoading(true);
@@ -130,176 +153,266 @@ export function PersonalRegistrar() {
         } finally {
             setLoading(false);
         }
-    }
-
+    };
 
     return (
-        <div>
-            <PersonalForm title="Registrar Personal" subtitle="Registrar nuevo miembro del personal." onSubmit={handleSubmit}>
-                <h3>Información General</h3>
-                <label>Primer Nombre</label>
-                <input type="text" name="primerNombre" required />
-                <label>Segundo Nombre</label>
-                <input type="text" name="segundoNombre" />
-                <label>Primer Apellido</label>
-                <input type="text" name="primerApellido" required />
-                <label>Segundo Apellido</label>
-                <input type="text" name="segundoApellido" />
+        <PersonalForm
+            title="Registrar Personal"
+            subtitle="Registrar nuevo miembro del personal."
+            onSubmit={handleSubmit}>
 
-                <label>Tipo Identificacion</label>
-                <select name="tipoIdentificacion" defaultValue="" required>
-                    <option value="" disabled>Tipo de Identificación</option>
-                    <option value="CIC">CIC</option>
-                    <option value="CRP">CRP</option>
-                    <option value="CRR">CRR</option>
-                    <option value="RE">RE</option>
-                    <option value="APO">APO</option>
-                    <option value="CRT">CRT</option>
-                    <option value="CRE">CRE</option>
-                    <option value="PEX">PEX</option>
-                </select>
-                <a>Información (Aquí una ventana modal con las siglas)</a>
-                <label>Identificación</label>
-                <input type="text" name="identificacion" required />
-                <label>Carné</label>
-                <input type="text" name="carnet" />
-                <label>Dirección</label>
-                <input type="text" name="direccion" />
-                <label>Usuario</label>
-                <input type="text" name="usuario" />
-                <hr></hr>
+            {/* INFORMACIÓN GENERAL */}
+            <Paper className={classes.card}>
+                <Group className={classes.sectionHeader}>
+                    <Title order={4} className={classes.sectionTitle}>Información general</Title>
+                </Group>
 
-                <h3>Roles en el centro</h3>
-                <label>Rol</label>
-                <select name="rol" defaultValue="" required>
-                    <option value="" disabled>Seleccionar rol</option>
-                    <option value='1'>Administrador</option>
-                    <option value='2'>Usuario Normal</option>
-                </select>
-
-                <label>Especialidad</label>
-                <select name="especialidad" defaultValue="" required>
-                    <option value="" disabled>Seleccionar especialidad</option>
-                    <option value="Medicina">Medicina</option>
-                    <option value="Enfermería">Enfermería</option>
-                    <option value="Psicología">Psicología</option>
-                    <option value="Nutrición">Nutrición</option>
-                    <option value="Trabajo Social">Trabajo Social</option>
-                    <option value="Terapia Física">Terapia Física</option>
-                    <option value="Terapia Respiratoria">Terapia Respiratoria</option>
-                    <option value="Terapia de Lenguaje">Terapia de Lenguaje</option>
-
-                </select>
-                <h3>Contactos</h3>
-                <button type="button" onClick={agregarContacto}>+ Nuevo contacto</button>
-                {contactos.map((contacto, index) => (
-
-                    <div key={index}>
-                        <h4>
-                            Contacto {index + 1}
-                        </h4>
-
-                        <label>Tipo</label>
-                        <select
-                            value={contacto.tipoValor}
-                            onChange={e =>
-                                actualizarContacto(
-                                    index,
-                                    "tipoValor",
-                                    e.target.value
-                                )
-                            }
-                            required>
-                            <option value="" disabled>
-                                Seleccionar
-                            </option>
-
-                            <option value="TELEFONO">
-                                Número Telefónico
-                            </option>
-
-                            <option value="CORREO">
-                                Correo Electrónico
-                            </option>
-
-                        </select>
-                        <label>Contacto</label>
-                        <input
-                            type="text"
-                            value={contacto.valor}
-                            onChange={e =>
-                                actualizarContacto(
-                                    index,
-                                    "valor",
-                                    e.target.value
-                                )
-                            }
-                            required
-                        />
-
-                        <button
-                            type="button"
-                            onClick={() =>
-                                eliminarContacto(index)
-                            }
-                        >
-                            X
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={() => {
-                                // "utilizar como usuario".
-                            }}
-                        >
-                            Utilizar como correo de usuario
-                        </button>
-
-                        <hr />
+                <div className={classes.formGrid}>
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Primer nombre<span className={classes.required}>*</span></label>
+                        <input className={classes.input} type="text" name="primerNombre" required />
                     </div>
 
-                ))}
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Segundo nombre</label>
+                        <input className={classes.input} type="text" name="segundoNombre" />
+                    </div>
 
-                <hr />
-                <h3>Documentos Adjuntos</h3>
-                <label>Se pueden elegir múltiples documentos. PNG, JPG, JPEG, PDF</label>
-                <input
-                    type="file"
-                    multiple
-                    accept=".png,.jpg,.jpeg,.pdf"
-                    onChange={manejarDocumentos}
-                />
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Primer apellido<span className={classes.required}>*</span></label>
+                        <input className={classes.input} type="text" name="primerApellido" required />
+                    </div>
 
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Segundo apellido</label>
+                        <input className={classes.input} type="text" name="segundoApellido" />
+                    </div>
 
-                {documentos.length > 0 && (
-                    <div>
-                        <h4>
-                            Documentos seleccionados
-                        </h4>
-                        {documentos.map((documento, index) => (
-                            <div key={index}>
-                                <span>
-                                    {documento.name}
-                                </span>
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        eliminarDocumento(index)
-                                    }>
-                                    X
-                                </button>
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Tipo de identificación<span className={classes.required}>*</span></label>
+                        <select className={classes.select} name="tipoIdentificacion" defaultValue="" required>
+                            <option value="" disabled>Tipo de identificación</option>
+                            <option value="CIC">CIC</option>
+                            <option value="CRP">CRP</option>
+                            <option value="CRR">CRR</option>
+                            <option value="RE">RE</option>
+                            <option value="APO">APO</option>
+                            <option value="CRT">CRT</option>
+                            <option value="CRE">CRE</option>
+                            <option value="PEX">PEX</option>
+                        </select>
+                        <button type="button" className={classes.infoLink}>
+                            ¿Qué significan estas siglas?
+                        </button>
+                    </div>
+
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Identificación<span className={classes.required}>*</span></label>
+                        <input className={classes.input} type="text" name="identificacion" required />
+                    </div>
+
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Carné</label>
+                        <input className={classes.input} type="text" name="carnet" />
+                    </div>
+
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Dirección</label>
+                        <input className={classes.input} type="text" name="direccion" />
+                    </div>
+
+                    <div className={`${classes.fieldGroup} ${classes.fieldFull}`}>
+                        <label className={classes.fieldLabel}>Usuario</label>
+                        <input
+                            ref={usuarioInputRef}
+                            className={classes.input}
+                            type="text"
+                            name="usuario"
+                            placeholder="Puede completarse desde un contacto de correo abajo"
+                        />
+                    </div>
+                </div>
+            </Paper>
+
+            {/* ROLES */}
+            <Paper className={classes.card}>
+                <Group className={classes.sectionHeader}>
+                    <Title order={4} className={classes.sectionTitle}>Roles en el centro</Title>
+                </Group>
+
+                <div className={classes.formGrid}>
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Rol<span className={classes.required}>*</span></label>
+                        <select className={classes.select} name="rol" defaultValue="" required>
+                            <option value="" disabled>Seleccionar rol</option>
+                            <option value="1">Administrador</option>
+                            <option value="2">Usuario Normal</option>
+                        </select>
+                    </div>
+
+                    <div className={classes.fieldGroup}>
+                        <label className={classes.fieldLabel}>Especialidad<span className={classes.required}>*</span></label>
+                        <select className={classes.select} name="especialidad" defaultValue="" required>
+                            <option value="" disabled>Seleccionar especialidad</option>
+                            <option value="Medicina">Medicina</option>
+                            <option value="Enfermería">Enfermería</option>
+                            <option value="Psicología">Psicología</option>
+                            <option value="Nutrición">Nutrición</option>
+                            <option value="Trabajo Social">Trabajo Social</option>
+                            <option value="Terapia Física">Terapia Física</option>
+                            <option value="Terapia Respiratoria">Terapia Respiratoria</option>
+                            <option value="Terapia de Lenguaje">Terapia de Lenguaje</option>
+                        </select>
+                    </div>
+                </div>
+            </Paper>
+
+            {/* CONTACTOS */}
+            <Paper className={classes.card}>
+                <Group justify="space-between" className={classes.sectionHeader}>
+                    <Title order={4} className={classes.sectionTitle}>Contactos</Title>
+                    <Button
+                        type="button"
+                        size="xs"
+                        variant="light"
+                        leftSection={<BsPlus size={16} />}
+                        onClick={agregarContacto}>
+                        Agregar contacto
+                    </Button>
+                </Group>
+
+                {contactos.length === 0 ? (
+                    <Text className={classes.emptyText}>Sin contactos agregados.</Text>
+                ) : (
+                    <Stack gap="sm">
+                        {contactos.map((contacto, index) => (
+                            <div key={index} className={classes.contactRow}>
+                                <select
+                                    className={classes.select}
+                                    value={contacto.tipoValor}
+                                    onChange={e =>
+                                        actualizarContacto(index, "tipoValor", e.target.value)
+                                    }
+                                    required>
+                                    <option value="" disabled>Tipo</option>
+                                    <option value="TELEFONO">Número Telefónico</option>
+                                    <option value="CORREO">Correo Electrónico</option>
+                                </select>
+
+                                <input
+                                    className={classes.input}
+                                    type={contacto.tipoValor === "CORREO" ? "email" : "text"}
+                                    placeholder={contacto.tipoValor === "CORREO" ? "correo@ejemplo.com" : "Número de teléfono"}
+                                    value={contacto.valor}
+                                    onChange={e =>
+                                        actualizarContacto(index, "valor", e.target.value)
+                                    }
+                                    required
+                                />
+
+                                <Group gap={4} wrap="nowrap" className={classes.contactActions}>
+                                    {contacto.tipoValor === "CORREO" && contacto.valor && (
+                                        <Tooltip label="Utilizar como usuario">
+                                            <ActionIcon
+                                                variant="subtle"
+                                                className={classes.actionEmail}
+                                                title="Usar como usuario"
+                                                aria-label="Usar como usuario"
+                                                onClick={() => usarComoUsuario(contacto.valor)}>
+                                                <BsPersonCheck size={16} />
+                                            </ActionIcon>
+                                        </Tooltip>
+                                    )}
+
+                                    <ActionIcon
+                                        variant="subtle"
+                                        color="red"
+                                        aria-label="Eliminar contacto"
+                                        onClick={() => eliminarContacto(index)}>
+                                        <BsTrash size={16} />
+                                    </ActionIcon>
+                                </Group>
                             </div>
                         ))}
-                    </div>
+                    </Stack>
                 )}
+            </Paper>
 
-                <Button
-                    type="submit"
-                    loading={loading}>
+            {/* DOCUMENTOS */}
+            <Paper className={classes.card}>
+                <Group className={classes.sectionHeader}>
+                    <Title order={4} className={classes.sectionTitle}>Documentos adjuntos</Title>
+                </Group>
+
+                <Text className={classes.helperText}>
+                    Se pueden elegir múltiples documentos. PNG, JPG, JPEG, PDF.
+                </Text>
+
+                <div
+                    className={classes.dropzone}
+                    onClick={() => fileInputRef.current?.click()}
+                    role="button"
+                    tabIndex={0}
+                >
+                    <BsUpload
+                        size={18}
+                        className={classes.dropzoneIcon}
+                    />
+
+                    <span>Hacé clic para seleccionar archivos</span>
+
+                    <input
+                        ref={fileInputRef}
+                        className={classes.hiddenFileInput}
+                        type="file"
+                        multiple
+                        accept=".png,.jpg,.jpeg,.pdf"
+                        onChange={manejarDocumentos}
+                    />
+                </div>
+
+                {documentos.length > 0 ? (
+                    <Stack gap="xs">
+                        {documentos.map((documento, index) => (
+                            <Group
+                                key={`${documento.name}-${documento.lastModified}-${index}`}
+                                justify="space-between"
+                                className={classes.listRow}>
+                                <Group gap="xs">
+                                    <BsFileEarmarkText size={16} className={classes.docIcon} />
+                                    <div>
+                                        <Text className={classes.value}>{documento.name}</Text>
+                                        <Text size="xs" className={classes.fileSize}>
+                                            {formatBytes(documento.size)}
+                                        </Text>
+                                    </div>
+                                </Group>
+
+                                <ActionIcon
+                                    variant="subtle"
+                                    color="red"
+                                    aria-label="Quitar archivo"
+                                    onClick={() => eliminarDocumento(index)}>
+                                    <BsX size={18} />
+                                </ActionIcon>
+                            </Group>
+                        ))}
+                    </Stack>
+                ) : (
+                    <Text className={classes.emptyText}>Sin documentos seleccionados.</Text>
+                )}
+            </Paper>
+
+            {/* SUBMIT */}
+            <Group justify="flex-end" className={classes.submitBar}>
+                <Button type="button" variant="default" onClick={() => navigate(-1)} disabled={loading}>
+                    Cancelar
+                </Button>
+                <Button type="submit" loading={loading}>
                     Registrar
                 </Button>
+            </Group>
 
-            </PersonalForm>
-        </div>
-    )
+        </PersonalForm>
+    );
 }
