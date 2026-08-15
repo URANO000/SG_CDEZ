@@ -20,6 +20,7 @@ import { RestablecerContrasena } from './pages/auth/restablecerContrasena';
 import { NotFound } from './pages/error/404';
 import { ServerError } from "./pages/error/500";
 import { PersonalDetalle } from './pages/personal/personalDetalle';
+import { PersonalEditar } from './pages/personal/personalEditar';
 
 function App() {
 
@@ -53,6 +54,12 @@ function App() {
               <Route path="/personal/:personalId/detalle" element={
                 <ProtectedRoute roles={["ROLE_ADMIN"]}>
                   <PersonalDetalle />
+                </ProtectedRoute>
+              }
+              />
+              <Route path="/personal/:personalId/editar" element={
+                <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                  <PersonalEditar />
                 </ProtectedRoute>
               }
               />

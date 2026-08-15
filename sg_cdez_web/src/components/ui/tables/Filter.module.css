@@ -1,7 +1,10 @@
 .pageTitle {
     color: var(--text);
-    margin-bottom: 20px;
+    padding: 20px 30px 20px 30px;
     font-weight: 600;
+    border: 1px solid rgba(107, 99, 117, 0.25);
+    box-shadow: rgba(113, 111, 116, 0.075);
+    background-color: #ffffff;
 }
 
 .filterBar {
@@ -9,19 +12,16 @@
     flex-wrap: wrap;
     align-items: flex-end;
     gap: 12px;
-    background: var(--card-bg);
-    padding: 16px;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
     margin-bottom: 20px;
 }
 
-/* .card {
-    background: var(--card-bg);
-    border-radius: 8px;
-    padding: 16px;
-    box-shadow: var(--shadow);
-} */
+
+.createBtn{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: end;
+    margin-bottom: 20px;
+}
 
 .field {
     flex: 1;
@@ -64,7 +64,7 @@
 .pageControl {
     border: 1px solid rgba(107, 99, 117, 0.2);
     color: var(--text);
-    background-color: var(--card-bg);
+    background-color: var(--table-color-light);
     border-radius: 6px;
 }
 
@@ -79,31 +79,35 @@
 }
 
 .mainpg {
-    padding: 30px;
+    padding-bottom: 30px;
+}
+
+.subpg {
+    padding: 20px 30px;
 }
 
 @media (max-width: 768px) {
-  .filterBar {
-    flex-direction: column;
-    align-items: stretch;
-  }
+    .filterBar {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-  .field {
-    min-width: 100%;
-  }
+    .field {
+        min-width: 100%;
+    }
 
-  .searchButton {
-    width: 100%;
-  }
+    .searchButton {
+        width: 100%;
+    }
 }
 
 @media (max-width: 480px) {
-  .pageTitle {
-    font-size: 1.25rem;
-  }
+    .pageTitle {
+        font-size: 1.25rem;
+    }
 
-  .paginationRoot {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+    .paginationRoot {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 }

@@ -1,5 +1,5 @@
 .wrapper {
-  background: var(--card-bg);
+  background: var(--table-color-light);
   border-radius: 8px;
   box-shadow: var(--shadow);
   overflow: hidden;
