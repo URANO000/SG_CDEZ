@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 import com.cdez.sg_cdez_api.service.AuditoriaService;
+import com.cdez.sg_cdez_api.repository.specifications.AdultoMayorSpecs;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -31,6 +32,16 @@ import java.util.Objects;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.cdez.sg_cdez_api.dto.request.AdultoMayorFiltro;
+import com.cdez.sg_cdez_api.dto.response.PageResponse;
+import com.cdez.sg_cdez_api.util.ValidationHelper;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 public class AdultoMayorServiceImpl implements AdultoMayorService {
@@ -40,6 +51,7 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
     private final MiscHelper MISC_HELPER;
     private final AuthHelper AUTH_HELPER;
     private final AuditoriaService auditoriaService;
+    private final ValidationHelper VALIDATION_HELPER;
 
 
     // Registra en el historial una acción realizada sobre un adulto mayor.
@@ -82,21 +94,40 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
 
     @Override
     public List<AdultoMayorResponse> listarAdultosMayores() {
-        return adultoMayorRepository.findByActivoTrue()
+        return adultoMayorRepository
+                .findAll(
+                        AdultoMayorSpecs.hasEstado(
+                                "ACTIVO"
+                        )
+                )
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
     }
+
     @Override
-    public List<AdultoMayorResponse> listarAdultosMayoresInactivos() {
-        return adultoMayorRepository.findByActivoFalseAndFechaFallecimientoIsNull()
+    public List<AdultoMayorResponse>
+    listarAdultosMayoresInactivos() {
+        return adultoMayorRepository
+                .findAll(
+                        AdultoMayorSpecs.hasEstado(
+                                "INACTIVO"
+                        )
+                )
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
     }
+
     @Override
-    public List<AdultoMayorResponse> listarAdultosMayoresFallecidos() {
-        return adultoMayorRepository.findByFechaFallecimientoIsNotNull()
+    public List<AdultoMayorResponse>
+    listarAdultosMayoresFallecidos() {
+        return adultoMayorRepository
+                .findAll(
+                        AdultoMayorSpecs.hasEstado(
+                                "FALLECIDO"
+                        )
+                )
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
@@ -122,23 +153,102 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         );
     }
     @Override
-    public List<AdultoMayorResponse> buscarAdultosMayores(String texto) {
-
-        if (texto == null || texto.isBlank()) {
+    public List<AdultoMayorResponse> buscarAdultosMayores(
+            String texto
+    ) {
+        if (
+                texto == null ||
+                        texto.isBlank()
+        ) {
             return listarAdultosMayores();
         }
 
         return adultoMayorRepository
-                .findByPrimerNombreContainingIgnoreCaseOrSegundoNombreContainingIgnoreCaseOrPrimerApellidoContainingIgnoreCaseOrSegundoApellidoContainingIgnoreCaseOrIdentificacionContainingIgnoreCase(
-                        texto,
-                        texto,
-                        texto,
-                        texto,
-                        texto
+                .findAll(
+                        AdultoMayorSpecs.containsSearch(
+                                texto
+                        )
                 )
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    @Override
+    public PageResponse<AdultoMayorResponse>
+    listarAdultosMayoresFiltrados(
+            AdultoMayorFiltro filtros,
+            Pageable pageable
+    ) {
+        Specification<AdultoMayor> spec =
+                Specification.unrestricted();
+
+        if (
+                filtros != null &&
+                        filtros.estado() != null &&
+                        !filtros.estado().isBlank()
+        ) {
+            String estado =
+                    filtros.estado()
+                            .trim()
+                            .toUpperCase();
+
+            Set<String> estadosPermitidos =
+                    Set.of(
+                            "ACTIVO",
+                            "INACTIVO",
+                            "FALLECIDO"
+                    );
+
+            if (
+                    !estadosPermitidos.contains(
+                            estado
+                    )
+            ) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "El estado indicado no es válido."
+                );
+            }
+
+            spec = spec.and(
+                    AdultoMayorSpecs.hasEstado(
+                            estado
+                    )
+            );
+        }
+
+        if (
+                filtros != null &&
+                        filtros.searchTerm() != null &&
+                        !filtros.searchTerm().isBlank()
+        ) {
+            spec = spec.and(
+                    AdultoMayorSpecs.containsSearch(
+                            filtros.searchTerm()
+                    )
+            );
+        }
+
+        Page<AdultoMayor> adultoMayorPage =
+                adultoMayorRepository.findAll(
+                        spec,
+                        pageable
+                );
+
+        VALIDATION_HELPER.checkPaginationBounds(
+                adultoMayorPage,
+                pageable
+        );
+
+        Page<AdultoMayorResponse> responsePage =
+                adultoMayorPage.map(
+                        this::mapToResponse
+                );
+
+        return new PageResponse<>(
+                responsePage
+        );
     }
 
     @Override
