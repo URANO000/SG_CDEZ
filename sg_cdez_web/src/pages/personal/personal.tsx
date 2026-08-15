@@ -32,6 +32,9 @@ export function Personal() {
             </div>
 
             <div className={classes.subpg}>
+                <Button className={classes.createBtn}>
+                    Registrar Personal
+                </Button>
                 <div className={classes.filterBar}>
                     <TextInput
                         placeholder="Buscar..."

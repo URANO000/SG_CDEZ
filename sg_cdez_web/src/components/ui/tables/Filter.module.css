@@ -16,6 +16,13 @@
 }
 
 
+.createBtn{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: end;
+    margin-bottom: 20px;
+}
+
 .field {
     flex: 1;
     min-width: 180px;
@@ -76,7 +83,7 @@
 }
 
 .subpg {
-    padding: 30px;
+    padding: 20px 30px;
 }
 
 @media (max-width: 768px) {

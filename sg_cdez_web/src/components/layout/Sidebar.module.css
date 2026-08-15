@@ -1,10 +1,11 @@
 
 /* Sidebar.module.css */
 .navbar {
-  display: flex;
+ display: flex;
   flex-direction: column;
-  height: 100dvh;
+  height: 100%;
   width: 280px;
+  flex-shrink: 0;
   background-color: var(--color-sidebar);
 }
 
