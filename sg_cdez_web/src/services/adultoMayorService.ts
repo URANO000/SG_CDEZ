@@ -2,17 +2,20 @@ import { apiClient } from "../utils/helper";
 
 import type {
   AdultoMayorDesactivarRequest,
+  AdultoMayorFiltro,
   AdultoMayorResponse,
-  EstadoAdultoMayor,
 } from "./interfaces/adultoMayorInterface";
 
-export async function listarAdultosMayores(
-  estado: EstadoAdultoMayor = "activos",
-): Promise<AdultoMayorResponse[]> {
-  const ruta = estado === "activos" ? "" : `/${estado}`;
+import type { PageResponse } from "./interfaces/pageResponse";
 
-  const response = await apiClient.get<AdultoMayorResponse[]>(
-    `/adultos-mayores${ruta}`,
+export async function listarAdultosMayoresFiltrados(
+  filtros: AdultoMayorFiltro,
+  page = 0,
+  size = 10,
+): Promise<PageResponse<AdultoMayorResponse>> {
+  const response = await apiClient.post<PageResponse<AdultoMayorResponse>>(
+    `/adultos-mayores/listarFiltrado?page=${page}&size=${size}`,
+    filtros,
   );
 
   return response.data;

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   Alert,
@@ -6,6 +6,7 @@ import {
   Group,
   Loader,
   Modal,
+  Pagination,
   Select,
   Text,
   Textarea,
@@ -14,21 +15,27 @@ import {
 } from "@mantine/core";
 
 import { AiOutlineSearch } from "react-icons/ai";
+
 import { BsPlusLg } from "react-icons/bs";
 
 import { AdultosMayoresTable } from "../../components/ui/tables/AdultosMayoresTable";
 
 import {
   desactivarAdultoMayor,
-  listarAdultosMayores,
+  listarAdultosMayoresFiltrados,
 } from "../../services/adultoMayorService";
 
 import type {
+  AdultoMayorFiltro,
   AdultoMayorResponse,
   EstadoAdultoMayor,
 } from "../../services/interfaces/adultoMayorInterface";
 
+import type { PageResponse } from "../../services/interfaces/pageResponse";
+
 import classes from "./AdultosMayores.module.css";
+
+import filterClasses from "../../components/ui/tables/Filter.module.css";
 
 function obtenerFechaHoraLocal(): string {
   const fechaActual = new Date();
@@ -41,13 +48,13 @@ function obtenerFechaHoraLocal(): string {
 }
 
 export function AdultosMayores() {
-  const [adultosMayores, setAdultosMayores] = useState<AdultoMayorResponse[]>(
-    [],
-  );
+  const [filtros, setFiltros] = useState<AdultoMayorFiltro>({
+    searchTerm: null,
+    estado: "ACTIVO",
+  });
 
-  const [estado, setEstado] = useState<EstadoAdultoMayor>("activos");
-
-  const [busqueda, setBusqueda] = useState("");
+  const [pageData, setPageData] =
+    useState<PageResponse<AdultoMayorResponse> | null>(null);
 
   const [loading, setLoading] = useState(true);
 
@@ -63,14 +70,23 @@ export function AdultosMayores() {
 
   const [guardando, setGuardando] = useState(false);
 
-  async function cargarAdultos(estadoSeleccionado: EstadoAdultoMayor) {
+  const pageSize = 10;
+
+  async function cargarAdultos(
+    page: number,
+    filtrosConsulta: AdultoMayorFiltro = filtros,
+  ) {
     setLoading(true);
     setError(null);
 
     try {
-      const registros = await listarAdultosMayores(estadoSeleccionado);
+      const response = await listarAdultosMayoresFiltrados(
+        filtrosConsulta,
+        page,
+        pageSize,
+      );
 
-      setAdultosMayores(registros);
+      setPageData(response);
     } catch {
       setError("No se pudo cargar la lista de adultos mayores.");
     } finally {
@@ -79,8 +95,13 @@ export function AdultosMayores() {
   }
 
   useEffect(() => {
-    listarAdultosMayores("activos")
-      .then(setAdultosMayores)
+    const filtrosIniciales: AdultoMayorFiltro = {
+      searchTerm: null,
+      estado: "ACTIVO",
+    };
+
+    listarAdultosMayoresFiltrados(filtrosIniciales, 0, pageSize)
+      .then(setPageData)
       .catch(() => {
         setError("No se pudo cargar la lista de adultos mayores.");
       })
@@ -89,20 +110,16 @@ export function AdultosMayores() {
       });
   }, []);
 
-  const resultados = useMemo(() => {
-    const texto = busqueda.trim().toLocaleLowerCase("es");
-
-    if (!texto) {
-      return adultosMayores;
+  function cambiarEstado(value: string | null) {
+    if (!value) {
+      return;
     }
 
-    return adultosMayores.filter((adultoMayor) => {
-      const informacion =
-        `${adultoMayor.nombreCompleto} ` + `${adultoMayor.identificacion}`;
-
-      return informacion.toLocaleLowerCase("es").includes(texto);
+    setFiltros({
+      ...filtros,
+      estado: value as EstadoAdultoMayor,
     });
-  }, [adultosMayores, busqueda]);
+  }
 
   function abrirDesactivacion(adultoMayor: AdultoMayorResponse) {
     setSeleccionado(adultoMayor);
@@ -138,7 +155,7 @@ export function AdultosMayores() {
       setFechaRetiro("");
       setMotivoRetiro("");
 
-      await cargarAdultos(estado);
+      await cargarAdultos(0, filtros);
     } catch {
       setError("No se pudo desactivar el registro del adulto mayor.");
     } finally {
@@ -160,48 +177,56 @@ export function AdultosMayores() {
 
       <div className={classes.titleRule} />
 
-      <div className={classes.filterBar}>
+      <div className={filterClasses.filterBar}>
         <TextInput
-          aria-label="Buscar adulto mayor"
           placeholder={"Buscar por nombre o identificación"}
           leftSection={<AiOutlineSearch size={17} />}
-          value={busqueda}
+          value={filtros.searchTerm ?? ""}
           onChange={(event) => {
-            setBusqueda(event.currentTarget.value);
+            const value = event.currentTarget.value;
+
+            setFiltros({
+              ...filtros,
+              searchTerm: value === "" ? null : value,
+            });
           }}
-          className={classes.searchField}
+          classNames={{
+            input: filterClasses.input,
+            root: filterClasses.field,
+          }}
         />
 
         <Select
-          aria-label={"Filtrar adultos mayores por estado"}
-          value={estado}
+          value={filtros.estado}
+          onChange={cambiarEstado}
           data={[
             {
-              value: "activos",
+              value: "ACTIVO",
               label: "Activos",
             },
             {
-              value: "inactivos",
+              value: "INACTIVO",
               label: "Inactivos",
             },
             {
-              value: "fallecidos",
+              value: "FALLECIDO",
               label: "Fallecidos",
             },
           ]}
-          onChange={(value) => {
-            if (!value) {
-              return;
-            }
-
-            const nuevoEstado = value as EstadoAdultoMayor;
-
-            setEstado(nuevoEstado);
-
-            void cargarAdultos(nuevoEstado);
+          classNames={{
+            input: filterClasses.input,
+            root: filterClasses.field,
           }}
-          className={classes.statusField}
         />
+
+        <Button
+          className={filterClasses.searchButton}
+          onClick={() => {
+            void cargarAdultos(0, filtros);
+          }}
+        >
+          Buscar
+        </Button>
       </div>
 
       {error && (
@@ -212,19 +237,35 @@ export function AdultosMayores() {
 
       {loading ? (
         <div className={classes.loadingState}>
-          <Loader color="var(--color-primary)" />
+          <Loader color={"var(--color-primary)"} />
         </div>
       ) : (
-        <AdultosMayoresTable
-          adultosMayores={resultados}
-          onDesactivar={abrirDesactivacion}
-        />
+        <>
+          <AdultosMayoresTable
+            adultosMayores={pageData?.content ?? []}
+            onDesactivar={abrirDesactivacion}
+          />
+
+          <Group justify="center" className={filterClasses.paginationBar}>
+            <Pagination
+              value={(pageData?.currentPage ?? 0) + 1}
+              onChange={(page) => {
+                void cargarAdultos(page - 1, filtros);
+              }}
+              total={Math.max(pageData?.totalPages ?? 0, 1)}
+              classNames={{
+                control: filterClasses.pageControl,
+                root: filterClasses.paginationRoot,
+              }}
+            />
+          </Group>
+        </>
       )}
 
       <Modal
         opened={seleccionado !== null}
         onClose={cerrarDesactivacion}
-        title="Desactivar adulto mayor"
+        title={"Desactivar adulto mayor"}
         centered
       >
         <Text size="sm" mb="md">

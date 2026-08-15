@@ -1,4 +1,9 @@
-export type EstadoAdultoMayor = "activos" | "inactivos" | "fallecidos";
+export type EstadoAdultoMayor = "ACTIVO" | "INACTIVO" | "FALLECIDO";
+
+export interface AdultoMayorFiltro {
+  searchTerm: string | null;
+  estado: EstadoAdultoMayor;
+}
 
 export interface AdultoMayorResponse {
   adultoId: string;
