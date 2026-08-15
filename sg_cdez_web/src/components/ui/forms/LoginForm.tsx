@@ -71,7 +71,7 @@ export function LoginForm() {
             <Group justify="space-between" mt="lg">
                 <Checkbox label="Recordarme" />
 
-                <Link to="/restablecer-contrasena">
+                <Link to="/forgot-password">
                     <Anchor component="button" size="sm">
                         ¿Olvidaste tu contraseña?
                     </Anchor>

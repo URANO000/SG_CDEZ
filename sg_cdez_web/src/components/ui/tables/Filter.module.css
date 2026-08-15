@@ -16,11 +16,16 @@
 }
 
 
-.createBtn{
+.createBtn {
     display: flex;
     flex-wrap: wrap;
     justify-content: end;
     margin-bottom: 20px;
+}
+
+.createBtn a {
+    text-decoration: none;
+    color: #ffffff;
 }
 
 .field {
