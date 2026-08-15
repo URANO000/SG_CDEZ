@@ -20,7 +20,8 @@ import { ProtectedRoute } from "./Routes";
 import { RestablecerContrasena } from "./pages/auth/restablecerContrasena";
 import { NotFound } from "./pages/error/404";
 import { ServerError } from "./pages/error/500";
-import { PersonalDetalle } from "./pages/personal/personalDetalle";
+import { PersonalDetalle } from './pages/personal/personalDetalle';
+import { PersonalEditar } from './pages/personal/personalEditar';
 
 function App() {
   return (
@@ -57,21 +58,22 @@ function App() {
               />
               <Route path="/documentacion" element={<Documentacion />} />
 
-              <Route
-                path="/personal"
-                element={
-                  <ProtectedRoute roles={["ROLE_ADMIN"]}>
-                    <Personal />
-                  </ProtectedRoute>
-                }
+              <Route path="/personal" element={
+                <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                  <Personal />
+                </ProtectedRoute>
+              } />
+              <Route path="/personal/:personalId/detalle" element={
+                <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                  <PersonalDetalle />
+                </ProtectedRoute>
+              }
               />
-              <Route
-                path="/personal/:personalId/detalle"
-                element={
-                  <ProtectedRoute roles={["ROLE_ADMIN"]}>
-                    <PersonalDetalle />
-                  </ProtectedRoute>
-                }
+              <Route path="/personal/:personalId/editar" element={
+                <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                  <PersonalEditar />
+                </ProtectedRoute>
+              }
               />
               <Route
                 path="/auditoria"

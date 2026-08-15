@@ -1,16 +1,18 @@
 .container {
   display: flex;
-  height: calc(100vh - 60px);
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--card-bg);
 }
 
 .main {
   flex: 1;
-  padding: 1rem;
   overflow: auto;
+  min-width: 0;
 }
 
 @media (max-width: 768px) {
   .main {
-    padding: 1rem 1rem 1rem 4rem; /* clears the fixed burger button */
+    padding: 1rem 1rem 1rem 4rem;
   }
 }

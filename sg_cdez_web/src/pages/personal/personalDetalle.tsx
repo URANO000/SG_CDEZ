@@ -87,8 +87,7 @@ export function PersonalDetalle() {
                 <ActionIcon
                     variant="subtle"
                     onClick={() => navigate(-1)}
-                    aria-label="Volver"
-                >
+                    aria-label="Volver">
                     <BsArrowLeft size={18} />
                 </ActionIcon>
             </Group>
@@ -117,14 +116,12 @@ export function PersonalDetalle() {
                 <div className={classes.mainColumn}>
 
                     <Paper className={classes.card}>
-
                         <Title order={4} className={classes.sectionTitle}> Información general </Title>
 
                         <SimpleGrid
                             cols={{ base: 1, sm: 2 }}
                             spacing="lg"
-                            className={classes.infoGrid}
-                        >
+                            className={classes.infoGrid}>
 
                             <div>
                                 <Text className={classes.label}>
@@ -196,21 +193,65 @@ export function PersonalDetalle() {
                 {/* RIGHT */}
                 <div className={classes.sideColumn}>
 
+                    <div>
+                        <Paper className={classes.card}>
+                            <Title order={4} className={classes.sectionTitle}> Historial</Title>
+                            <SimpleGrid
+                                cols={{ base: 1, sm: 2 }}
+                                spacing="lg"
+                                className={classes.infoGrid}>
+                                <div>
+                                    <Text className={classes.label}>
+                                        Creado Por
+                                    </Text>
+
+                                    <Text className={classes.value}>
+                                        {personal.createdBy}
+                                    </Text>
+                                </div>
+                                <div>
+                                    <Text className={classes.label}>
+                                        Creado En
+                                    </Text>
+
+                                    <Text className={classes.value}>
+                                        {personal.createdAt}
+                                    </Text>
+                                </div>
+                                <div>
+                                    <Text className={classes.label}>
+                                        Última Actualización Por
+                                    </Text>
+
+                                    <Text className={classes.value}>
+                                        {personal.updatedBy}
+                                    </Text>
+                                </div>
+                                <div>
+                                    <Text className={classes.label}>
+                                        Última Actualización En
+                                    </Text>
+
+                                    <Text className={classes.value}>
+                                        {personal.updatedAt}
+                                    </Text>
+                                </div>
+
+
+                            </SimpleGrid>
+                        </Paper>
+                    </div>
+
+                </div>
+
+                <div className={classes.mainColumn}>
                     {/* CONTACTOS */}
 
                     <Paper className={`${classes.card} ${classes.scrollCard}`}>
-
-                        <Title
-                            order={4}
-                            className={classes.sectionTitle}
-                        >
-                            Contactos
-                        </Title>
+                        <Title order={4} className={classes.sectionTitle}> Contactos </Title>
 
                         <div className={classes.scrollContent}>
-
                             {personal.contactos.length > 0 ? (
-
                                 <Stack gap="xs">
 
                                     {personal.contactos.map((contacto) => (
@@ -245,22 +286,16 @@ export function PersonalDetalle() {
 
                     </Paper>
 
+                </div>
 
-                    {/* DOCUMENTOS */}
+                {/* DOCUMENTOS */}
 
+                <div className={classes.sideColumn}>
                     <Paper className={`${classes.card} ${classes.scrollCard}`}>
-
-                        <Title
-                            order={4}
-                            className={classes.sectionTitle}
-                        >
-                            Documentos
-                        </Title>
+                        <Title order={4} className={classes.sectionTitle}> Documentos </Title>
 
                         <div className={classes.scrollContent}>
-
                             {personal.documentos.length > 0 ? (
-
                                 <Stack gap="xs">
 
                                     {personal.documentos.map((documento) => {
@@ -281,8 +316,7 @@ export function PersonalDetalle() {
                                                 <Group gap="xs">
                                                     <BsFileEarmarkText
                                                         size={16}
-                                                        className={classes.docIcon}
-                                                    />
+                                                        className={classes.docIcon} />
 
                                                     <Text className={classes.value}>
                                                         {documento.nombreArchivo}
@@ -309,8 +343,7 @@ export function PersonalDetalle() {
                                                             documentoId,
                                                             documento.nombreArchivo
                                                         );
-                                                    }}
-                                                >
+                                                    }}>
                                                     <BsDownload size={16} />
                                                 </ActionIcon>
 
@@ -330,13 +363,10 @@ export function PersonalDetalle() {
                             )}
 
                         </div>
-
                     </Paper>
-
                 </div>
 
             </div>
-
         </div>
     );
 }
