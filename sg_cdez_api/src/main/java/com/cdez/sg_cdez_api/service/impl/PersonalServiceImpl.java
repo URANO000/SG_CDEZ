@@ -265,7 +265,6 @@ public class PersonalServiceImpl implements PersonalService {
                                                 return String.join(" ", parts);
                                             },
                                             TextAlignment.LEFT, 2.5f),
-                                    new Column<>("Dirección", PersonalResponse::direccion, TextAlignment.LEFT, 2.5f),
                                     new Column<>("Carné", PersonalResponse::carnet, TextAlignment.LEFT, 1f),
                                     new Column<>("Usuario", PersonalResponse::usuario, TextAlignment.LEFT, 2f),
                                     new Column<>(

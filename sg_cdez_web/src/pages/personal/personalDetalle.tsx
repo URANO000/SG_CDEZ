@@ -122,7 +122,7 @@ export function PersonalDetalle() {
             <div className={classes.contentGrid}>
 
                 {/* LEFT */}
-                <div className={classes.mainColumn}>
+                <div className={`${classes.mainColumn} ${classes.topCard}`}>
 
                     <Paper className={classes.card}>
                         <Title order={4} className={classes.sectionTitle}> Información general </Title>
@@ -200,7 +200,7 @@ export function PersonalDetalle() {
 
 
                 {/* RIGHT */}
-                <div className={classes.sideColumn}>
+                <div className={`${classes.sideColumn} ${classes.topCard}`}>
 
                     <div>
                         <Paper className={classes.card}>

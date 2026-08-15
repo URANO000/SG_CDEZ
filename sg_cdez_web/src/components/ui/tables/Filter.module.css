@@ -15,17 +15,29 @@
     margin-bottom: 20px;
 }
 
-
-.createBtn {
+.btnBar{
     display: flex;
     flex-wrap: wrap;
     justify-content: end;
     margin-bottom: 20px;
+    gap: 12px;
+}
+
+
+.createBtn {
     text-decoration: none;
 }
 
 .createBtn a {
     color: #ffffff;
+}
+
+.reportBtn{
+    background-color: var(--color-secondary);
+}
+
+.reportBtn:hover{
+    background-color: #688399;
 }
 
 .field {

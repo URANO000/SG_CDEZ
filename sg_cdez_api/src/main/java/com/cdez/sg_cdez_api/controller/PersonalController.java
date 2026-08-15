@@ -63,7 +63,7 @@ public class PersonalController {
         return SERVICE.desactivarPersonal(id);
     }
 
-    @GetMapping("/reporte")
+    @GetMapping("/reportePDF")
     public ResponseEntity<byte[]> generarReportePdf() throws IOException {
         byte[] pdf = SERVICE.generarReportePersonalPDF();
         return ResponseEntity.ok()

@@ -14,30 +14,28 @@
     min-height: 36px;
 }
 
+.topCard {
+    height: 100%;
+}
 
 .contentGrid {
     display: grid;
     grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr);
     gap: 20px;
-    align-items: start;
+    align-items: stretch;
 }
 
-.mainColumn {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-
+.mainColumn,
 .sideColumn {
     display: flex;
     flex-direction: column;
     gap: 20px;
-
-    position: sticky;
-    top: 20px;
 }
 
+.mainColumn > :first-child,
+.sideColumn > :first-child {
+    height: 100%;
+}
 
 .headerCard {
     background-color: var(--table-color-light);
@@ -111,7 +109,7 @@
 }
 
 .scrollContent {
-    max-height: 320px;
+    max-height: 200px;
     overflow-y: auto;
 
     padding-right: 6px;
