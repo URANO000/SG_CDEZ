@@ -43,3 +43,10 @@ export const actualizarPersonal = async (personalId: string,formData: FormData):
     );
     return response.data;
 };
+
+export const generarReportePDF = async () => {
+  const response = await apiClient.get(`/personal/reportePDF`, {
+    responseType: 'blob', 
+  });
+  return response.data; 
+};

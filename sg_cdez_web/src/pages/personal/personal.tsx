@@ -8,6 +8,7 @@ import classes from '../../components/ui/tables/Filter.module.css';
 import { Group, Title, Select, Button, TextInput, Pagination } from "@mantine/core";
 import { AiOutlineSearch } from "react-icons/ai";
 import { Link } from "react-router";
+import { generarReportePDF } from "../../services/personalService";
 
 export function Personal() {
     const [filtros, setFiltros] = useState<PersonalFiltro>({
@@ -18,6 +19,18 @@ export function Personal() {
 
     const [pageSize] = useState(10);
     const [pageData, setPageData] = useState<PageResponse<PersonalResponse> | null>(null);
+
+    const handleGenerateReport = async () => {
+        const blob = await generarReportePDF();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'reporte_de_personal.pdf';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+    };
 
     const cargarPersonal = async (page: number) => {
         const response = await listarPersonalFiltrado(filtros, page, pageSize);
@@ -33,11 +46,16 @@ export function Personal() {
             </div>
 
             <div className={classes.subpg}>
-                <Link to={'/personal/registrar'} className={classes.createBtn}>
-                    <Button>
-                        Registrar Personal
+                <div className={classes.btnBar}>
+                    <Link to={'/personal/registrar'} className={classes.createBtn}>
+                        <Button>
+                            Registrar Personal
+                        </Button>
+                    </Link>
+                    <Button onClick={handleGenerateReport} className={classes.reportBtn}>
+                        Generar Reporte
                     </Button>
-                </Link>
+                </div>
                 <div className={classes.filterBar}>
                     <TextInput
                         placeholder="Buscar..."
