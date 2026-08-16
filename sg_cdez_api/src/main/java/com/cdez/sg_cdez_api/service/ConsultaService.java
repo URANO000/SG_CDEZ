@@ -5,9 +5,11 @@ import com.cdez.sg_cdez_api.dto.response.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 
 @Service
 public interface ConsultaService {
     PageResponse<ConsultaResponse> listarConsultasFiltradas(ConsultaFiltro filtros,Pageable pageable);
-    ConsultaResponse obtenerConsultaPorId(int id);
+    ConsultaResponse obtenerConsultaPorId(UUID id);
 }

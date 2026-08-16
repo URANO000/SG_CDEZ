@@ -1,18 +1,18 @@
 package com.cdez.sg_cdez_api.service.impl;
 
 import com.cdez.sg_cdez_api.dto.request.ConsultaFiltro;
-import com.cdez.sg_cdez_api.dto.response.ConsultaResponse;
-import com.cdez.sg_cdez_api.dto.response.PageResponse;
-import com.cdez.sg_cdez_api.entity.Consulta;
+import com.cdez.sg_cdez_api.dto.response.*;
+import com.cdez.sg_cdez_api.entity.*;
 import com.cdez.sg_cdez_api.repository.ConsultaRepository;
 import com.cdez.sg_cdez_api.repository.specifications.ConsultaSpecs;
 import com.cdez.sg_cdez_api.service.ConsultaService;
-import com.cdez.sg_cdez_api.util.AuthHelper;
-import com.cdez.sg_cdez_api.util.ValidationHelper;
+import com.cdez.sg_cdez_api.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 
 @Service
@@ -51,21 +51,29 @@ public class ConsultaServiceImpl implements ConsultaService {
     }
 
     @Override
-    public ConsultaResponse obtenerConsultaPorId(int id) {
+    public ConsultaResponse obtenerConsultaPorId(UUID id) {
         return null;
     }
 
     private ConsultaResponse mapDTO(Consulta consulta){
+        AdultoMayor adultoMayor = consulta.getAdultoMayor();
         return new ConsultaResponse(
                 consulta.getConsultaId(),
-                consulta.getAdultoMayor().getNombreCompleto(),
+                new AdultoMayorConsultaResponse(
+                        adultoMayor.getAdultoId(),
+                        adultoMayor.getTipoIdentificacion(),
+                        adultoMayor.getIdentificacion(),
+                        adultoMayor.getNombreCompleto(),
+                        adultoMayor.getFechaNacimiento(),
+                        adultoMayor.getSexo()
+                ),
                 consulta.getMotivo(),
-                consulta.getTipoIntervencion(),
+                consulta.getTipoConsulta(),
                 consulta.getDescripcion(),
                 consulta.getDiagnostico(),
                 consulta.getRecomendaciones(),
                 consulta.getNotas(),
-                consulta.getReferencia().getPersonalId(),
+                consulta.isActivo() ? "Activo" : "Inactivo",
                 consulta.getCreatedBy().getNombreCompleto(),
                 consulta.getCreatedBy().getPersonalId(),
                 consulta.getCreatedAt()

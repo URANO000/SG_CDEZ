@@ -59,10 +59,10 @@ public class Personal {
     @OneToMany(mappedBy = "updatedBy")
     private List<EncargadoLegal> encargadosLegalesU = new ArrayList<>();
 
-    @OneToMany(mappedBy = "referencia")
-    private List<Consulta> referenciaConsultas = new ArrayList<>();
     @OneToMany(mappedBy = "createdBy")
     private List<Consulta> consultas = new ArrayList<>();
+    @OneToMany(mappedBy = "updatedBy")
+    private List<Consulta> consultasU = new ArrayList<>();
 
     @OneToMany(mappedBy = "personal")
     private List<Documento> documentos = new ArrayList<>();

@@ -4,6 +4,8 @@ import com.cdez.sg_cdez_api.entity.Consulta;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.UUID;
 
-public interface ConsultaRepository extends JpaRepository<Consulta, Integer>, JpaSpecificationExecutor<Consulta> {
+
+public interface ConsultaRepository extends JpaRepository<Consulta, UUID>, JpaSpecificationExecutor<Consulta> {
 }
