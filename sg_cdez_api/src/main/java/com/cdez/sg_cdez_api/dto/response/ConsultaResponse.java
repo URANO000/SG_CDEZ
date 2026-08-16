@@ -4,15 +4,15 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record ConsultaResponse(
-        int consultaId,
-        String adultoMayorNombre,
+        UUID consultaId,
+        AdultoMayorConsultaResponse adultoMayor,
         String motivo,
-        String tipoIntervencion,
+        String tipoConsulta,
         String descripcion,
         String diagnostico,
         String recomendaciones,
         String notas,
-        UUID referenciaPersonal,
+        String activo,
         String createdByName,
         UUID createdById,
         LocalDateTime createdAt
