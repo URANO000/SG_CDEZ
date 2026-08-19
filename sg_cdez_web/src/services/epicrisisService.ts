@@ -31,3 +31,10 @@ export async function listarHistorialEpicrisis(
 
   return response.data;
 }
+export async function descargarEpicrisis(epicrisisId: string): Promise<Blob> {
+  const response = await apiClient.get(`/epicrisis/${epicrisisId}/descargar`, {
+    responseType: "blob",
+  });
+
+  return response.data;
+}

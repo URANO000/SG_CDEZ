@@ -12,11 +12,12 @@ import {
   Tabs,
   Text,
   Title,
+  Button,
+  Pagination,
+  Select,
 } from "@mantine/core";
 
 import axios from "axios";
-
-import { obtenerEpicrisisVigente } from "../../services/epicrisisService";
 
 import type { EpicrisisResponse } from "../../services/interfaces/epicrisisInterface";
 
@@ -33,6 +34,16 @@ import { listarEncargadosPorAdulto } from "../../services/encargadoLegalService"
 import type { EncargadoLegalResponse } from "../../services/interfaces/encargadoLegalInterface";
 
 import classes from "./Expediente.module.css";
+
+import { EpicrisisTable } from "../../components/ui/tables/EpicrisisTable";
+
+import {
+  descargarEpicrisis,
+  listarHistorialEpicrisis,
+  obtenerEpicrisisVigente,
+} from "../../services/epicrisisService";
+
+import type { PageResponse } from "../../services/interfaces/pageResponse";
 
 interface CampoInformacion {
   etiqueta: string;
@@ -90,9 +101,48 @@ export function AdultoMayorExpediente() {
   const [epicrisisVigente, setEpicrisisVigente] =
     useState<EpicrisisResponse | null>(null);
 
+  const [historialEpicrisis, setHistorialEpicrisis] =
+    useState<PageResponse<EpicrisisResponse> | null>(null);
+
+  const [historialLoading, setHistorialLoading] = useState(true);
+
+  const [historialError, setHistorialError] = useState(false);
+
+  const [anioEpicrisis, setAnioEpicrisis] = useState<string | null>(null);
+
+  const cantidadEpicrisis = 5;
+
   const [epicrisisLoading, setEpicrisisLoading] = useState(true);
 
   const [epicrisisError, setEpicrisisError] = useState(false);
+
+  async function cargarHistorialEpicrisis(pagina: number, anio?: number) {
+    if (!adultoId) return;
+
+    try {
+      setHistorialLoading(true);
+      setHistorialError(false);
+
+      const response = await listarHistorialEpicrisis(
+        adultoId,
+        pagina,
+        cantidadEpicrisis,
+        anio,
+      );
+
+      setHistorialEpicrisis(response);
+    } catch {
+      setHistorialError(true);
+    } finally {
+      setHistorialLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!adultoId) return;
+
+    void cargarHistorialEpicrisis(0);
+  }, [adultoId]);
 
   useEffect(() => {
     const id = adultoId;
@@ -236,6 +286,26 @@ export function AdultoMayorExpediente() {
     },
   ];
 
+  async function manejarDescargaEpicrisis(epicrisis: EpicrisisResponse) {
+    try {
+      const archivo = await descargarEpicrisis(epicrisis.epicrisisId);
+
+      const url = URL.createObjectURL(archivo);
+      const enlace = document.createElement("a");
+
+      enlace.href = url;
+      enlace.download = epicrisis.nombreArchivo;
+
+      document.body.appendChild(enlace);
+      enlace.click();
+      enlace.remove();
+
+      URL.revokeObjectURL(url);
+    } catch {
+      window.alert("No se pudo descargar la epicrisis.");
+    }
+  }
+
   return (
     <div className={classes.container}>
       <Group gap="sm" className={classes.topBar}>
@@ -350,8 +420,7 @@ export function AdultoMayorExpediente() {
             </Alert>
           ) : encargados.length === 0 ? (
             <Text className={classes.emptyState}>
-              No hay un encargado No hay un encargado legal asociado a este
-              adulto mayor.
+              No hay un encargado legal asociado a este adulto mayor.
             </Text>
           ) : (
             <Stack gap="md" className={classes.encargadosList}>
@@ -484,6 +553,85 @@ export function AdultoMayorExpediente() {
               </SimpleGrid>
             </Paper>
           )}
+
+          <div className={classes.historySection}>
+            <Group
+              justify="space-between"
+              align="end"
+              wrap="wrap"
+              className={classes.historyHeader}
+            >
+              <div>
+                <Title order={4} className={classes.personName}>
+                  Historial de epicrisis
+                </Title>
+
+                <Text size="sm" className={classes.secondaryText}>
+                  Epicrisis anteriores asociadas al adulto mayor.
+                </Text>
+              </div>
+
+              <Group gap="sm" align="end">
+                <Select
+                  label="Año"
+                  placeholder="Todos los años"
+                  clearable
+                  value={anioEpicrisis}
+                  onChange={setAnioEpicrisis}
+                  data={Array.from({ length: 10 }, (_, indice) => {
+                    const anio = new Date().getFullYear() - indice;
+
+                    return {
+                      value: anio.toString(),
+                      label: anio.toString(),
+                    };
+                  })}
+                />
+
+                <Button
+                  className={classes.filterButton}
+                  onClick={() =>
+                    void cargarHistorialEpicrisis(
+                      0,
+                      anioEpicrisis ? Number(anioEpicrisis) : undefined,
+                    )
+                  }
+                >
+                  Filtrar
+                </Button>
+              </Group>
+            </Group>
+
+            {historialLoading ? (
+              <div className={classes.loadingSection}>
+                <Loader color="var(--color-primary)" />
+              </div>
+            ) : historialError ? (
+              <Alert color="red">
+                No se pudo cargar el historial de epicrisis.
+              </Alert>
+            ) : (
+              <>
+                <EpicrisisTable
+                  epicrisis={historialEpicrisis?.content ?? []}
+                  onDescargar={manejarDescargaEpicrisis}
+                />
+
+                <Group justify="center" className={classes.paginationBar}>
+                  <Pagination
+                    value={(historialEpicrisis?.currentPage ?? 0) + 1}
+                    onChange={(pagina) =>
+                      void cargarHistorialEpicrisis(
+                        pagina - 1,
+                        anioEpicrisis ? Number(anioEpicrisis) : undefined,
+                      )
+                    }
+                    total={Math.max(historialEpicrisis?.totalPages ?? 0, 1)}
+                  />
+                </Group>
+              </>
+            )}
+          </div>
         </Tabs.Panel>
 
         <Tabs.Panel value="documentos" className={classes.panelPlaceholder}>

@@ -208,3 +208,24 @@
   opacity: 0.55;
   text-align: center;
 }
+.historySection {
+    margin-top: 32px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(107, 99, 117, 0.16);
+}
+
+.historyHeader {
+    margin-bottom: 20px;
+}
+
+.filterButton {
+    background-color: var(--color-navbar);
+}
+
+.filterButton:hover {
+    background-color: var(--color-secondary);
+}
+
+.paginationBar {
+    margin-top: 20px;
+}
