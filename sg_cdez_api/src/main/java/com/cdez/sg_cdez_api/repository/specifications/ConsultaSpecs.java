@@ -45,6 +45,10 @@ public class ConsultaSpecs {
         };
     }
 
+    public static Specification<Consulta> isActivo(boolean providedEstado){
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("activo"), providedEstado);
+    }
+
     public static Specification<Consulta> containsName(String providedSearch){
         return (root, query, criteriaBuilder) -> {
             String pattern = "%" + providedSearch.toLowerCase().trim() + "%";

@@ -8,7 +8,6 @@ public record AdultoMayorConsultaResponse(
         String tipoIdentificacion,
         String identificacion,
         String nombreCompleto,
-        LocalDateTime fechaNacimiento,
-        String sexo
+        LocalDateTime fechaNacimiento
 ) {
 }

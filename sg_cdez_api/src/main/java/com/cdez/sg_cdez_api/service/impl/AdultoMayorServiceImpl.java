@@ -501,5 +501,13 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         }
     }
 
+    public AdultoMayor obtenerAdultoCheck(UUID id){
+        return adultoMayorRepository.findById(id)
+                .orElseThrow(()-> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Adulto indicado no encontrado"
+                ));
+    }
+
 
 }
