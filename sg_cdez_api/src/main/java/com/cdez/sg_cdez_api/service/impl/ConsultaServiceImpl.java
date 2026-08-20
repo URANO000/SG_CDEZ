@@ -133,7 +133,7 @@ public class ConsultaServiceImpl implements ConsultaService {
         return mapDTO(consultaDesactivada);
     }
 
-    private ConsultaResponse mapDTO(Consulta consulta){
+    public ConsultaResponse mapDTO(Consulta consulta){
         AdultoMayor adultoMayor = consulta.getAdultoMayor();
         Personal personal = consulta.getCreatedBy();
         return new ConsultaResponse(

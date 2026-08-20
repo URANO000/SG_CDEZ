@@ -8,7 +8,6 @@ import java.util.*;
 
 public record ConsultaNutricionalResponse(
         UUID consultaNutricionalId,
-        AdultoMayorConsultaResponse adultoMayor,
         ConsultaResponse consultaGeneral,
         String historiaAlimentaria,
         Apetito apetito,
@@ -22,11 +21,8 @@ public record ConsultaNutricionalResponse(
         String frecuenciaEvacuaciones,
         String consistenciaBristol,
         String estadoCognitivo,
-        List<TamizajeNutricionalCreateRequest> tamizajes,
-        List<ExamenLaboratorioCreateRequest> examenesLaboratorio,
-        AntropometriaCreateRequest antropometria,
-        PersonalConsultaResponse createdBy,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        List<TamizajeResponse> tamizajes,
+        List<ExamenLaboratorioResponse> examenesLaboratorio,
+        AntropometriaResponse antropometria
 ) {
 }

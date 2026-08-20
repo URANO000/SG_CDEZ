@@ -4,6 +4,7 @@ import com.cdez.sg_cdez_api.dto.request.ConsultaCreateRequest;
 import com.cdez.sg_cdez_api.dto.request.ConsultaFiltro;
 import com.cdez.sg_cdez_api.dto.request.ConsultaUpdateRequest;
 import com.cdez.sg_cdez_api.dto.response.*;
+import com.cdez.sg_cdez_api.entity.Consulta;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -17,4 +18,5 @@ public interface ConsultaService {
     ConsultaResponse crearConsulta(ConsultaCreateRequest request);
     ConsultaResponse actualizarConsulta(ConsultaUpdateRequest request, UUID id);
     ConsultaResponse desactivarConsulta(UUID id);
+    ConsultaResponse mapDTO(Consulta consulta);
 }
