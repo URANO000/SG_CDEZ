@@ -8,12 +8,21 @@ import {
   Loader,
   Paper,
   SimpleGrid,
+  Stack,
   Tabs,
   Text,
   Title,
+  Button,
+  Pagination,
+  Select,
+  Modal,
 } from "@mantine/core";
 
-import { BsArrowLeft } from "react-icons/bs";
+import axios from "axios";
+
+import type { EpicrisisResponse } from "../../services/interfaces/epicrisisInterface";
+
+import { BsArrowLeft, BsDownload, BsEye } from "react-icons/bs";
 
 import { useNavigate, useParams } from "react-router";
 
@@ -21,7 +30,25 @@ import { obtenerAdultoMayorPorId } from "../../services/adultoMayorService";
 
 import type { AdultoMayorResponse } from "../../services/interfaces/adultoMayorInterface";
 
+import { listarEncargadosPorAdulto } from "../../services/encargadoLegalService";
+
+import type { EncargadoLegalResponse } from "../../services/interfaces/encargadoLegalInterface";
+
 import classes from "./Expediente.module.css";
+
+import { EpicrisisTable } from "../../components/ui/tables/EpicrisisTable";
+
+import { EpicrisisForm } from "../../components/ui/forms/EpicrisisForm";
+
+import {
+  descargarEpicrisis,
+  listarHistorialEpicrisis,
+  obtenerEpicrisisVigente,
+} from "../../services/epicrisisService";
+
+import { notifications } from "@mantine/notifications";
+
+import type { PageResponse } from "../../services/interfaces/pageResponse";
 
 interface CampoInformacion {
   etiqueta: string;
@@ -70,6 +97,60 @@ export function AdultoMayorExpediente() {
 
   const [error, setError] = useState(false);
 
+  const [encargados, setEncargados] = useState<EncargadoLegalResponse[]>([]);
+
+  const [encargadosLoading, setEncargadosLoading] = useState(true);
+
+  const [encargadosError, setEncargadosError] = useState(false);
+
+  const [epicrisisVigente, setEpicrisisVigente] =
+    useState<EpicrisisResponse | null>(null);
+
+  const [historialEpicrisis, setHistorialEpicrisis] =
+    useState<PageResponse<EpicrisisResponse> | null>(null);
+
+  const [historialLoading, setHistorialLoading] = useState(true);
+
+  const [historialError, setHistorialError] = useState(false);
+
+  const [anioEpicrisis, setAnioEpicrisis] = useState<string | null>(null);
+
+  const cantidadEpicrisis = 5;
+
+  const [epicrisisLoading, setEpicrisisLoading] = useState(true);
+
+  const [epicrisisError, setEpicrisisError] = useState(false);
+
+  const [modalEpicrisisAbierto, setModalEpicrisisAbierto] = useState(false);
+
+  async function cargarHistorialEpicrisis(pagina: number, anio?: number) {
+    if (!adultoId) return;
+
+    try {
+      setHistorialLoading(true);
+      setHistorialError(false);
+
+      const response = await listarHistorialEpicrisis(
+        adultoId,
+        pagina,
+        cantidadEpicrisis,
+        anio,
+      );
+
+      setHistorialEpicrisis(response);
+    } catch {
+      setHistorialError(true);
+    } finally {
+      setHistorialLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!adultoId) return;
+
+    void cargarHistorialEpicrisis(0);
+  }, [adultoId]);
+
   useEffect(() => {
     const id = adultoId;
 
@@ -85,6 +166,39 @@ export function AdultoMayorExpediente() {
       .finally(() => {
         setLoading(false);
       });
+
+    listarEncargadosPorAdulto(id)
+      .then(setEncargados)
+      .catch(() => {
+        setEncargadosError(true);
+      })
+      .finally(() => {
+        setEncargadosLoading(false);
+      });
+  }, [adultoId]);
+
+  useEffect(() => {
+    if (!adultoId) return;
+
+    async function cargarEpicrisisVigente() {
+      try {
+        setEpicrisisLoading(true);
+        setEpicrisisError(false);
+
+        const epicrisis = await obtenerEpicrisisVigente(adultoId!);
+        setEpicrisisVigente(epicrisis);
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+          setEpicrisisVigente(null);
+        } else {
+          setEpicrisisError(true);
+        }
+      } finally {
+        setEpicrisisLoading(false);
+      }
+    }
+
+    void cargarEpicrisisVigente();
   }, [adultoId]);
 
   if (!adultoId) {
@@ -178,6 +292,86 @@ export function AdultoMayorExpediente() {
       valor: adultoMayor.ayudaBiomecanica ? "Sí" : "No",
     },
   ];
+
+  async function manejarDescargaEpicrisis(epicrisis: EpicrisisResponse) {
+    try {
+      const archivo = await descargarEpicrisis(epicrisis.epicrisisId);
+
+      const url = URL.createObjectURL(archivo);
+      const enlace = document.createElement("a");
+
+      enlace.href = url;
+      enlace.download = epicrisis.nombreArchivo;
+
+      document.body.appendChild(enlace);
+      enlace.click();
+      enlace.remove();
+
+      URL.revokeObjectURL(url);
+
+      notifications.show({
+        title: "Descarga iniciada",
+        message: `Se descargará ${epicrisis.nombreArchivo}.`,
+        color: "green",
+      });
+    } catch {
+      notifications.show({
+        title: "Error de descarga",
+        message: "No se pudo descargar la epicrisis.",
+        color: "red",
+      });
+    }
+  }
+
+  async function manejarVisualizacionEpicrisis(epicrisis: EpicrisisResponse) {
+    const ventana = window.open("", "_blank");
+
+    if (!ventana) {
+      notifications.show({
+        title: "Ventana bloqueada",
+        message: "Permita las ventanas emergentes para visualizar el archivo.",
+        color: "orange",
+      });
+
+      return;
+    }
+
+    try {
+      ventana.document.title = "Cargando archivo...";
+
+      const archivo = await descargarEpicrisis(epicrisis.epicrisisId);
+
+      const url = URL.createObjectURL(archivo);
+
+      ventana.location.href = url;
+
+      window.setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 60000);
+    } catch {
+      ventana.close();
+
+      notifications.show({
+        title: "Error de visualización",
+        message: "No se pudo visualizar la epicrisis.",
+        color: "red",
+      });
+    }
+  }
+
+  function manejarEpicrisisRegistrada(epicrisis: EpicrisisResponse) {
+    setEpicrisisVigente(epicrisis);
+    setModalEpicrisisAbierto(false);
+    setAnioEpicrisis(null);
+
+    void cargarHistorialEpicrisis(0);
+
+    notifications.show({
+      title: "Epicrisis registrada",
+      message: "La epicrisis se registró correctamente.",
+      color: "green",
+    });
+  }
 
   return (
     <div className={classes.container}>
@@ -282,12 +476,272 @@ export function AdultoMayorExpediente() {
           </SimpleGrid>
         </Tabs.Panel>
 
-        <Tabs.Panel value="encargados" className={classes.panelPlaceholder}>
-          La información de encargados legales se integrará posteriormente.
+        <Tabs.Panel value="encargados" className={classes.panel}>
+          {encargadosLoading ? (
+            <div className={classes.loadingState}>
+              <Loader color="var(--color-primary)" />
+            </div>
+          ) : encargadosError ? (
+            <Alert color="red">
+              No se pudieron cargar los encargados legales.
+            </Alert>
+          ) : encargados.length === 0 ? (
+            <Text className={classes.emptyState}>
+              No hay un encargado legal asociado a este adulto mayor.
+            </Text>
+          ) : (
+            <Stack gap="md" className={classes.encargadosList}>
+              {encargados.map((encargado) => {
+                const contactosActivos = encargado.contactos.filter(
+                  (contacto) => contacto.activo === "Activo",
+                );
+
+                const nombreCompleto = [
+                  encargado.primerNombre,
+                  encargado.segundoNombre,
+                  encargado.primerApellido,
+                  encargado.segundoApellido,
+                ]
+                  .filter(Boolean)
+                  .join(" ");
+
+                return (
+                  <Paper
+                    key={encargado.encargadoId}
+                    className={classes.encargadoCard}
+                  >
+                    <Title order={4} className={classes.encargadoName}>
+                      {nombreCompleto}
+                    </Title>
+
+                    <SimpleGrid
+                      cols={{
+                        base: 1,
+                        sm: 2,
+                      }}
+                      spacing="lg"
+                    >
+                      <Campo
+                        etiqueta={"Tipo de identificación"}
+                        valor={encargado.tipoIdentificacion}
+                      />
+
+                      <Campo
+                        etiqueta="Identificación"
+                        valor={encargado.identificacion}
+                      />
+
+                      <Campo etiqueta="Dirección" valor={encargado.direccion} />
+
+                      <Campo
+                        etiqueta="Estado"
+                        valor={encargado.activo ? "Activo" : "Inactivo"}
+                      />
+                    </SimpleGrid>
+
+                    <div className={classes.contactosSection}>
+                      <Text className={classes.label}>Contactos</Text>
+
+                      {contactosActivos.length > 0 ? (
+                        <div className={classes.contactosList}>
+                          {contactosActivos.map((contacto) => (
+                            <div
+                              key={contacto.contactoId}
+                              className={classes.contactoRow}
+                            >
+                              <Text className={classes.contactoType}>
+                                {contacto.tipoValor}
+                              </Text>
+
+                              <Text className={classes.value}>
+                                {contacto.valor}
+                              </Text>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <Text className={classes.emptyState}>
+                          Sin contactos activos registrados.
+                        </Text>
+                      )}
+                    </div>
+                  </Paper>
+                );
+              })}
+            </Stack>
+          )}
         </Tabs.Panel>
 
-        <Tabs.Panel value="epicrisis" className={classes.panelPlaceholder}>
-          El historial de epicrisis se integrará posteriormente.
+        <Tabs.Panel value="epicrisis" className={classes.panel}>
+          <Group justify="flex-end" mb="lg">
+            <Button
+              onClick={() => setModalEpicrisisAbierto(true)}
+              className={classes.registerButton}
+            >
+              + Nueva epicrisis
+            </Button>
+          </Group>
+          {epicrisisLoading ? (
+            <div className={classes.loadingSection}>
+              <Loader color="var(--color-primary)" />
+            </div>
+          ) : epicrisisError ? (
+            <Alert color="red">No se pudo cargar la epicrisis vigente.</Alert>
+          ) : !epicrisisVigente ? (
+            <div className={classes.emptyState}>
+              No existe una epicrisis vigente registrada.
+            </div>
+          ) : (
+            <Paper className={classes.epicrisisCard}>
+              <Group justify="space-between" mb="lg">
+                <div>
+                  <Text className={classes.label}>Epicrisis vigente</Text>
+
+                  <Title order={4} className={classes.personName}>
+                    {epicrisisVigente.centroSalud}
+                  </Title>
+                </div>
+
+                <Badge className={classes.badgeActive}>Vigente</Badge>
+              </Group>
+
+              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xl">
+                <Campo
+                  etiqueta="Fecha de emisión"
+                  valor={mostrarFecha(epicrisisVigente.fechaEmision)}
+                />
+
+                <Campo
+                  etiqueta="Fecha de recepción"
+                  valor={mostrarFecha(epicrisisVigente.fechaRecepcion)}
+                />
+
+                <Campo
+                  etiqueta="Nombre del archivo"
+                  valor={epicrisisVigente.nombreArchivo}
+                />
+
+                <Campo
+                  etiqueta="Tipo de archivo"
+                  valor={epicrisisVigente.tipoArchivo}
+                />
+              </SimpleGrid>
+              <Group justify="flex-end" mt="xl">
+                <Button
+                  variant="outline"
+                  leftSection={<BsEye size={16} />}
+                  onClick={() =>
+                    void manejarVisualizacionEpicrisis(epicrisisVigente)
+                  }
+                >
+                  Visualizar
+                </Button>
+
+                <Button
+                  leftSection={<BsDownload size={16} />}
+                  className={classes.registerButton}
+                  onClick={() =>
+                    void manejarDescargaEpicrisis(epicrisisVigente)
+                  }
+                >
+                  Descargar
+                </Button>
+              </Group>
+            </Paper>
+          )}
+
+          <div className={classes.historySection}>
+            <Group
+              justify="space-between"
+              align="end"
+              wrap="wrap"
+              className={classes.historyHeader}
+            >
+              <div>
+                <Title order={4} className={classes.personName}>
+                  Historial de epicrisis
+                </Title>
+
+                <Text size="sm" className={classes.secondaryText}>
+                  Epicrisis anteriores asociadas al adulto mayor.
+                </Text>
+              </div>
+
+              <Group gap="sm" align="end">
+                <Select
+                  label="Año"
+                  placeholder="Todos los años"
+                  clearable
+                  value={anioEpicrisis}
+                  onChange={setAnioEpicrisis}
+                  data={Array.from({ length: 10 }, (_, indice) => {
+                    const anio = new Date().getFullYear() - indice;
+
+                    return {
+                      value: anio.toString(),
+                      label: anio.toString(),
+                    };
+                  })}
+                />
+
+                <Button
+                  className={classes.filterButton}
+                  onClick={() =>
+                    void cargarHistorialEpicrisis(
+                      0,
+                      anioEpicrisis ? Number(anioEpicrisis) : undefined,
+                    )
+                  }
+                >
+                  Filtrar
+                </Button>
+              </Group>
+            </Group>
+
+            {historialLoading ? (
+              <div className={classes.loadingSection}>
+                <Loader color="var(--color-primary)" />
+              </div>
+            ) : historialError ? (
+              <Alert color="red">
+                No se pudo cargar el historial de epicrisis.
+              </Alert>
+            ) : (
+              <>
+                <EpicrisisTable
+                  epicrisis={historialEpicrisis?.content ?? []}
+                  onVisualizar={manejarVisualizacionEpicrisis}
+                  onDescargar={manejarDescargaEpicrisis}
+                />
+
+                <Group justify="center" className={classes.paginationBar}>
+                  <Pagination
+                    value={(historialEpicrisis?.currentPage ?? 0) + 1}
+                    onChange={(pagina) =>
+                      void cargarHistorialEpicrisis(
+                        pagina - 1,
+                        anioEpicrisis ? Number(anioEpicrisis) : undefined,
+                      )
+                    }
+                    total={Math.max(historialEpicrisis?.totalPages ?? 0, 1)}
+                  />
+                </Group>
+              </>
+            )}
+          </div>
+          <Modal
+            opened={modalEpicrisisAbierto}
+            onClose={() => setModalEpicrisisAbierto(false)}
+            title="Registrar nueva epicrisis"
+            centered
+            closeOnClickOutside
+          >
+            <EpicrisisForm
+              adultoId={adultoId}
+              onRegistrada={manejarEpicrisisRegistrada}
+              onCancelar={() => setModalEpicrisisAbierto(false)}
+            />
+          </Modal>
         </Tabs.Panel>
 
         <Tabs.Panel value="documentos" className={classes.panelPlaceholder}>

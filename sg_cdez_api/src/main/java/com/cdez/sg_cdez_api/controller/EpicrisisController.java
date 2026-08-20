@@ -11,6 +11,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.cdez.sg_cdez_api.dto.response.PageResponse;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -62,6 +66,26 @@ public class EpicrisisController {
                 epicrisisService.listarEpicrisisPorAdulto(
                         adultoId,
                         anio
+                )
+        );
+    }
+
+    @GetMapping("/adultos-mayores/{adultoId}/epicrisis/historial")
+    public ResponseEntity<PageResponse<EpicrisisResponse>> listarHistorialEpicrisis(
+            @PathVariable UUID adultoId,
+            @RequestParam(required = false) Integer anio,
+            @PageableDefault(
+                    size = 10,
+                    sort = "fechaEmision",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+                epicrisisService.listarHistorialEpicrisis(
+                        adultoId,
+                        anio,
+                        pageable
                 )
         );
     }
