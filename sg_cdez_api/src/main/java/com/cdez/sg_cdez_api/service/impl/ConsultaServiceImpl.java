@@ -28,24 +28,24 @@ public class ConsultaServiceImpl implements ConsultaService {
 
     @Override
     public PageResponse<ConsultaResponse> listarConsultasFiltradas(ConsultaFiltro filtros, Pageable pageable) {
-        if(filtros.adultoId() == null){
-            throw new RuntimeException("Id de adulto mayor no puede ser vacío");
+        Specification<Consulta> spec = Specification.unrestricted();
+
+        if(filtros.searchTerm() != null){
+            spec = spec.and(ConsultaSpecs.containsSearch(filtros.searchTerm()));
         }
 
-        Specification<Consulta> spec = Specification.unrestricted();
-        spec = spec.and(ConsultaSpecs.hasAdultoId(filtros.adultoId()));
+        if (filtros.personalView()) {
+            UUID personalId = AUTH_HELPER.obtenerUsuarioAutenticado().getPersonalId();
 
-        if(filtros.personalView() != null){
-            spec = spec.and(ConsultaSpecs.hasCreatedById(AUTH_HELPER.obtenerUsuarioAutenticado().getPersonalId()));
+            spec = spec.and(
+                    ConsultaSpecs.hasCreatedById(personalId)
+            );
         }
 
         if(filtros.especialidad() != null){
             spec = spec.and(ConsultaSpecs.hasEspecialidad(filtros.especialidad()));
         }
 
-        if(filtros.nombreCreadoPor() != null){
-            spec = spec.and(ConsultaSpecs.containsName(filtros.nombreCreadoPor()));
-        }
 
         spec = spec.and(ConsultaSpecs.isActivo(true)); // Siempre (por ahora).
 

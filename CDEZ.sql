@@ -45,7 +45,7 @@ CREATE TABLE AdultoMayor(
 	segundo_apellido VARCHAR(50) NULL,
 	nacionalidad VARCHAR(100) NOT NULL,
 	fecha_nacimiento TIMESTAMP NULL,
-	sexo VARCHAR(1) CHECK (sexo IN ('H', 'M')) NOT NULL,
+	sexo VARCHAR(1) CHECK (sexo IN ('F', 'M')) NOT NULL,
 	direccion VARCHAR(200) NOT NULL,
 	escolaridad VARCHAR(80) NOT NULL,
 	grupo_familiar VARCHAR(200),
@@ -62,6 +62,7 @@ CREATE TABLE AdultoMayor(
 	updated_by UUID REFERENCES Personal(personal_id) NULL,
 	updated_at TIMESTAMP NULL
 );
+
 
 CREATE TABLE EncargadoLegal(
 	encargado_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -229,8 +230,8 @@ CREATE TABLE Consulta(
 	notas TEXT,
 	created_by UUID NOT NULL REFERENCES Personal(personal_id),
 	created_at TIMESTAMP NOT NULL,
-	updated_by UUID NOT NULL REFERENCES Personal(personal_id),
-	updated_at TIMESTAMP NOT NULL,
+	updated_by UUID REFERENCES Personal(personal_id),
+	updated_at TIMESTAMP,
 	activo BOOl NOT NUlL
 );
 
@@ -300,7 +301,7 @@ CREATE TABLE Medicamento(
 	observaciones TEXT,
 	created_by UUID NOT NULL REFERENCES Personal(personal_id),
 	created_at TIMESTAMP NOT NULL,
-	updated_by UUID NOT NULL REFERENCES Personal(personal_id),
-	updated_at TIMESTAMP NOT NULL,
+	updated_by UUID  REFERENCES Personal(personal_id),
+	updated_at TIMESTAMP,
 	activo BOOl NOT NULL
 );

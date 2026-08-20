@@ -19,12 +19,12 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("api/consulta")
 public class ConsultaController {
     private final ConsultaService SERVICE;
 
     @PostMapping("/listarConsultasFiltradas")
-    public PageResponse<ConsultaResponse> listarConsultasFiltradas(ConsultaFiltro filtros, @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
+    public PageResponse<ConsultaResponse> listarConsultasFiltradas(@Valid @RequestBody ConsultaFiltro filtros, @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
         return SERVICE.listarConsultasFiltradas(filtros, pageable);
     }
 
