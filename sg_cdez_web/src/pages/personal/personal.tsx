@@ -64,7 +64,7 @@ export function Personal() {
                 </div>
                 <div className={classes.filterBar}>
                     <TextInput
-                        placeholder="Buscar..."
+                        placeholder="Buscar por nombre o identificación..."
                         leftSection={<AiOutlineSearch size={16} />}
                         value={filtros.searchTerm ?? ""}
                         onChange={(e) => setFiltros({ ...filtros, searchTerm: e.target.value === "" ? null : e.target.value })}

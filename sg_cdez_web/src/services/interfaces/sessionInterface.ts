@@ -4,6 +4,7 @@ export interface Session {
     nombreCompleto: string;
     usuario: string;
     rol: string;
+    especialidad: string;
 }
 
 export interface AuthContextType {

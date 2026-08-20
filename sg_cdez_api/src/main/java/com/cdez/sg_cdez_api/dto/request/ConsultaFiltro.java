@@ -1,11 +1,9 @@
 package com.cdez.sg_cdez_api.dto.request;
 
-import java.util.UUID;
 
 public record ConsultaFiltro(
-        UUID adultoId,
-        Boolean personalView,
-        String especialidad,
-        String nombreCreadoPor
+        String searchTerm,
+        boolean personalView,
+        String especialidad
 ) {
 }

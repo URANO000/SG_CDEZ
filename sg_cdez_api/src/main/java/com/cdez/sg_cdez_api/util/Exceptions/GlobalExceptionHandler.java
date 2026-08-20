@@ -1,14 +1,13 @@
 package com.cdez.sg_cdez_api.util.Exceptions;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import lombok.*;
+import org.springframework.http.*;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(PageOutOfBoundsException.class)
@@ -26,6 +25,21 @@ public class GlobalExceptionHandler {
                 .body(Map.of(
                         "message", ex.getMessage()
                 ));
+    }
+
+    @ExceptionHandler(TokenExpiradoException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleTokenExpirado(TokenExpiradoException ex){
+        return  new ErrorResponse("El código de verificación ha expirado", ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage())
+        );
+        return ResponseEntity.badRequest().body(errors);
     }
 
 

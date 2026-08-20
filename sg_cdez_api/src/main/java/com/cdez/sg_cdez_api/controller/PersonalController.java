@@ -1,25 +1,17 @@
 package com.cdez.sg_cdez_api.controller;
 
-import com.cdez.sg_cdez_api.dto.request.PersonalActualizarRequest;
-import com.cdez.sg_cdez_api.dto.request.PersonalCreateRequest;
-import com.cdez.sg_cdez_api.dto.request.PersonalFiltro;
-import com.cdez.sg_cdez_api.dto.response.PageResponse;
-import com.cdez.sg_cdez_api.dto.response.PersonalResponse;
+import com.cdez.sg_cdez_api.dto.request.*;
+import com.cdez.sg_cdez_api.dto.response.*;
 import com.cdez.sg_cdez_api.service.PersonalService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
-
+import java.util.*;
 @RestController
 @RequestMapping("api/personal")
 @RequiredArgsConstructor

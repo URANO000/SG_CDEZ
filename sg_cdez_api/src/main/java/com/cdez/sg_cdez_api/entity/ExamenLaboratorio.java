@@ -10,7 +10,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "examen_laboratorio")
+@Table(name = "examenlaboratorio")
 public class ExamenLaboratorio {
 
     @Id

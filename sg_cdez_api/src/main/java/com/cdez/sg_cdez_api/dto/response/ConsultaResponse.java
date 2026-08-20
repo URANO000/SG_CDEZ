@@ -13,8 +13,8 @@ public record ConsultaResponse(
         String recomendaciones,
         String notas,
         String activo,
-        String createdByName,
-        UUID createdById,
-        LocalDateTime createdAt
+        PersonalConsultaResponse createdBy,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
 }
