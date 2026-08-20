@@ -2,11 +2,10 @@ package com.cdez.sg_cdez_api.dto.response;
 
 import java.util.UUID;
 
-public record UserSessionResponse(
-        UUID usuarioId,
-        String nombreCompleto,
+public record PersonalConsultaResponse(
+        UUID personalId,
         String usuario,
-        String rol,
+        String nombreCompleto,
         String especialidad
 ) {
 }

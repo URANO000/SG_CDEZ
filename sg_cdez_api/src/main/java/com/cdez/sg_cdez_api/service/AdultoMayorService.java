@@ -8,6 +8,7 @@ import com.cdez.sg_cdez_api.dto.request.AdultoMayorFallecimientoRequest;
 import com.cdez.sg_cdez_api.dto.request.AdultoMayorFiltro;
 import com.cdez.sg_cdez_api.dto.response.PageResponse;
 
+import com.cdez.sg_cdez_api.entity.AdultoMayor;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
 
@@ -25,5 +26,6 @@ public interface AdultoMayorService {
     AdultoMayorResponse registrarFallecimiento(UUID id, AdultoMayorFallecimientoRequest request);
     byte[] generarReporteAdultoPDF();
     PageResponse<AdultoMayorResponse> listarAdultosMayoresFiltrados(AdultoMayorFiltro filtros, Pageable pageable);
+    AdultoMayor obtenerAdultoCheck(UUID id);
 
 }

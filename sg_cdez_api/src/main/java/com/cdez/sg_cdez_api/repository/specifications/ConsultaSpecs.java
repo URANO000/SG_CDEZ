@@ -9,10 +9,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class ConsultaSpecs {
-    public static Specification<Consulta> hasAdultoId(UUID providedAdultoId){
-        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("adultoMayor").get("adultoId"), providedAdultoId);
-    }
-
     public static Specification<Consulta> hasCreatedById(UUID providedPersonalId){
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("createdBy").get("personalId"), providedPersonalId);
     }
@@ -45,11 +41,15 @@ public class ConsultaSpecs {
         };
     }
 
-    public static Specification<Consulta> containsName(String providedSearch){
+    public static Specification<Consulta> isActivo(boolean providedEstado){
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("activo"), providedEstado);
+    }
+
+    public static Specification<Consulta> containsSearch(String providedSearch){
         return (root, query, criteriaBuilder) -> {
             String pattern = "%" + providedSearch.toLowerCase().trim() + "%";
 
-            Expression<String> fullName =
+            Expression<String> createdByName =
                     criteriaBuilder.concat(
                             criteriaBuilder.concat(
                                     criteriaBuilder.concat(
@@ -69,13 +69,39 @@ public class ConsultaSpecs {
                                     criteriaBuilder.coalesce(root.get("createdBy").get("segundoApellido"), "")
                             )
                     );
+
+            Expression<String> adultoName =
+                    criteriaBuilder.concat(
+                            criteriaBuilder.concat(
+                                    criteriaBuilder.concat(
+                                            criteriaBuilder.coalesce(root.get("adultoMayor").get("primerNombre"), ""),
+                                            " "
+                                    ),
+                                    criteriaBuilder.concat(
+                                            criteriaBuilder.coalesce(root.get("adultoMayor").get("segundoNombre"), ""),
+                                            " "
+                                    )
+                            ),
+                            criteriaBuilder.concat(
+                                    criteriaBuilder.concat(
+                                            criteriaBuilder.coalesce(root.get("adultoMayor").get("primerApellido"), ""),
+                                            criteriaBuilder.literal(" ")
+                                    ),
+                                    criteriaBuilder.coalesce(root.get("adultoMayor").get("segundoApellido"), "")
+                            )
+                    );
             // Case-insensitive
             return criteriaBuilder.or(
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("createdBy").get("primerNombre")), pattern),
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("createdBy").get("segundoNombre")), pattern),
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("createdBy").get("primerApellido")), pattern),
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("createdBy").get("segundoApellido")), pattern),
-                    criteriaBuilder.like(criteriaBuilder.lower(fullName), pattern)
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("adultoMayor").get("primerNombre")), pattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("adultoMayor").get("segundoNombre")), pattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("adultoMayor").get("primerApellido")), pattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("adultoMayor").get("segundoApellido")), pattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(createdByName), pattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(adultoName), pattern)
             );
 
         };

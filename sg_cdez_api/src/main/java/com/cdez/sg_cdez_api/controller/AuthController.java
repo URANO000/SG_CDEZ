@@ -3,6 +3,7 @@ package com.cdez.sg_cdez_api.controller;
 import com.cdez.sg_cdez_api.dto.request.*;
 import com.cdez.sg_cdez_api.dto.response.*;
 import com.cdez.sg_cdez_api.entity.CustomUserDetails;
+import com.cdez.sg_cdez_api.entity.Personal;
 import com.cdez.sg_cdez_api.service.*;
 import com.cdez.sg_cdez_api.util.Exceptions.TokenExpiradoException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -83,14 +84,16 @@ public class AuthController {
                 .map(GrantedAuthority::getAuthority)
                 .orElse(null);
 
-        String nombre = PERSONAL_SERVICE.obtenerNombrePorId(user.getUsuarioId());
+        PersonalResponse personal = PERSONAL_SERVICE.obtenerPersonalPorId(user.getUsuarioId());
 
         return ResponseEntity.ok(
                 new UserSessionResponse(
                         user.getUsuarioId(),
-                        nombre,
+                        personal.primerNombre() + " " + personal.primerApellido(),
                         user.getUsuario(),
-                        rol
+                        rol,
+                        personal.especialidad()
+
                 )
         );
     }

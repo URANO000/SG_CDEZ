@@ -357,7 +357,7 @@ export function PersonalRegistrar() {
                         size={18}
                         className={classes.dropzoneIcon}/>
 
-                    <span>Hacé clic para seleccionar archivos</span>
+                    <span>Haga clic para seleccionar archivos</span>
 
                     <input
                         ref={fileInputRef}
