@@ -15,6 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.*;
+import org.springframework.http.HttpMethod;
+
 
 import java.util.List;
 
@@ -47,8 +49,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/reenviar-verificacion").permitAll()
 
                         .requestMatchers("/api/perfil/**").hasAnyRole("PERSONAL", "ADMIN")
+                        // Solo el rol ADMIN puede registrar adultos mayores
+                        .requestMatchers(HttpMethod.POST, "/api/adultos-mayores").hasRole("ADMIN")
 
+                        // Los roles PERSONAL y ADMIN pueden acceder al resto de operaciones del módulo
                         .requestMatchers("/api/adultos-mayores/**").hasAnyRole("PERSONAL", "ADMIN")
+
                         .requestMatchers("/api/epicrisis/**").hasAnyRole("ADMIN", "PERSONAL")
                         .requestMatchers("/api/encargados/**").hasAnyRole("PERSONAL", "ADMIN")
                         .requestMatchers("/api/documentos/**").hasAnyRole("PERSONAL", "ADMIN")
