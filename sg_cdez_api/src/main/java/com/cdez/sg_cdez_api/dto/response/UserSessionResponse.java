@@ -6,6 +6,7 @@ public record UserSessionResponse(
         UUID usuarioId,
         String nombreCompleto,
         String usuario,
-        String rol
+        String rol,
+        String especialidad
 ) {
 }
