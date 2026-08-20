@@ -130,20 +130,6 @@ ON Documento(activo);
 CREATE INDEX idx_documento_created_at
 ON Documento(created_at);
 
-CREATE TABLE Consulta(
-	consulta_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-	adulto_id UUID REFERENCES AdultoMayor(adulto_id),
-	motivo VARCHAR(100) NOT NULL,
-	tipo_intervencion VARCHAR(100) NOT NULL,
-	descripcion VARCHAR(250) NOT NULL,
-	diagnostico VARCHAR(200) NOT NULL,
-	recomendaciones VARCHAR(200) NULL,
-	notas VARCHAR(200) NULL,
-	referencia UUID REFERENCES Personal(personal_id),
-	created_by UUID REFERENCES Personal(personal_id) NOT NULL,
-	created_at TIMESTAMP NOT NULL
-);
-
 CREATE TABLE EncargadoAdulto(
     adulto_id    UUID REFERENCES AdultoMayor(adulto_id),
     encargado_id UUID REFERENCES EncargadoLegal(encargado_id),
@@ -228,4 +214,93 @@ CREATE TABLE PasswordResetToken(
 	expires_at TIMESTAMP NOT NULL,
 	token VARCHAR(255) NOT NULL,
 	usado BOOL NOT NULL
+);
+
+-- 16/8/2026
+CREATE TABLE Consulta(
+	consulta_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	adulto_id UUID NOT NULL REFERENCES AdultoMayor(adulto_id),
+	tipo_consulta VARCHAR(255) NOT NULL,
+	motivo VARCHAR(200) NOT NULL,
+	descripcion TEXT,
+	diagnostico VARCHAR(200),
+	resultados_evaluaciones TEXT,
+	recomendaciones TEXT,
+	notas TEXT,
+	created_by UUID NOT NULL REFERENCES Personal(personal_id),
+	created_at TIMESTAMP NOT NULL,
+	updated_by UUID NOT NULL REFERENCES Personal(personal_id),
+	updated_at TIMESTAMP NOT NULL,
+	activo BOOl NOT NUlL
+);
+
+CREATE TABLE ConsultaNutricional(
+	consulta_nutricional_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	consulta_id UUID NOT NULL UNIQUE REFERENCES Consulta(consulta_id),
+	historia_alimentaria TEXT,
+	apetito VARCHAR(30),
+	masticacion VARCHAR(50),
+	deglucion VARCHAR(50),
+	nauseas BOOLEAN,
+	vomitos BOOLEAN,
+	distension BOOLEAN,
+	gases BOOLEAN,
+	reflujo BOOLEAN,
+	frecuencia_evacuaciones VARCHAR(100),
+	consistencia_bristol VARCHAR(50),
+	estado_cognitivo TEXT
+);
+
+CREATE TABLE Antropometria (
+	antropometria_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	consulta_nutricional_id UUID NOT NULL UNIQUE REFERENCES ConsultaNutricional(consulta_nutricional_id),
+
+	peso_actual DECIMAL(6,2),
+	peso_habitual DECIMAL(6,2),
+	peso_hace_6_meses DECIMAL(6,2),
+	talla DECIMAL(5,2),
+	altura_estimada DECIMAL(5,2),
+	imc DECIMAL(5,2),
+	circumferencia_pantorrilla DECIMAL(6,2),
+	circunferencia_braquial DECIMAL(6,2),
+    circunferencia_cintura DECIMAL(6,2),
+    perdida_peso_porcentaje DECIMAL(5,2)
+);
+
+CREATE TABLE TamizajeNutricional(
+	tamizaje_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	consulta_nutricional_id UUID NOT NULL REFERENCES ConsultaNutricional(consulta_nutricional_id),
+
+	tipo VARCHAR(30) NOT NULL,
+	puntaje DECIMAL(6,2),
+	resultado VARCHAR(100),
+	observaciones TEXT
+);
+
+CREATE TABLE ExamenLaboratorio (
+    examen_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    consulta_nutricional_id UUID NOT NULL REFERENCES ConsultaNutricional(consulta_nutricional_id),
+
+    nombre VARCHAR(150) NOT NULL,
+    valor VARCHAR(100),
+    unidad VARCHAR(50),
+    fecha TIMESTAMP,
+    observaciones TEXT
+);
+
+CREATE TABLE Medicamento(
+	medicamento_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	adulto_id UUID NOT NULL REFERENCES AdultoMayor(adulto_id),
+
+	nombre VARCHAR(200) NOT NULl,
+	dosis VARCHAR(100),
+	horario VARCHAR(100),
+	tipo VARCHAR(50),
+	observaciones TEXT,
+	created_by UUID NOT NULL REFERENCES Personal(personal_id),
+	created_at TIMESTAMP NOT NULL,
+	updated_by UUID NOT NULL REFERENCES Personal(personal_id),
+	updated_at TIMESTAMP NOT NULL,
+	activo BOOl NOT NULL
 );
