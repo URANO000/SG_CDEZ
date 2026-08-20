@@ -15,13 +15,14 @@ import {
   Button,
   Pagination,
   Select,
+  Modal,
 } from "@mantine/core";
 
 import axios from "axios";
 
 import type { EpicrisisResponse } from "../../services/interfaces/epicrisisInterface";
 
-import { BsArrowLeft } from "react-icons/bs";
+import { BsArrowLeft, BsDownload, BsEye } from "react-icons/bs";
 
 import { useNavigate, useParams } from "react-router";
 
@@ -37,11 +38,15 @@ import classes from "./Expediente.module.css";
 
 import { EpicrisisTable } from "../../components/ui/tables/EpicrisisTable";
 
+import { EpicrisisForm } from "../../components/ui/forms/EpicrisisForm";
+
 import {
   descargarEpicrisis,
   listarHistorialEpicrisis,
   obtenerEpicrisisVigente,
 } from "../../services/epicrisisService";
+
+import { notifications } from "@mantine/notifications";
 
 import type { PageResponse } from "../../services/interfaces/pageResponse";
 
@@ -115,6 +120,8 @@ export function AdultoMayorExpediente() {
   const [epicrisisLoading, setEpicrisisLoading] = useState(true);
 
   const [epicrisisError, setEpicrisisError] = useState(false);
+
+  const [modalEpicrisisAbierto, setModalEpicrisisAbierto] = useState(false);
 
   async function cargarHistorialEpicrisis(pagina: number, anio?: number) {
     if (!adultoId) return;
@@ -301,9 +308,69 @@ export function AdultoMayorExpediente() {
       enlace.remove();
 
       URL.revokeObjectURL(url);
+
+      notifications.show({
+        title: "Descarga iniciada",
+        message: `Se descargará ${epicrisis.nombreArchivo}.`,
+        color: "green",
+      });
     } catch {
-      window.alert("No se pudo descargar la epicrisis.");
+      notifications.show({
+        title: "Error de descarga",
+        message: "No se pudo descargar la epicrisis.",
+        color: "red",
+      });
     }
+  }
+
+  async function manejarVisualizacionEpicrisis(epicrisis: EpicrisisResponse) {
+    const ventana = window.open("", "_blank");
+
+    if (!ventana) {
+      notifications.show({
+        title: "Ventana bloqueada",
+        message: "Permita las ventanas emergentes para visualizar el archivo.",
+        color: "orange",
+      });
+
+      return;
+    }
+
+    try {
+      ventana.document.title = "Cargando archivo...";
+
+      const archivo = await descargarEpicrisis(epicrisis.epicrisisId);
+
+      const url = URL.createObjectURL(archivo);
+
+      ventana.location.href = url;
+
+      window.setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 60000);
+    } catch {
+      ventana.close();
+
+      notifications.show({
+        title: "Error de visualización",
+        message: "No se pudo visualizar la epicrisis.",
+        color: "red",
+      });
+    }
+  }
+
+  function manejarEpicrisisRegistrada(epicrisis: EpicrisisResponse) {
+    setEpicrisisVigente(epicrisis);
+    setModalEpicrisisAbierto(false);
+    setAnioEpicrisis(null);
+
+    void cargarHistorialEpicrisis(0);
+
+    notifications.show({
+      title: "Epicrisis registrada",
+      message: "La epicrisis se registró correctamente.",
+      color: "green",
+    });
   }
 
   return (
@@ -506,6 +573,14 @@ export function AdultoMayorExpediente() {
         </Tabs.Panel>
 
         <Tabs.Panel value="epicrisis" className={classes.panel}>
+          <Group justify="flex-end" mb="lg">
+            <Button
+              onClick={() => setModalEpicrisisAbierto(true)}
+              className={classes.registerButton}
+            >
+              + Nueva epicrisis
+            </Button>
+          </Group>
           {epicrisisLoading ? (
             <div className={classes.loadingSection}>
               <Loader color="var(--color-primary)" />
@@ -551,6 +626,27 @@ export function AdultoMayorExpediente() {
                   valor={epicrisisVigente.tipoArchivo}
                 />
               </SimpleGrid>
+              <Group justify="flex-end" mt="xl">
+                <Button
+                  variant="outline"
+                  leftSection={<BsEye size={16} />}
+                  onClick={() =>
+                    void manejarVisualizacionEpicrisis(epicrisisVigente)
+                  }
+                >
+                  Visualizar
+                </Button>
+
+                <Button
+                  leftSection={<BsDownload size={16} />}
+                  className={classes.registerButton}
+                  onClick={() =>
+                    void manejarDescargaEpicrisis(epicrisisVigente)
+                  }
+                >
+                  Descargar
+                </Button>
+              </Group>
             </Paper>
           )}
 
@@ -614,6 +710,7 @@ export function AdultoMayorExpediente() {
               <>
                 <EpicrisisTable
                   epicrisis={historialEpicrisis?.content ?? []}
+                  onVisualizar={manejarVisualizacionEpicrisis}
                   onDescargar={manejarDescargaEpicrisis}
                 />
 
@@ -632,6 +729,19 @@ export function AdultoMayorExpediente() {
               </>
             )}
           </div>
+          <Modal
+            opened={modalEpicrisisAbierto}
+            onClose={() => setModalEpicrisisAbierto(false)}
+            title="Registrar nueva epicrisis"
+            centered
+            closeOnClickOutside
+          >
+            <EpicrisisForm
+              adultoId={adultoId}
+              onRegistrada={manejarEpicrisisRegistrada}
+              onCancelar={() => setModalEpicrisisAbierto(false)}
+            />
+          </Modal>
         </Tabs.Panel>
 
         <Tabs.Panel value="documentos" className={classes.panelPlaceholder}>

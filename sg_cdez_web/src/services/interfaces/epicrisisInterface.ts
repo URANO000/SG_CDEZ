@@ -13,3 +13,9 @@ export interface EpicrisisResponse {
   createdAt: string;
   updatedAt: string | null;
 }
+export interface EpicrisisRegistroRequest {
+  fechaEmision: string;
+  fechaRecepcion: string | null;
+  centroSalud: string;
+  archivo: File;
+}

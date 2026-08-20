@@ -1,5 +1,10 @@
 import { apiClient } from "../utils/helper";
-import type { EpicrisisResponse } from "./interfaces/epicrisisInterface";
+
+import type {
+  EpicrisisRegistroRequest,
+  EpicrisisResponse,
+} from "./interfaces/epicrisisInterface";
+
 import type { PageResponse } from "./interfaces/pageResponse";
 
 export async function obtenerEpicrisisVigente(
@@ -31,6 +36,29 @@ export async function listarHistorialEpicrisis(
 
   return response.data;
 }
+
+export async function registrarEpicrisis(
+  adultoId: string,
+  request: EpicrisisRegistroRequest,
+): Promise<EpicrisisResponse> {
+  const formData = new FormData();
+
+  formData.append("fechaEmision", request.fechaEmision);
+  formData.append("centroSalud", request.centroSalud);
+  formData.append("archivo", request.archivo);
+
+  if (request.fechaRecepcion) {
+    formData.append("fechaRecepcion", request.fechaRecepcion);
+  }
+
+  const response = await apiClient.post<EpicrisisResponse>(
+    `/adultos-mayores/${adultoId}/epicrisis`,
+    formData,
+  );
+
+  return response.data;
+}
+
 export async function descargarEpicrisis(epicrisisId: string): Promise<Blob> {
   const response = await apiClient.get(`/epicrisis/${epicrisisId}/descargar`, {
     responseType: "blob",

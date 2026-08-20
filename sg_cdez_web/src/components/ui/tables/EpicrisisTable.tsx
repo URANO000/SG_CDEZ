@@ -1,10 +1,11 @@
 import { ActionIcon, Group, Table, Tooltip } from "@mantine/core";
-import { BsDownload } from "react-icons/bs";
+import { BsDownload, BsEye } from "react-icons/bs";
 import type { EpicrisisResponse } from "../../../services/interfaces/epicrisisInterface";
 import classes from "./Table.module.css";
 
 interface EpicrisisTableProps {
   epicrisis: EpicrisisResponse[];
+  onVisualizar: (epicrisis: EpicrisisResponse) => void;
   onDescargar: (epicrisis: EpicrisisResponse) => void;
 }
 
@@ -18,6 +19,7 @@ function mostrarFecha(fecha: string | null): string {
 
 export function EpicrisisTable({
   epicrisis,
+  onVisualizar,
   onDescargar,
 }: EpicrisisTableProps) {
   return (
@@ -40,6 +42,17 @@ export function EpicrisisTable({
                 <Table.Tr key={registro.epicrisisId}>
                   <Table.Td>
                     <Group gap={4} wrap="nowrap">
+                      <Tooltip label="Visualizar epicrisis">
+                        <ActionIcon
+                          variant="subtle"
+                          className={classes.actionView}
+                          onClick={() => onVisualizar(registro)}
+                          aria-label="Visualizar epicrisis"
+                        >
+                          <BsEye size={16} />
+                        </ActionIcon>
+                      </Tooltip>
+
                       <Tooltip label="Descargar epicrisis">
                         <ActionIcon
                           variant="subtle"
