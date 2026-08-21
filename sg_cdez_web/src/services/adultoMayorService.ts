@@ -1,12 +1,24 @@
 import { apiClient } from "../utils/helper";
 
 import type {
+  AdultoMayorCreateRequest,
   AdultoMayorDesactivarRequest,
   AdultoMayorFiltro,
   AdultoMayorResponse,
 } from "./interfaces/adultoMayorInterface";
 
 import type { PageResponse } from "./interfaces/pageResponse";
+
+export async function registrarAdultoMayor(
+  request: AdultoMayorCreateRequest,
+): Promise<AdultoMayorResponse> {
+  const response = await apiClient.post<AdultoMayorResponse>(
+    "/adultos-mayores",
+    request,
+  );
+
+  return response.data;
+}
 
 export async function listarAdultosMayoresFiltrados(
   filtros: AdultoMayorFiltro,

@@ -20,6 +20,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import com.cdez.sg_cdez_api.dto.response.PageResponse;
+import com.cdez.sg_cdez_api.repository.specifications.EpicrisisSpecs;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -154,6 +159,33 @@ public class EpicrisisServiceImpl implements EpicrisisService {
         return epicrisis.stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<EpicrisisResponse> listarHistorialEpicrisis(
+            UUID adultoId,
+            Integer anio,
+            Pageable pageable
+    ) {
+        if (!adultoMayorRepository.existsById(adultoId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "No se encontró el adulto mayor indicado."
+            );
+        }
+
+        Specification<Epicrisis> specification =
+                EpicrisisSpecs.perteneceAlAdulto(adultoId)
+                        .and(EpicrisisSpecs.esHistorial())
+                        .and(EpicrisisSpecs.documentoActivo())
+                        .and(EpicrisisSpecs.emitidaEnAnio(anio));
+
+        Page<EpicrisisResponse> responsePage = epicrisisRepository
+                .findAll(specification, pageable)
+                .map(this::mapToResponse);
+
+        return new PageResponse<>(responsePage);
     }
 
     @Override

@@ -1,4 +1,7 @@
 import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
+import { Notifications } from "@mantine/notifications";
+import { MantineProvider } from "@mantine/core";
 import { zurquiTheme } from "./theme";
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router";
@@ -9,7 +12,6 @@ import { Activar } from "./pages/auth/activarCuenta";
 import { ForgotPassword } from "./pages/auth/forgotPassword";
 import { ResendVerification } from "./pages/auth/resendVerification";
 import { Consultas } from "./pages/consultas/consultas";
-import { MantineProvider } from "@mantine/core";
 import { AdultosMayores } from "./pages/adultosMayores/adultosMayores";
 import { AdultoMayorExpediente } from "./pages/adultosMayores/adultoMayorExpediente";
 import { Personal } from "./pages/personal/personal";
@@ -20,13 +22,15 @@ import { ProtectedRoute } from "./Routes";
 import { RestablecerContrasena } from "./pages/auth/restablecerContrasena";
 import { NotFound } from "./pages/error/404";
 import { ServerError } from "./pages/error/500";
-import { PersonalDetalle } from './pages/personal/personalDetalle';
-import { PersonalEditar } from './pages/personal/personalEditar';
-import { PersonalRegistrar } from './pages/personal/personalRegistrar';
+import { PersonalDetalle } from "./pages/personal/personalDetalle";
+import { PersonalEditar } from "./pages/personal/personalEditar";
+import { PersonalRegistrar } from "./pages/personal/personalRegistrar";
+import { AdultoMayorRegistrar } from "./pages/adultosMayores/adultoMayorRegistrar";
 
 function App() {
   return (
     <MantineProvider theme={zurquiTheme}>
+      <Notifications position="top-right" />
       <AuthProvider>
         <Router>
           <Routes>
@@ -57,36 +61,56 @@ function App() {
                 path="/adultosMayores/:adultoId/expediente"
                 element={<AdultoMayorExpediente />}
               />
+              <Route
+                path="/adultosMayores/registrar"
+                element={
+                  <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                    <AdultoMayorRegistrar />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/documentacion" element={<Documentacion />} />
 
-              <Route path="/personal" element={
-                <ProtectedRoute roles={["ROLE_ADMIN"]}>
-                  <Personal />
-                </ProtectedRoute>
-              } />
-              <Route path="/personal/:personalId/detalle" element={
-                <ProtectedRoute roles={["ROLE_ADMIN"]}>
-                  <PersonalDetalle />
-                </ProtectedRoute>
-              }
+              <Route
+                path="/personal"
+                element={
+                  <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                    <Personal />
+                  </ProtectedRoute>
+                }
               />
-              <Route path="/personal/:personalId/editar" element={
-                <ProtectedRoute roles={["ROLE_ADMIN"]}>
-                  <PersonalEditar />
-                </ProtectedRoute>
-              }
+              <Route
+                path="/personal/:personalId/detalle"
+                element={
+                  <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                    <PersonalDetalle />
+                  </ProtectedRoute>
+                }
               />
-              <Route path="/personal/registrar" element={
-                <ProtectedRoute roles={["ROLE_ADMIN"]}>
-                  <PersonalRegistrar />
-                </ProtectedRoute>
-              }
+              <Route
+                path="/personal/:personalId/editar"
+                element={
+                  <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                    <PersonalEditar />
+                  </ProtectedRoute>
+                }
               />
-              <Route path="/auditoria" element={
-                <ProtectedRoute roles={["ROLE_ADMIN"]}>
-                  <Auditoria />
-                </ProtectedRoute>
-              } />
+              <Route
+                path="/personal/registrar"
+                element={
+                  <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                    <PersonalRegistrar />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/auditoria"
+                element={
+                  <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                    <Auditoria />
+                  </ProtectedRoute>
+                }
+              />
             </Route>
           </Routes>
         </Router>

@@ -16,9 +16,13 @@ import {
 
 import { AiOutlineSearch } from "react-icons/ai";
 
+import { useNavigate } from "react-router";
+
 import { BsPlusLg } from "react-icons/bs";
 
 import { AdultosMayoresTable } from "../../components/ui/tables/AdultosMayoresTable";
+
+import { useAuth } from "../../services/authContext";
 
 import {
   desactivarAdultoMayor,
@@ -52,6 +56,10 @@ export function AdultosMayores() {
     searchTerm: null,
     estado: "ACTIVO",
   });
+
+  const { user } = useAuth();
+
+  const navigate = useNavigate();
 
   const [pageData, setPageData] =
     useState<PageResponse<AdultoMayorResponse> | null>(null);
@@ -170,9 +178,14 @@ export function AdultosMayores() {
           Adultos Mayores
         </Title>
 
-        <Button leftSection={<BsPlusLg size={15} />} disabled>
-          Nuevo registro
-        </Button>
+        {user?.rol === "ROLE_ADMIN" && (
+          <Button
+            leftSection={<BsPlusLg size={15} />}
+            onClick={() => navigate("/adultosMayores/registrar")}
+          >
+            Registrar Adulto Mayor
+          </Button>
+        )}
       </Group>
 
       <div className={classes.titleRule} />

@@ -1,5 +1,24 @@
 export type EstadoAdultoMayor = "ACTIVO" | "INACTIVO" | "FALLECIDO";
 
+export interface AdultoMayorCreateRequest {
+  tipoIdentificacion: string;
+  identificacion: string;
+  primerNombre: string;
+  segundoNombre: string | null;
+  primerApellido: string;
+  segundoApellido: string | null;
+  nacionalidad: string;
+  fechaNacimiento: string | null;
+  sexo: "F" | "M";
+  direccion: string;
+  escolaridad: string;
+  grupoFamiliar: string | null;
+  pension: boolean;
+  funcionalidadFisica: string | null;
+  ayudaBiomecanica: boolean;
+  fechaIngreso: string;
+}
+
 export interface AdultoMayorFiltro {
   searchTerm: string | null;
   estado: EstadoAdultoMayor;

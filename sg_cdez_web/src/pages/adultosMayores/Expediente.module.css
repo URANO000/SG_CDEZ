@@ -104,6 +104,69 @@
   justify-content: center;
 }
 
+.encargadosList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.encargadoCard {
+  padding: 22px;
+
+  background-color: var(--card-bg);
+
+  border: 1px solid rgba(107, 99, 117, 0.13);
+  border-radius: 8px;
+}
+
+.encargadoName {
+  margin-bottom: 18px;
+
+  color: var(--text);
+  font-weight: 600;
+}
+
+.contactosSection {
+  margin-top: 22px;
+  padding-top: 18px;
+
+  border-top: 1px solid rgba(107, 99, 117, 0.15);
+}
+
+.contactosList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contactoRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 10px 12px;
+
+  background-color: rgba(107, 99, 117, 0.05);
+
+  border-radius: 6px;
+}
+
+.contactoType {
+  min-width: 100px;
+
+  color: var(--text);
+  font-weight: 600;
+}
+
+.emptyState {
+  padding: 40px 20px;
+
+  color: var(--text);
+  opacity: 0.6;
+
+  text-align: center;
+}
+
 @media (max-width: 700px) {
   .container {
     padding: 20px 12px 32px;
@@ -120,4 +183,56 @@
   .panelPlaceholder {
     padding: 18px;
   }
+}
+
+.epicrisisCard {
+  padding: 24px;
+  background: var(--card-bg);
+  border: 1px solid rgba(107, 99, 117, 0.16);
+  border-radius: 8px;
+}
+
+.loadingSection {
+  display: flex;
+  min-height: 220px;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyState {
+  display: flex;
+  min-height: 220px;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  opacity: 0.55;
+  text-align: center;
+}
+.historySection {
+  margin-top: 32px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(107, 99, 117, 0.16);
+}
+
+.historyHeader {
+  margin-bottom: 20px;
+}
+
+.filterButton {
+  background-color: var(--color-navbar);
+}
+
+.filterButton:hover {
+  background-color: var(--color-secondary);
+}
+
+.paginationBar {
+  margin-top: 20px;
+}
+.registerButton {
+  background-color: var(--color-navbar);
+}
+
+.registerButton:hover {
+  background-color: var(--color-secondary);
 }
