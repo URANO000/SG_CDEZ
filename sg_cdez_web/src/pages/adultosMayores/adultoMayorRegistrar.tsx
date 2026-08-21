@@ -102,7 +102,7 @@ export function AdultoMayorRegistrar() {
         (form.elements.namedItem("ayudaBiomecanica") as HTMLSelectElement)
           .value === "true",
 
-      fechaIngreso,
+      fechaIngreso: `${fechaIngreso}T00:00:00`,
     };
 
     try {
@@ -430,7 +430,7 @@ export function AdultoMayorRegistrar() {
 
               <input
                 className={classes.input}
-                type="datetime-local"
+                type="date"
                 name="fechaIngreso"
                 required
               />
