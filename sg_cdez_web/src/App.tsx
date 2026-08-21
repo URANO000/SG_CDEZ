@@ -25,6 +25,7 @@ import { ServerError } from "./pages/error/500";
 import { PersonalDetalle } from "./pages/personal/personalDetalle";
 import { PersonalEditar } from "./pages/personal/personalEditar";
 import { PersonalRegistrar } from "./pages/personal/personalRegistrar";
+import { AdultoMayorRegistrar } from "./pages/adultosMayores/adultoMayorRegistrar";
 
 function App() {
   return (
@@ -59,6 +60,14 @@ function App() {
               <Route
                 path="/adultosMayores/:adultoId/expediente"
                 element={<AdultoMayorExpediente />}
+              />
+              <Route
+                path="/adultosMayores/registrar"
+                element={
+                  <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                    <AdultoMayorRegistrar />
+                  </ProtectedRoute>
+                }
               />
               <Route path="/documentacion" element={<Documentacion />} />
 

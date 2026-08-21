@@ -46,6 +46,18 @@ import {
   obtenerEpicrisisVigente,
 } from "../../services/epicrisisService";
 
+import { DocumentoTable } from "../../components/ui/tables/DocumentoTable";
+
+import { DocumentoForm } from "../../components/ui/forms/DocumentoForm";
+
+import {
+  descargarDocumento,
+  desactivarDocumento,
+  listarDocumentosPorAdulto,
+} from "../../services/documentoService";
+
+import type { DocumentoResponse } from "../../services/interfaces/personalResponse";
+
 import { notifications } from "@mantine/notifications";
 
 import type { PageResponse } from "../../services/interfaces/pageResponse";
@@ -109,6 +121,19 @@ export function AdultoMayorExpediente() {
   const [historialEpicrisis, setHistorialEpicrisis] =
     useState<PageResponse<EpicrisisResponse> | null>(null);
 
+  const [documentos, setDocumentos] = useState<DocumentoResponse[]>([]);
+
+  const [documentosLoading, setDocumentosLoading] = useState(true);
+
+  const [documentosError, setDocumentosError] = useState(false);
+
+  const [modalDocumentoAbierto, setModalDocumentoAbierto] = useState(false);
+
+  const [documentoADesactivar, setDocumentoADesactivar] =
+    useState<DocumentoResponse | null>(null);
+
+  const [desactivandoDocumento, setDesactivandoDocumento] = useState(false);
+
   const [historialLoading, setHistorialLoading] = useState(true);
 
   const [historialError, setHistorialError] = useState(false);
@@ -144,6 +169,33 @@ export function AdultoMayorExpediente() {
       setHistorialLoading(false);
     }
   }
+
+  async function cargarDocumentos() {
+    if (!adultoId) {
+      return;
+    }
+
+    try {
+      setDocumentosLoading(true);
+      setDocumentosError(false);
+
+      const response = await listarDocumentosPorAdulto(adultoId);
+
+      setDocumentos(response);
+    } catch {
+      setDocumentosError(true);
+    } finally {
+      setDocumentosLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!adultoId) {
+      return;
+    }
+
+    void cargarDocumentos();
+  }, [adultoId]);
 
   useEffect(() => {
     if (!adultoId) return;
@@ -323,6 +375,40 @@ export function AdultoMayorExpediente() {
     }
   }
 
+  async function manejarDescargaDocumento(documento: DocumentoResponse) {
+    if (documento.documentoId == null) {
+      return;
+    }
+
+    try {
+      const archivo = await descargarDocumento(documento.documentoId);
+
+      const url = URL.createObjectURL(archivo);
+      const enlace = document.createElement("a");
+
+      enlace.href = url;
+      enlace.download = documento.nombreArchivo;
+
+      document.body.appendChild(enlace);
+      enlace.click();
+      enlace.remove();
+
+      URL.revokeObjectURL(url);
+
+      notifications.show({
+        title: "Descarga iniciada",
+        message: `Se descargará ${documento.nombreArchivo}.`,
+        color: "green",
+      });
+    } catch {
+      notifications.show({
+        title: "Error de descarga",
+        message: "No se pudo descargar el documento.",
+        color: "red",
+      });
+    }
+  }
+
   async function manejarVisualizacionEpicrisis(epicrisis: EpicrisisResponse) {
     const ventana = window.open("", "_blank");
 
@@ -359,6 +445,46 @@ export function AdultoMayorExpediente() {
     }
   }
 
+  async function manejarVisualizacionDocumento(documento: DocumentoResponse) {
+    if (documento.documentoId == null) {
+      return;
+    }
+
+    const ventana = window.open("", "_blank");
+
+    if (!ventana) {
+      notifications.show({
+        title: "Ventana bloqueada",
+        message: "Permita las ventanas emergentes para visualizar el archivo.",
+        color: "orange",
+      });
+
+      return;
+    }
+
+    try {
+      ventana.document.title = "Cargando archivo...";
+
+      const archivo = await descargarDocumento(documento.documentoId);
+
+      const url = URL.createObjectURL(archivo);
+
+      ventana.location.href = url;
+
+      window.setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 60000);
+    } catch {
+      ventana.close();
+
+      notifications.show({
+        title: "Error de visualización",
+        message: "No se pudo visualizar el documento.",
+        color: "red",
+      });
+    }
+  }
+
   function manejarEpicrisisRegistrada(epicrisis: EpicrisisResponse) {
     setEpicrisisVigente(epicrisis);
     setModalEpicrisisAbierto(false);
@@ -371,6 +497,52 @@ export function AdultoMayorExpediente() {
       message: "La epicrisis se registró correctamente.",
       color: "green",
     });
+  }
+
+  function manejarDocumentoRegistrado() {
+    setModalDocumentoAbierto(false);
+
+    void cargarDocumentos();
+
+    notifications.show({
+      title: "Documento adjuntado",
+      message: "El documento se adjuntó correctamente al expediente.",
+      color: "green",
+    });
+  }
+
+  function solicitarDesactivacionDocumento(documento: DocumentoResponse) {
+    setDocumentoADesactivar(documento);
+  }
+
+  async function confirmarDesactivacionDocumento() {
+    if (documentoADesactivar?.documentoId == null) {
+      return;
+    }
+
+    try {
+      setDesactivandoDocumento(true);
+
+      await desactivarDocumento(documentoADesactivar.documentoId);
+
+      setDocumentoADesactivar(null);
+
+      await cargarDocumentos();
+
+      notifications.show({
+        title: "Documento desactivado",
+        message: "El documento dejó de mostrarse en el expediente.",
+        color: "green",
+      });
+    } catch {
+      notifications.show({
+        title: "Error al desactivar",
+        message: "No se pudo desactivar el documento.",
+        color: "red",
+      });
+    } finally {
+      setDesactivandoDocumento(false);
+    }
   }
 
   return (
@@ -744,8 +916,93 @@ export function AdultoMayorExpediente() {
           </Modal>
         </Tabs.Panel>
 
-        <Tabs.Panel value="documentos" className={classes.panelPlaceholder}>
-          Los documentos del expediente se integrarán posteriormente.
+        <Tabs.Panel value="documentos" className={classes.panel}>
+          <Group justify="space-between" align="center" mb="lg">
+            <div>
+              <Title order={4} className={classes.personName}>
+                Documentos del expediente
+              </Title>
+
+              <Text size="sm" className={classes.secondaryText}>
+                Archivos asociados al expediente del adulto mayor.
+              </Text>
+            </div>
+
+            <Button
+              onClick={() => setModalDocumentoAbierto(true)}
+              className={classes.registerButton}
+            >
+              + Adjuntar documento
+            </Button>
+          </Group>
+
+          {documentosLoading ? (
+            <div className={classes.loadingSection}>
+              <Loader color="var(--color-primary)" />
+            </div>
+          ) : documentosError ? (
+            <Alert color="red">
+              No se pudieron cargar los documentos del expediente.
+            </Alert>
+          ) : (
+            <DocumentoTable
+              documentos={documentos}
+              onVisualizar={manejarVisualizacionDocumento}
+              onDescargar={manejarDescargaDocumento}
+              onDesactivar={solicitarDesactivacionDocumento}
+            />
+          )}
+
+          <Modal
+            opened={modalDocumentoAbierto}
+            onClose={() => setModalDocumentoAbierto(false)}
+            title="Adjuntar documento"
+            centered
+            closeOnClickOutside
+          >
+            <DocumentoForm
+              adultoId={adultoId}
+              onRegistrado={manejarDocumentoRegistrado}
+              onCancelar={() => setModalDocumentoAbierto(false)}
+            />
+          </Modal>
+
+          <Modal
+            opened={documentoADesactivar !== null}
+            onClose={() => setDocumentoADesactivar(null)}
+            title="Desactivar documento"
+            centered
+          >
+            <Stack gap="md">
+              <Text>
+                ¿Desea desactivar el documento{" "}
+                <strong>{documentoADesactivar?.nombreArchivo}</strong>?
+              </Text>
+
+              <Text size="sm" className={classes.secondaryText}>
+                El documento dejará de mostrarse en el expediente, pero no será
+                eliminado del sistema.
+              </Text>
+
+              <Group justify="flex-end">
+                <Button
+                  variant="default"
+                  disabled={desactivandoDocumento}
+                  onClick={() => setDocumentoADesactivar(null)}
+                >
+                  Cancelar
+                </Button>
+
+                <Button
+                  color="red"
+                  loading={desactivandoDocumento}
+                  onClick={() => void confirmarDesactivacionDocumento()}
+                >
+                  Desactivar
+                </Button>
+              </Group>
+            </Stack>
+          </Modal>
         </Tabs.Panel>
       </Tabs>
     </div>
