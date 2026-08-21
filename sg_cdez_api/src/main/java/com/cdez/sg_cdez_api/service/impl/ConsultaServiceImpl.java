@@ -7,6 +7,7 @@ import com.cdez.sg_cdez_api.repository.ConsultaRepository;
 import com.cdez.sg_cdez_api.repository.specifications.ConsultaSpecs;
 import com.cdez.sg_cdez_api.service.*;
 import com.cdez.sg_cdez_api.util.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -62,6 +63,7 @@ public class ConsultaServiceImpl implements ConsultaService {
     }
 
     @Override
+    @Transactional
     public ConsultaResponse crearConsulta(ConsultaCreateRequest request) {
         AUTH_HELPER.validarUsuarioActivo();
 
@@ -163,7 +165,7 @@ public class ConsultaServiceImpl implements ConsultaService {
         );
     }
 
-    private Consulta obtenerConsultaCheck(UUID id){
+    public Consulta obtenerConsultaCheck(UUID id){
         return REPOSITORY.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
@@ -171,7 +173,7 @@ public class ConsultaServiceImpl implements ConsultaService {
                 ));
     }
 
-    private void verificarEdicionValida(UUID id){
+    public void verificarEdicionValida(UUID id){
         if(!AUTH_HELPER.obtenerUsuarioAutenticado().getPersonalId()
                 .equals(id)){
             throw new ResponseStatusException(

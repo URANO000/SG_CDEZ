@@ -1,9 +1,7 @@
 package com.cdez.sg_cdez_api.dto.response;
 
-import com.cdez.sg_cdez_api.dto.request.*;
 import com.cdez.sg_cdez_api.entity.enums.Apetito;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 public record ConsultaNutricionalResponse(
