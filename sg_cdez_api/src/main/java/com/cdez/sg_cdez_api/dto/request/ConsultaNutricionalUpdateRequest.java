@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 public record ConsultaNutricionalUpdateRequest(
+        ConsultaUpdateRequest consulta,
         String historiaAlimentaria,
         Apetito apetito,
         String masticacion,

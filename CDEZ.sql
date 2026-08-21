@@ -34,7 +34,6 @@ CREATE TABLE Personal (
 	credenciales_expiradas BOOL
 );
 
-
 CREATE TABLE AdultoMayor(
 	adulto_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	tipo_identificacion VARCHAR(100) NOT NULL,
@@ -222,9 +221,9 @@ CREATE TABLE Consulta(
 	consulta_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	adulto_id UUID NOT NULL REFERENCES AdultoMayor(adulto_id),
 	tipo_consulta VARCHAR(255) NOT NULL,
-	motivo VARCHAR(200) NOT NULL,
+	motivo TEXT NOT NULL,
 	descripcion TEXT,
-	diagnostico VARCHAR(200),
+	diagnostico TEXT,
 	resultados_evaluaciones TEXT,
 	recomendaciones TEXT,
 	notas TEXT,
@@ -240,15 +239,15 @@ CREATE TABLE ConsultaNutricional(
 	consulta_id UUID NOT NULL UNIQUE REFERENCES Consulta(consulta_id),
 	historia_alimentaria TEXT,
 	apetito VARCHAR(30),
-	masticacion VARCHAR(50),
-	deglucion VARCHAR(50),
+	masticacion TEXT,
+	deglucion TEXT,
 	nauseas BOOLEAN,
 	vomitos BOOLEAN,
 	distension BOOLEAN,
 	gases BOOLEAN,
 	reflujo BOOLEAN,
-	frecuencia_evacuaciones VARCHAR(100),
-	consistencia_bristol VARCHAR(50),
+	frecuencia_evacuaciones TEXT,
+	consistencia_bristol TEXT,
 	estado_cognitivo TEXT
 );
 

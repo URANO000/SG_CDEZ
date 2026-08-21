@@ -6,6 +6,7 @@ import com.cdez.sg_cdez_api.entity.*;
 import com.cdez.sg_cdez_api.repository.ConsultaNutricionalRepository;
 import com.cdez.sg_cdez_api.service.*;
 import com.cdez.sg_cdez_api.util.AuthHelper;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -33,11 +34,14 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
     }
 
     @Override
+    @Transactional
     public ConsultaNutricionalResponse crearConsultaNutricional(ConsultaNutricionalCreateRequest request) {
-        validarEspecialidad(AUTH_HELPER.obtenerUsuarioAutenticado().getPersonalId());
+        validarEspecialidad(AUTH_HELPER.obtenerUsuarioAutenticado());
 
         ConsultaNutricional consultaNutricional = new ConsultaNutricional();
-        CONSULTA_SERVICE.crearConsulta(request.consultaGeneral());
+        Consulta consulta = CONSULTA_SERVICE.crearConsultaEntity(request.consultaGeneral());
+
+        consultaNutricional.setConsulta(consulta);
 
         consultaNutricional.setHistoriaAlimentaria(request.historiaAlimentaria() == null
                 ? null
@@ -68,20 +72,90 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
 
         TAMIZAJE_SERVICE.crearTamizajes(request.tamizajes(), consultaNutricionalGuardada);
 
+        EXAMENLAB_SERVICE.crearExamenesLab(request.examenesLaboratorio(), consultaNutricionalGuardada);
 
-        return null;
+        ANTROPOMETRIA_SERVICE.crearAntropometria(request.antropometria(), consultaNutricionalGuardada);
+
+        return mapDTO(consultaNutricionalGuardada);
     }
 
     @Override
+    @Transactional
     public ConsultaNutricionalResponse actualizarConsultaNutricional(UUID id, ConsultaNutricionalUpdateRequest request) {
-        return null;
+        validarEspecialidad(AUTH_HELPER.obtenerUsuarioAutenticado());
+
+        ConsultaNutricional consultaNutricionalVieja = obtenerConsultaNutricionalCheck(id);
+        UUID consultaId = consultaNutricionalVieja.getConsulta().getConsultaId();
+
+        CONSULTA_SERVICE.actualizarConsulta(request.consulta(), consultaId);
+
+        consultaNutricionalVieja.setHistoriaAlimentaria(
+                request.historiaAlimentaria() == null
+                        ? null
+                        : request.historiaAlimentaria().trim()
+        );
+
+        consultaNutricionalVieja.setApetito(request.apetito());
+
+        consultaNutricionalVieja.setMasticacion(
+                request.masticacion() == null
+                        ? null
+                        : request.masticacion().trim()
+        );
+
+        consultaNutricionalVieja.setDeglucion(
+                request.deglucion() == null
+                        ? null
+                        : request.deglucion().trim()
+        );
+
+        consultaNutricionalVieja.setNauseas(request.nauseas());
+        consultaNutricionalVieja.setVomitos(request.vomitos());
+        consultaNutricionalVieja.setDistension(request.distension());
+        consultaNutricionalVieja.setGases(request.gases());
+        consultaNutricionalVieja.setReflujo(request.reflujo());
+
+        consultaNutricionalVieja.setFrecuenciaEvacuaciones(
+                request.frecuenciaEvacuaciones() == null
+                        ? null
+                        : request.frecuenciaEvacuaciones().trim()
+        );
+
+        consultaNutricionalVieja.setConsistenciaBristol(
+                request.consistenciaBristol() == null
+                        ? null
+                        : request.consistenciaBristol().trim()
+        );
+
+        consultaNutricionalVieja.setEstadoCognitivo(
+                request.estadoCognitivo() == null
+                        ? null
+                        : request.estadoCognitivo().trim()
+        );
+
+        ConsultaNutricional actualizada = REPOSITORY.save(consultaNutricionalVieja);
+
+        if(request.tamizajes() != null){
+            TAMIZAJE_SERVICE.actualizarTamizajes(request.tamizajes(), actualizada);
+        }
+
+        if(request.examenesLaboratorio() != null){
+            EXAMENLAB_SERVICE.actualizarExamenesLab(request.examenesLaboratorio(), actualizada);
+        }
+
+        if(request.antropometria() != null){
+            ANTROPOMETRIA_SERVICE.actualizarAntropometria(request.antropometria(), actualizada);
+        }
+
+        return mapDTO(actualizada);
     }
 
     @Override
+    @Transactional
     public ConsultaNutricionalResponse desactivarConsultaNutricional(UUID id) {
         ConsultaNutricional consultaNutricional = obtenerConsultaNutricionalCheck(id);
-        CONSULTA_SERVICE.verificarEdicionValida(consultaNutricional.getConsulta().getConsultaId());
-        validarEspecialidad(id);
+        CONSULTA_SERVICE.desactivarConsulta(consultaNutricional.getConsulta().getConsultaId());
+        validarEspecialidad(AUTH_HELPER.obtenerUsuarioAutenticado());
 
         consultaNutricional.getConsulta().setActivo(false);
         REPOSITORY.save(consultaNutricional);
@@ -107,8 +181,8 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
                 consultaNutricional.getConsistenciaBristol(),
                 consultaNutricional.getEstadoCognitivo(),
                 TAMIZAJE_SERVICE.listarTamizajesPorConsulta(consultaNutricional),
-                EXAMENLAB_SERVICE.listarExamenesPorConsulta(consultaNutricional.getConsultaNutricionalId()),
-                ANTROPOMETRIA_SERVICE.listarAntropometriaPorConsulta(consultaNutricional.getConsultaNutricionalId())
+                EXAMENLAB_SERVICE.listarExamenesPorConsulta(consultaNutricional),
+                ANTROPOMETRIA_SERVICE.obtenerAntropometriaPorConsulta(consultaNutricional)
         );
     }
 
@@ -120,8 +194,7 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
                 ));
     }
 
-    private void validarEspecialidad(UUID id){
-        Personal personal = AUTH_HELPER.obtenerUsuarioAutenticado();
+    private void validarEspecialidad(Personal personal){
         String especialidad = personal.getEspecialidad() != null
                 ? personal.getEspecialidad().toUpperCase().trim()
                 : null;
@@ -132,7 +205,7 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
             );
         }
 
-        if(!especialidad.equals("NUTRICIÓN")){
+        if(!especialidad.equals("NUTRICION")){
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,
                     "Sólo personal de nutrición puede realizar acciones sobre consulta nutricional."

@@ -7,7 +7,6 @@ import com.cdez.sg_cdez_api.repository.ConsultaRepository;
 import com.cdez.sg_cdez_api.repository.specifications.ConsultaSpecs;
 import com.cdez.sg_cdez_api.service.*;
 import com.cdez.sg_cdez_api.util.*;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -63,14 +62,20 @@ public class ConsultaServiceImpl implements ConsultaService {
     }
 
     @Override
-    @Transactional
-    public ConsultaResponse crearConsulta(ConsultaCreateRequest request) {
+    public Consulta crearConsultaEntity(ConsultaCreateRequest request) {
         AUTH_HELPER.validarUsuarioActivo();
 
         Consulta nuevaConsulta = new Consulta();
-        AdultoMayor adultoMayor = ADULTO_SERVICE.obtenerAdultoCheck(request.adultoId());
+
+        AdultoMayor adultoMayor =
+                ADULTO_SERVICE.obtenerAdultoCheck(request.adultoId());
 
         nuevaConsulta.setAdultoMayor(adultoMayor);
+        nuevaConsulta.setTipoConsulta(
+                request.tipoConsulta() == null
+                        ? null
+                        : request.tipoConsulta().trim().toUpperCase()
+        );
         nuevaConsulta.setTipoConsulta((request.tipoConsulta() == null)
                 ? null : request.tipoConsulta().trim().toUpperCase());
         nuevaConsulta.setMotivo((request.motivo() == null)
@@ -83,13 +88,24 @@ public class ConsultaServiceImpl implements ConsultaService {
                 ? "N/A" : request.resultadosEvaluaciones());
         nuevaConsulta.setRecomendaciones((request.recomendaciones() == null)
                 ? "N/A" : request.recomendaciones().trim());
-        nuevaConsulta.setNotas(request.notas().trim());
+        nuevaConsulta.setNotas(request.notas() == null
+                ? "N/A"
+                : request.notas().trim());
         nuevaConsulta.setActivo(true);
 
-        nuevaConsulta.setCreatedBy(AUTH_HELPER.obtenerUsuarioAutenticado());
-        nuevaConsulta.setCreatedAt(LocalDateTime.now(Clock.systemUTC()));
+        nuevaConsulta.setCreatedBy(
+                AUTH_HELPER.obtenerUsuarioAutenticado()
+        );
+        nuevaConsulta.setCreatedAt(
+                LocalDateTime.now(Clock.systemUTC())
+        );
 
-        Consulta consulta = REPOSITORY.save(nuevaConsulta);
+        return REPOSITORY.save(nuevaConsulta);
+    }
+
+    @Override
+    public ConsultaResponse crearConsulta(ConsultaCreateRequest request) {
+        Consulta consulta = crearConsultaEntity(request);
 
         return mapDTO(consulta);
     }
@@ -173,7 +189,7 @@ public class ConsultaServiceImpl implements ConsultaService {
                 ));
     }
 
-    public void verificarEdicionValida(UUID id){
+    private void verificarEdicionValida(UUID id){
         if(!AUTH_HELPER.obtenerUsuarioAutenticado().getPersonalId()
                 .equals(id)){
             throw new ResponseStatusException(

@@ -14,9 +14,9 @@ public interface ConsultaService {
     PageResponse<ConsultaResponse> listarConsultasFiltradas(ConsultaFiltro filtros,Pageable pageable);
     ConsultaResponse obtenerConsultaPorId(UUID id);
     ConsultaResponse crearConsulta(ConsultaCreateRequest request);
+    Consulta crearConsultaEntity(ConsultaCreateRequest request);
     ConsultaResponse actualizarConsulta(ConsultaUpdateRequest request, UUID id);
     ConsultaResponse desactivarConsulta(UUID id);
     ConsultaResponse mapDTO(Consulta consulta);
     Consulta obtenerConsultaCheck(UUID id);
-    void verificarEdicionValida(UUID id);
 }
