@@ -64,9 +64,10 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
                 ? null
                 : request.estadoCognitivo().trim());
 
-        REPOSITORY.save(consultaNutricional);
+        ConsultaNutricional consultaNutricionalGuardada = REPOSITORY.save(consultaNutricional);
 
-        TAMIZAJE_SERVICE.crearTamizajes(request.tamizajes(), consultaNutricional);
+        TAMIZAJE_SERVICE.crearTamizajes(request.tamizajes(), consultaNutricionalGuardada);
+
 
         return null;
     }

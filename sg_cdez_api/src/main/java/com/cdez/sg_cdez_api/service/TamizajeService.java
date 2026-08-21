@@ -14,6 +14,4 @@ public interface TamizajeService {
     List<TamizajeResponse> listarTamizajesPorConsulta(ConsultaNutricional consultaNutricional);
     List<TamizajeResponse> crearTamizajes(List<TamizajeNutricionalCreateRequest> requests, ConsultaNutricional consultaNutricional);
     List<TamizajeResponse> actualizarTamizajes(List<TamizajeNutricionalUpdateRequest> requests, ConsultaNutricional consultaNutricional);
-    List<TamizajeResponse> desactivarTamizajes(List<UUID> tamizajes, ConsultaNutricional consultaNutricional);
-
 }
