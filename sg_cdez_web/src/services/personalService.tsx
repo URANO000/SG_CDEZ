@@ -1,4 +1,4 @@
-import { apiClient } from "../utils/helper";
+import { apiClient } from "../utils/apiHelper";
 import type { PersonalFiltro } from './interfaces/personalFiltroInterface';
 import type { PageResponse } from "./interfaces/pageResponse";
 import type { PersonalResponse } from "./interfaces/personalResponse";

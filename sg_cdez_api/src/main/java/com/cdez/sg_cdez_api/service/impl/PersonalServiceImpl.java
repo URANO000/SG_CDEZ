@@ -325,7 +325,7 @@ public class PersonalServiceImpl implements PersonalService {
         return REPOSITORY.findById(id)
                 .orElseThrow(()-> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Personal indicado no existe."
+                        "Miembro del personal indicado no existe."
                 ));
     }
 }

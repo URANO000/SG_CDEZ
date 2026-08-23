@@ -1,4 +1,4 @@
-import { apiClient } from "../utils/helper";
+import { apiClient } from "../utils/apiHelper";
 
 import type { EncargadoLegalResponse } from "./interfaces/encargadoLegalInterface";
 

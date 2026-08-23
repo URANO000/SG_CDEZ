@@ -7,6 +7,9 @@ import { Paper, Title, Text, Badge, Group, SimpleGrid, Stack, ActionIcon, Loader
 import { BsArrowLeft, BsFileEarmarkText, BsDownload } from 'react-icons/bs';
 import { useNavigate } from "react-router";
 import { descargarDocumento } from "../../services/documentoService";
+import axios from "axios";
+import { notifications } from "@mantine/notifications";
+import { mostrarFecha } from "../../utils/formatHelper";
 
 export function PersonalDetalle() {
     const { personalId } = useParams();
@@ -61,7 +64,19 @@ export function PersonalDetalle() {
             link.remove();
             window.URL.revokeObjectURL(url);
         } catch {
-            alert("Error...I need to make notifs properly")
+            if (axios.isAxiosError(error) && error.response?.status === 404) {
+                notifications.show({
+                    title: "Error al cargar datos",
+                    message: error.response.data?.message,
+                    color: "orange"
+                });
+                return;
+            }
+            notifications.show({
+                title: "Error al mostrar datos del personal",
+                message: "No fue posible recuperar los datos del miembro del personal.",
+                color: "red",
+            });
         } finally {
             setDownloadingId(null);
         }
@@ -224,26 +239,41 @@ export function PersonalDetalle() {
                                     </Text>
 
                                     <Text className={classes.value}>
-                                        {personal.createdAt}
+                                        {mostrarFecha(personal.createdAt)}
                                     </Text>
                                 </div>
                                 <div>
                                     <Text className={classes.label}>
                                         Última Actualización Por
                                     </Text>
-
-                                    <Text className={classes.value}>
-                                        {personal.updatedBy}
-                                    </Text>
+                                    {
+                                        personal.updatedBy != null ? (
+                                            <Text className={classes.value}>
+                                                {personal.updatedBy}
+                                            </Text>
+                                        ) : (
+                                            <Text className={classes.emptyText}>
+                                                N/A
+                                            </Text>
+                                        )
+                                    }
                                 </div>
                                 <div>
                                     <Text className={classes.label}>
                                         Última Actualización En
                                     </Text>
+                                    {
+                                        personal.updatedAt != null ? (
+                                            <Text className={classes.value}>
+                                                {mostrarFecha(personal.updatedAt)}
+                                            </Text>
 
-                                    <Text className={classes.value}>
-                                        {personal.updatedAt}
-                                    </Text>
+                                        ) : (
+                                            <Text className={classes.emptyText}>
+                                                {mostrarFecha(personal.updatedAt)}
+                                            </Text>
+                                        )
+                                    }
                                 </div>
 
 
