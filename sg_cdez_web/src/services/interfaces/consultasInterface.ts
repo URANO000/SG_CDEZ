@@ -1,5 +1,3 @@
-export type Apetito = "BUENO" | "REGULAR" | "MALO";
-export type TipoTamizaje = "MNA" | "SARC_F" | "MUST" | "NRS";
 
 export interface ConsultaNutricionalPageResponse {
     consultaNutricionalId : string;

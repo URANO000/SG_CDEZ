@@ -26,6 +26,7 @@ import { PersonalDetalle } from "./pages/personal/personalDetalle";
 import { PersonalEditar } from "./pages/personal/personalEditar";
 import { PersonalRegistrar } from "./pages/personal/personalRegistrar";
 import { AdultoMayorRegistrar } from "./pages/adultosMayores/adultoMayorRegistrar";
+import { ConsultaDetalle } from "./pages/consultas/consultaDetalle";
 
 function App() {
   return (
@@ -60,6 +61,13 @@ function App() {
                   <Consultas />
                 </ProtectedRoute>
               } />
+              <Route path="/consulta/:consultaId/detalle"
+              element={
+                <ProtectedRoute roles={["ROLE_PERSONAL"]}>
+                  <ConsultaDetalle />
+                </ProtectedRoute>
+              }
+               />
               <Route path="/adultosMayores" element={<AdultosMayores />} />
               <Route
                 path="/adultosMayores/:adultoId/expediente"

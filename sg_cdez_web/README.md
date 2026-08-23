@@ -8,3 +8,4 @@ npm i -D postcss postcss-preset-mantine postcss-simple-vars
 npm i @mantine/colors-generator
 ### Functional libraries
 npm i react-router@latest
+npm i bigdecimal.js

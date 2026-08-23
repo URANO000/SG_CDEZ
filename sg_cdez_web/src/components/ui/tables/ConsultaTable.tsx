@@ -69,7 +69,7 @@ export function ConsultaTable({consultas, onRefresh}: ConsultaTableProps) {
                                                     className={classes.actionView}
                                                     onClick={() =>
                                                         navigate(
-                                                            `/consulta/${consulta.consultaId}`
+                                                            `/consulta/${consulta.consultaId}/detalle`
                                                         )
                                                     }
                                                     aria-label="Ver detalles">
