@@ -104,7 +104,7 @@ export function EpicrisisForm({
           {...form.getInputProps("archivo")}
         />
 
-        <Group justify="flex-end" mt="sm">
+        <Group justify="flex-end" gap="sm" mt="md">
           <Button
             type="button"
             variant="default"
@@ -114,8 +114,8 @@ export function EpicrisisForm({
             Cancelar
           </Button>
 
-          <Button type="submit" loading={loading} className="primary-button">
-            Registrar epicrisis
+          <Button type="submit" loading={loading}>
+            Registrar encargado
           </Button>
         </Group>
       </Stack>
