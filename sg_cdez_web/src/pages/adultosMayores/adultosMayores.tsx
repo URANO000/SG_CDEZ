@@ -24,7 +24,10 @@ import { AdultosMayoresTable } from "../../components/ui/tables/AdultosMayoresTa
 
 import { useAuth } from "../../services/authContext";
 
+import { notifications } from "@mantine/notifications";
+
 import {
+  activarAdultoMayor,
   desactivarAdultoMayor,
   listarAdultosMayoresFiltrados,
 } from "../../services/adultoMayorService";
@@ -78,6 +81,11 @@ export function AdultosMayores() {
 
   const [guardando, setGuardando] = useState(false);
 
+  const [adultoAActivar, setAdultoAActivar] =
+    useState<AdultoMayorResponse | null>(null);
+
+  const [activando, setActivando] = useState(false);
+
   const pageSize = 10;
 
   async function cargarAdultos(
@@ -99,6 +107,36 @@ export function AdultosMayores() {
       setError("No se pudo cargar la lista de adultos mayores.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function confirmarActivacion() {
+    if (!adultoAActivar) {
+      return;
+    }
+
+    try {
+      setActivando(true);
+
+      await activarAdultoMayor(adultoAActivar.adultoId);
+
+      setAdultoAActivar(null);
+
+      await cargarAdultos(0, filtros);
+
+      notifications.show({
+        title: "Adulto mayor activado",
+        message: "El registro se activó correctamente.",
+        color: "green",
+      });
+    } catch {
+      notifications.show({
+        title: "Error al activar",
+        message: "No se pudo activar el registro del adulto mayor.",
+        color: "red",
+      });
+    } finally {
+      setActivando(false);
     }
   }
 
@@ -257,6 +295,7 @@ export function AdultosMayores() {
           <AdultosMayoresTable
             adultosMayores={pageData?.content ?? []}
             onDesactivar={abrirDesactivacion}
+            onActivar={setAdultoAActivar}
           />
 
           <Group justify="center" className={filterClasses.paginationBar}>
@@ -323,6 +362,43 @@ export function AdultosMayores() {
             }}
           >
             Desactivar
+          </Button>
+        </Group>
+      </Modal>
+
+      <Modal
+        opened={adultoAActivar !== null}
+        onClose={() => {
+          if (!activando) {
+            setAdultoAActivar(null);
+          }
+        }}
+        title="Activar adulto mayor"
+        centered
+      >
+        <Text size="sm">
+          ¿Desea volver a activar el registro de{" "}
+          <strong>{adultoAActivar?.nombreCompleto}</strong>?
+        </Text>
+
+        <Text size="sm" c="dimmed" mt="xs">
+          El adulto mayor volverá a aparecer entre los registros activos.
+        </Text>
+
+        <Group justify="flex-end" gap="sm" mt="lg">
+          <Button
+            variant="default"
+            disabled={activando}
+            onClick={() => setAdultoAActivar(null)}
+          >
+            Cancelar
+          </Button>
+
+          <Button
+            loading={activando}
+            onClick={() => void confirmarActivacion()}
+          >
+            Activar
           </Button>
         </Group>
       </Modal>

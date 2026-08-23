@@ -54,3 +54,13 @@ export async function desactivarAdultoMayor(
 
   return response.data;
 }
+
+export async function activarAdultoMayor(
+  adultoId: string,
+): Promise<AdultoMayorResponse> {
+  const response = await apiClient.patch<AdultoMayorResponse>(
+    `/adultos-mayores/${adultoId}/activar`,
+  );
+
+  return response.data;
+}
