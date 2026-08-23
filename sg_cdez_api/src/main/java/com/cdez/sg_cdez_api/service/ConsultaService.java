@@ -11,12 +11,11 @@ import java.util.UUID;
 
 @Service
 public interface ConsultaService {
-    PageResponse<ConsultaResponse> listarConsultasFiltradas(ConsultaFiltro filtros,Pageable pageable);
-    ConsultaResponse obtenerConsultaPorId(UUID id);
-    ConsultaResponse crearConsulta(ConsultaCreateRequest request);
+    PageResponse<ConsultaPageResponse> listarConsultasFiltradas(ConsultaFiltro filtros, Pageable pageable);
+    ConsultaDetailResponse obtenerConsultaPorId(UUID id);
+    ConsultaDetailResponse crearConsulta(ConsultaCreateRequest request);
     Consulta crearConsultaEntity(ConsultaCreateRequest request);
-    ConsultaResponse actualizarConsulta(ConsultaUpdateRequest request, UUID id);
-    ConsultaResponse desactivarConsulta(UUID id);
-    ConsultaResponse mapDTO(Consulta consulta);
+    ConsultaDetailResponse actualizarConsulta(ConsultaUpdateRequest request, UUID id);
+    ConsultaDetailResponse desactivarConsulta(UUID id);
     Consulta obtenerConsultaCheck(UUID id);
 }

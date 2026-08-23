@@ -12,7 +12,7 @@ public record AntropometriaResponse(
         BigDecimal alturaEstimada,
         BigDecimal imc,
         BigDecimal circunferenciaPantorrilla,
-        BigDecimal circunferenciaBranquial,
+        BigDecimal circunferenciaBraquial,
         BigDecimal circunferenciaCintura,
         BigDecimal perdidaPesoPorcentaje
 ) {

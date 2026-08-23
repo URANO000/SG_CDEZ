@@ -1,7 +1,6 @@
 package com.cdez.sg_cdez_api.service.impl;
 
 import com.cdez.sg_cdez_api.dto.request.*;
-import com.cdez.sg_cdez_api.dto.response.*;
 import com.cdez.sg_cdez_api.entity.*;
 import com.cdez.sg_cdez_api.repository.ConsultaNutricionalRepository;
 import com.cdez.sg_cdez_api.service.*;
@@ -23,19 +22,19 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
     private final ExamenLaboratorioService EXAMENLAB_SERVICE;
     private final AuthHelper AUTH_HELPER;
 
-    @Override
-    public ConsultaNutricionalResponse listarConsultasNutricionalesFiltradas(ConsultaFiltro filtro) {
-        return null;
-    }
-
-    @Override
-    public ConsultaNutricionalResponse obtenerConsultaNutricionalPorId(UUID id) {
-        return mapDTO(obtenerConsultaNutricionalCheck(id));
-    }
+//    @Override
+//    public List<ConsultaNutricionalDetailResponse> listarConsultasNutricionalesFiltradas(ConsultaFiltro filtro) {
+//        return REPOSITORY.findByConsultaActivoTrue().stream().map(this::mapDTO).toList();
+//    }
+//
+//    @Override
+//    public ConsultaNutricionalDetailResponse obtenerConsultaNutricionalPorId(UUID id) {
+//        return mapDTO(obtenerConsultaNutricionalCheck(id));
+//    }
 
     @Override
     @Transactional
-    public ConsultaNutricionalResponse crearConsultaNutricional(ConsultaNutricionalCreateRequest request) {
+    public void crearConsultaNutricional(ConsultaNutricionalCreateRequest request) {
         validarEspecialidad(AUTH_HELPER.obtenerUsuarioAutenticado());
 
         ConsultaNutricional consultaNutricional = new ConsultaNutricional();
@@ -76,12 +75,11 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
 
         ANTROPOMETRIA_SERVICE.crearAntropometria(request.antropometria(), consultaNutricionalGuardada);
 
-        return mapDTO(consultaNutricionalGuardada);
     }
 
     @Override
     @Transactional
-    public ConsultaNutricionalResponse actualizarConsultaNutricional(UUID id, ConsultaNutricionalUpdateRequest request) {
+    public void actualizarConsultaNutricional(UUID id, ConsultaNutricionalUpdateRequest request) {
         validarEspecialidad(AUTH_HELPER.obtenerUsuarioAutenticado());
 
         ConsultaNutricional consultaNutricionalVieja = obtenerConsultaNutricionalCheck(id);
@@ -147,43 +145,17 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
             ANTROPOMETRIA_SERVICE.actualizarAntropometria(request.antropometria(), actualizada);
         }
 
-        return mapDTO(actualizada);
     }
 
     @Override
     @Transactional
-    public ConsultaNutricionalResponse desactivarConsultaNutricional(UUID id) {
+    public void desactivarConsultaNutricional(UUID id) {
         ConsultaNutricional consultaNutricional = obtenerConsultaNutricionalCheck(id);
         CONSULTA_SERVICE.desactivarConsulta(consultaNutricional.getConsulta().getConsultaId());
         validarEspecialidad(AUTH_HELPER.obtenerUsuarioAutenticado());
 
         consultaNutricional.getConsulta().setActivo(false);
         REPOSITORY.save(consultaNutricional);
-        return mapDTO(consultaNutricional);
-    }
-
-    private ConsultaNutricionalResponse mapDTO(ConsultaNutricional consultaNutricional){
-        Consulta consulta = consultaNutricional.getConsulta();
-
-        return new ConsultaNutricionalResponse(
-                consultaNutricional.getConsultaNutricionalId(),
-                CONSULTA_SERVICE.mapDTO(consulta),
-                consultaNutricional.getHistoriaAlimentaria(),
-                consultaNutricional.getApetito(),
-                consultaNutricional.getMasticacion(),
-                consultaNutricional.getDeglucion(),
-                consultaNutricional.getNauseas(),
-                consultaNutricional.getVomitos(),
-                consultaNutricional.getDistension(),
-                consultaNutricional.getGases(),
-                consultaNutricional.getReflujo(),
-                consultaNutricional.getFrecuenciaEvacuaciones(),
-                consultaNutricional.getConsistenciaBristol(),
-                consultaNutricional.getEstadoCognitivo(),
-                TAMIZAJE_SERVICE.listarTamizajesPorConsulta(consultaNutricional),
-                EXAMENLAB_SERVICE.listarExamenesPorConsulta(consultaNutricional),
-                ANTROPOMETRIA_SERVICE.obtenerAntropometriaPorConsulta(consultaNutricional)
-        );
     }
 
     private ConsultaNutricional obtenerConsultaNutricionalCheck(UUID id){

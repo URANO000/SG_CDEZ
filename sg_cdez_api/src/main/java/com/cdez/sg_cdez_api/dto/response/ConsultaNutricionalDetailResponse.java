@@ -4,9 +4,8 @@ import com.cdez.sg_cdez_api.entity.enums.Apetito;
 
 import java.util.*;
 
-public record ConsultaNutricionalResponse(
+public record ConsultaNutricionalDetailResponse(
         UUID consultaNutricionalId,
-        ConsultaResponse consultaGeneral,
         String historiaAlimentaria,
         Apetito apetito,
         String masticacion,

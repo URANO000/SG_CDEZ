@@ -2,7 +2,6 @@ package com.cdez.sg_cdez_api.dto.request;
 
 import jakarta.validation.constraints.NotEmpty;
 
-import java.util.UUID;
 
 public record ConsultaUpdateRequest(
         @NotEmpty(message = "Tipo de consulta no puede estar vacía.")

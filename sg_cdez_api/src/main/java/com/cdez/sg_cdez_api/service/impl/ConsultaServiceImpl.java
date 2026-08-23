@@ -25,9 +25,12 @@ public class ConsultaServiceImpl implements ConsultaService {
     private final AuthHelper AUTH_HELPER;
     private final ValidationHelper VALIDATION_HELPER;
     private final AdultoMayorService ADULTO_SERVICE;
+    private final TamizajeService TAMIZAJE_SERVICE;
+    private final AntropometriaService ANTROPOMETRIA_SERVICE;
+    private final ExamenLaboratorioService EXAMENLAB_SERVICE;
 
     @Override
-    public PageResponse<ConsultaResponse> listarConsultasFiltradas(ConsultaFiltro filtros, Pageable pageable) {
+    public PageResponse<ConsultaPageResponse> listarConsultasFiltradas(ConsultaFiltro filtros, Pageable pageable) {
         Specification<Consulta> spec = Specification.unrestricted();
 
         if(filtros.searchTerm() != null){
@@ -52,13 +55,13 @@ public class ConsultaServiceImpl implements ConsultaService {
         Page<Consulta> consultaPage = REPOSITORY.findAll(spec, pageable);
         VALIDATION_HELPER.checkPaginationBounds(consultaPage, pageable);
 
-        Page<ConsultaResponse> responsePage = consultaPage.map(this::mapDTO);
+        Page<ConsultaPageResponse> responsePage = consultaPage.map(this::mapPageDTO);
         return new PageResponse<>(responsePage);
     }
 
     @Override
-    public ConsultaResponse obtenerConsultaPorId(UUID id) {
-        return mapDTO(obtenerConsultaCheck(id));
+    public ConsultaDetailResponse obtenerConsultaPorId(UUID id) {
+        return mapDetailDTO(obtenerConsultaCheck(id));
     }
 
     @Override
@@ -104,14 +107,14 @@ public class ConsultaServiceImpl implements ConsultaService {
     }
 
     @Override
-    public ConsultaResponse crearConsulta(ConsultaCreateRequest request) {
+    public ConsultaDetailResponse crearConsulta(ConsultaCreateRequest request) {
         Consulta consulta = crearConsultaEntity(request);
 
-        return mapDTO(consulta);
+        return mapDetailDTO(consulta);
     }
 
     @Override
-    public ConsultaResponse actualizarConsulta(ConsultaUpdateRequest request, UUID id) {
+    public ConsultaDetailResponse actualizarConsulta(ConsultaUpdateRequest request, UUID id) {
         Consulta consultaActualizar = obtenerConsultaCheck(id);
 
         verificarEdicionValida(consultaActualizar.getCreatedBy().getPersonalId());
@@ -136,11 +139,11 @@ public class ConsultaServiceImpl implements ConsultaService {
 
         Consulta consultaActualizada = REPOSITORY.save(consultaActualizar);
 
-        return mapDTO(consultaActualizada);
+        return mapDetailDTO(consultaActualizada);
     }
 
     @Override
-    public ConsultaResponse desactivarConsulta(UUID id) {
+    public ConsultaDetailResponse desactivarConsulta(UUID id) {
         Consulta consulta = obtenerConsultaCheck(id);
 
         verificarEdicionValida(consulta.getCreatedBy().getPersonalId());
@@ -148,13 +151,53 @@ public class ConsultaServiceImpl implements ConsultaService {
         consulta.setActivo(false);
 
         Consulta consultaDesactivada = REPOSITORY.save(consulta);
-        return mapDTO(consultaDesactivada);
+        return mapDetailDTO(consultaDesactivada);
     }
 
-    public ConsultaResponse mapDTO(Consulta consulta){
+    public ConsultaPageResponse mapPageDTO(Consulta consulta){
         AdultoMayor adultoMayor = consulta.getAdultoMayor();
         Personal personal = consulta.getCreatedBy();
-        return new ConsultaResponse(
+
+        ConsultaNutricionalPageResponse nutricional = null;
+
+        if(consulta.getConsultaNutricional() != null){
+            nutricional = nutricionalMapDTO(consulta.getConsultaNutricional());
+        }
+
+        return new ConsultaPageResponse(
+                consulta.getConsultaId(),
+                new AdultoMayorConsultaResponse(
+                        adultoMayor.getAdultoId(),
+                        adultoMayor.getTipoIdentificacion(),
+                        adultoMayor.getIdentificacion(),
+                        adultoMayor.getNombreCompleto(),
+                        adultoMayor.getFechaNacimiento()
+                ),
+                consulta.getTipoConsulta(),
+                consulta.isActivo() ? "Activo" : "Inactivo",
+                new PersonalConsultaResponse(
+                        personal.getPersonalId(),
+                        personal.getUsuario(),
+                        personal.getNombreCompleto(),
+                        personal.getEspecialidad()
+                ),
+                consulta.getCreatedAt(),
+                consulta.getUpdatedAt(),
+                nutricional
+        );
+    }
+
+    private ConsultaDetailResponse mapDetailDTO(Consulta consulta){
+        AdultoMayor adultoMayor = consulta.getAdultoMayor();
+        Personal personal = consulta.getCreatedBy();
+
+            ConsultaNutricionalDetailResponse nutricional = null;
+
+        if(consulta.getConsultaNutricional() != null){
+            nutricional = nutricionalMapDetailDTO(consulta.getConsultaNutricional());
+        }
+
+        return new ConsultaDetailResponse(
                 consulta.getConsultaId(),
                 new AdultoMayorConsultaResponse(
                         adultoMayor.getAdultoId(),
@@ -167,6 +210,7 @@ public class ConsultaServiceImpl implements ConsultaService {
                 consulta.getTipoConsulta(),
                 consulta.getDescripcion(),
                 consulta.getDiagnostico(),
+                consulta.getResultadosEvaluaciones(),
                 consulta.getRecomendaciones(),
                 consulta.getNotas(),
                 consulta.isActivo() ? "Activo" : "Inactivo",
@@ -177,7 +221,35 @@ public class ConsultaServiceImpl implements ConsultaService {
                         personal.getEspecialidad()
                 ),
                 consulta.getCreatedAt(),
-                consulta.getUpdatedAt()
+                consulta.getUpdatedAt(),
+                nutricional
+        );
+    }
+
+    public ConsultaNutricionalPageResponse nutricionalMapDTO(ConsultaNutricional consultaNutricional){
+        return new ConsultaNutricionalPageResponse(
+                consultaNutricional.getConsultaNutricionalId()
+        );
+    }
+
+    private ConsultaNutricionalDetailResponse nutricionalMapDetailDTO(ConsultaNutricional consultaNutricional){
+        return new ConsultaNutricionalDetailResponse(
+                consultaNutricional.getConsultaNutricionalId(),
+                consultaNutricional.getHistoriaAlimentaria(),
+                consultaNutricional.getApetito(),
+                consultaNutricional.getMasticacion(),
+                consultaNutricional.getDeglucion(),
+                consultaNutricional.getNauseas(),
+                consultaNutricional.getVomitos(),
+                consultaNutricional.getDistension(),
+                consultaNutricional.getGases(),
+                consultaNutricional.getReflujo(),
+                consultaNutricional.getFrecuenciaEvacuaciones(),
+                consultaNutricional.getConsistenciaBristol(),
+                consultaNutricional.getEstadoCognitivo(),
+                TAMIZAJE_SERVICE.listarTamizajesPorConsulta(consultaNutricional),
+                EXAMENLAB_SERVICE.listarExamenesPorConsulta(consultaNutricional),
+                ANTROPOMETRIA_SERVICE.obtenerAntropometriaPorConsulta(consultaNutricional)
         );
     }
 

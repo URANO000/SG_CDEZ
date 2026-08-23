@@ -35,4 +35,10 @@ public class Consulta {
     @JoinColumn(name = "updated_by", nullable = true)
     private Personal updatedBy;
     private LocalDateTime updatedAt;
+
+    @OneToOne(
+            mappedBy = "consulta",
+            fetch = FetchType.LAZY
+    )
+    private ConsultaNutricional consultaNutricional;
 }
