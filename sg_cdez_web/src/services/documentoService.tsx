@@ -1,4 +1,4 @@
-import { apiClient } from "../utils/helper";
+import { apiClient } from "../utils/apiHelper";
 import type { DocumentoResponse } from "./interfaces/personalResponse";
 
 export const descargarDocumento = async (documentoId: number) => {

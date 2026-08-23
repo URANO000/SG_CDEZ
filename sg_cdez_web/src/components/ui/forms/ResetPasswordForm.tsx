@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import { restablecerContrasena } from "../../../services/authService";
 import { useForm } from "@mantine/form";
 import { Button, PasswordInput } from "@mantine/core";
+import { PasswordStrengthInput } from "../../../components/common/Passwordstrengthinput";
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const [loading, setLoading] = useState(false);
@@ -55,11 +56,8 @@ export function ResetPasswordForm({ token }: { token: string }) {
       onSubmit={form.onSubmit(handleSubmit)}
       subtitle=""
     >
-      <PasswordInput
-        label="Contraseña"
-        placeholder="Tu contraseña"
+      <PasswordStrengthInput
         {...form.getInputProps("contrasena")}
-        required
         mt="md"
         radius="md"
       />

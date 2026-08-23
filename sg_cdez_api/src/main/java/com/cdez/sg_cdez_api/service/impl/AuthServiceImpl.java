@@ -10,10 +10,12 @@ import com.cdez.sg_cdez_api.util.Exceptions.TokenExpiradoException;
 import com.cdez.sg_cdez_api.util.Exceptions.TooManyRequestsException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -86,7 +88,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void activarCuenta(ActivateAccountRequest request) {
         EmailVerificationToken verificationToken = VERIFICATION_REPOSITORY.findByToken(request.token())
-                .orElseThrow(() -> new RuntimeException("Token Inválido."));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Token Inválido."
+                ));
 
         if (verificationToken.isUsado()){
             throw new RuntimeException("El token ya fue utilizado.");

@@ -4,6 +4,7 @@ import lombok.*;
 import org.springframework.http.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +41,14 @@ public class GlobalExceptionHandler {
                 errors.put(error.getField(), error.getDefaultMessage())
         );
         return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleResponseStatus(ResponseStatusException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("message", ex.getReason());
+        body.put("status", ex.getStatusCode().value());
+        return ResponseEntity.status(ex.getStatusCode()).body(body);
     }
 
 

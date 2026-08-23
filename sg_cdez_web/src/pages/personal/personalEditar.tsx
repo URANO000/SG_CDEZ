@@ -10,6 +10,8 @@ import { Paper, Title, Text, Group, Stack, Button, ActionIcon } from "@mantine/c
 import { BsPlus, BsTrash, BsPersonCheck, BsUpload, BsFileEarmarkText, BsX } from "react-icons/bs";
 import classes from "../../components/ui/forms/PersonalForm.module.css";
 import { useRef } from "react";
+import axios from "axios";
+import { notifications } from "@mantine/notifications";
 
 function formatBytes(bytes: number): string {
     if (bytes === 0) return "0 KB";
@@ -79,8 +81,20 @@ export function PersonalEditar() {
                 setDocumentosDesactivar([]);
 
             } catch (error) {
-                console.error(error);
-                alert("No se pudo cargar el personal.");
+                if (axios.isAxiosError(error) && error.response?.status === 404) {
+                    notifications.show({
+                        title: "Error al cargar datos",
+                        message: error.response.data?.message,
+                        color: "orange"
+                    });
+                    return;
+                }
+
+                notifications.show({
+                    title: "Error al mostrar datos del personal",
+                    message: "No fue posible recuperar los datos del miembro del personal.",
+                    color: "red",
+                });
             } finally {
                 setLoadingData(false);
             }
@@ -277,14 +291,39 @@ export function PersonalEditar() {
             );
 
             await actualizarPersonal(personalId, formDataMultipart);
-            alert("Personal actualizado con éxito");
+            notifications.show({
+                title: "Personal actualizado",
+                message: "El miembro del personal se actualizó correctamente.",
+                color: "green",
+            });
+
 
             navigate(`/personal`);
 
         } catch (error) {
-            console.error(error);
+            if (axios.isAxiosError(error) && error.response?.status === 401) {
+                notifications.show({
+                    title: "Falta de permisos",
+                    message: error.response.data?.message,
+                    color: "orange"
+                });
+                return;
+            }
 
-            alert("No se pudo actualizar el personal.");
+            if (axios.isAxiosError(error) && error.response?.status === 404) {
+                notifications.show({
+                    title: "Error al actualizar",
+                    message: error.response.data?.message,
+                    color: "orange"
+                });
+                return;
+            }
+
+            notifications.show({
+                title: "Error al actualizar",
+                message: "No se pudo actualizar el miembro del personal.",
+                color: "red",
+            });
         } finally {
             setLoading(false);
         }
