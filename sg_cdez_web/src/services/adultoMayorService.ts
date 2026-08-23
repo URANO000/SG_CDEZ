@@ -2,6 +2,7 @@ import { apiClient } from "../utils/helper";
 
 import type {
   AdultoMayorCreateRequest,
+  AdultoMayorFallecimientoRequest,
   AdultoMayorDesactivarRequest,
   AdultoMayorFiltro,
   AdultoMayorResponse,
@@ -60,6 +61,18 @@ export async function activarAdultoMayor(
 ): Promise<AdultoMayorResponse> {
   const response = await apiClient.patch<AdultoMayorResponse>(
     `/adultos-mayores/${adultoId}/activar`,
+  );
+
+  return response.data;
+}
+
+export async function registrarFallecimientoAdultoMayor(
+  adultoId: string,
+  request: AdultoMayorFallecimientoRequest,
+): Promise<AdultoMayorResponse> {
+  const response = await apiClient.patch<AdultoMayorResponse>(
+    `/adultos-mayores/${adultoId}/fallecimiento`,
+    request,
   );
 
   return response.data;

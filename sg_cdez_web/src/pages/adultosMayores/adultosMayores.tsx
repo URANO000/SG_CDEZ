@@ -8,6 +8,7 @@ import {
   Modal,
   Pagination,
   Select,
+  Stack,
   Text,
   Textarea,
   TextInput,
@@ -30,6 +31,7 @@ import {
   activarAdultoMayor,
   desactivarAdultoMayor,
   listarAdultosMayoresFiltrados,
+  registrarFallecimientoAdultoMayor,
 } from "../../services/adultoMayorService";
 
 import type {
@@ -85,6 +87,16 @@ export function AdultosMayores() {
     useState<AdultoMayorResponse | null>(null);
 
   const [activando, setActivando] = useState(false);
+
+  const [adultoAFallecimiento, setAdultoAFallecimiento] =
+    useState<AdultoMayorResponse | null>(null);
+
+  const [fechaFallecimiento, setFechaFallecimiento] = useState("");
+
+  const [observacionFallecimiento, setObservacionFallecimiento] = useState("");
+
+  const [registrandoFallecimiento, setRegistrandoFallecimiento] =
+    useState(false);
 
   const pageSize = 10;
 
@@ -181,6 +193,55 @@ export function AdultosMayores() {
     setSeleccionado(null);
     setFechaRetiro("");
     setMotivoRetiro("");
+  }
+
+  function abrirFallecimiento(adultoMayor: AdultoMayorResponse) {
+    setAdultoAFallecimiento(adultoMayor);
+    setFechaFallecimiento("");
+    setObservacionFallecimiento("");
+  }
+
+  function cerrarFallecimiento() {
+    if (registrandoFallecimiento) {
+      return;
+    }
+
+    setAdultoAFallecimiento(null);
+    setFechaFallecimiento("");
+    setObservacionFallecimiento("");
+  }
+
+  async function confirmarFallecimiento() {
+    if (!adultoAFallecimiento || !fechaFallecimiento) {
+      return;
+    }
+
+    try {
+      setRegistrandoFallecimiento(true);
+
+      await registrarFallecimientoAdultoMayor(adultoAFallecimiento.adultoId, {
+        fechaFallecimiento: `${fechaFallecimiento}T00:00:00`,
+        motivoRetiro: observacionFallecimiento.trim(),
+      });
+
+      cerrarFallecimiento();
+
+      await cargarAdultos(0, filtros);
+
+      notifications.show({
+        title: "Fallecimiento registrado",
+        message: "El fallecimiento del adulto mayor se registró correctamente.",
+        color: "green",
+      });
+    } catch {
+      notifications.show({
+        title: "Error al registrar",
+        message: "No se pudo registrar el fallecimiento del adulto mayor.",
+        color: "red",
+      });
+    } finally {
+      setRegistrandoFallecimiento(false);
+    }
   }
 
   async function confirmarDesactivacion() {
@@ -294,8 +355,10 @@ export function AdultosMayores() {
         <>
           <AdultosMayoresTable
             adultosMayores={pageData?.content ?? []}
+            estadoListado={filtros.estado}
             onDesactivar={abrirDesactivacion}
             onActivar={setAdultoAActivar}
+            onFallecimiento={abrirFallecimiento}
           />
 
           <Group justify="center" className={filterClasses.paginationBar}>
@@ -399,6 +462,66 @@ export function AdultosMayores() {
             onClick={() => void confirmarActivacion()}
           >
             Activar
+          </Button>
+        </Group>
+      </Modal>
+
+      <Modal
+        opened={adultoAFallecimiento !== null}
+        onClose={cerrarFallecimiento}
+        title={
+          <Stack gap={2}>
+            <Title order={3}>Registrar fallecimiento</Title>
+
+            <Text size="sm" c="dimmed" fw={400}>
+              Registre la fecha de fallecimiento del adulto mayor.
+            </Text>
+          </Stack>
+        }
+        centered
+      >
+        <Text size="sm" mb="md">
+          Se registrará el fallecimiento de{" "}
+          <strong>{adultoAFallecimiento?.nombreCompleto}</strong>.
+        </Text>
+
+        <TextInput
+          type="date"
+          label="Fecha de fallecimiento"
+          required
+          value={fechaFallecimiento}
+          onChange={(event) => setFechaFallecimiento(event.currentTarget.value)}
+          mb="md"
+        />
+
+        <Textarea
+          label="Observación"
+          description="Este campo es opcional."
+          autosize
+          minRows={3}
+          maxLength={200}
+          value={observacionFallecimiento}
+          onChange={(event) =>
+            setObservacionFallecimiento(event.currentTarget.value)
+          }
+        />
+
+        <Group justify="flex-end" gap="sm" mt="lg">
+          <Button
+            variant="default"
+            disabled={registrandoFallecimiento}
+            onClick={cerrarFallecimiento}
+          >
+            Cancelar
+          </Button>
+
+          <Button
+            color="red"
+            loading={registrandoFallecimiento}
+            disabled={!fechaFallecimiento}
+            onClick={() => void confirmarFallecimiento()}
+          >
+            Registrar fallecimiento
           </Button>
         </Group>
       </Modal>

@@ -46,3 +46,8 @@ export interface AdultoMayorDesactivarRequest {
   fechaRetiro: string;
   motivoRetiro: string;
 }
+
+export interface AdultoMayorFallecimientoRequest {
+  fechaFallecimiento: string;
+  motivoRetiro: string;
+}

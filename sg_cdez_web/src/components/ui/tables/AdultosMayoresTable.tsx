@@ -1,23 +1,31 @@
 import { ActionIcon, Group, Table, Tooltip } from "@mantine/core";
 
-import { BsEye, BsPersonDash, BsPersonCheck } from "react-icons/bs";
+import { BsEye, BsPersonDash, BsPersonCheck, BsPersonX } from "react-icons/bs";
 
 import { useNavigate } from "react-router";
 
-import type { AdultoMayorResponse } from "../../../services/interfaces/adultoMayorInterface";
+import type {
+  AdultoMayorResponse,
+  EstadoAdultoMayor,
+} from "../../../services/interfaces/adultoMayorInterface";
 
 import classes from "./Table.module.css";
 
 interface AdultosMayoresTableProps {
   adultosMayores: AdultoMayorResponse[];
+  estadoListado: EstadoAdultoMayor;
+
   onDesactivar: (adultoMayor: AdultoMayorResponse) => void;
   onActivar: (adultoMayor: AdultoMayorResponse) => void;
+  onFallecimiento: (adultoMayor: AdultoMayorResponse) => void;
 }
 
 export function AdultosMayoresTable({
   adultosMayores,
+  estadoListado,
   onDesactivar,
   onActivar,
+  onFallecimiento,
 }: AdultosMayoresTableProps) {
   const navigate = useNavigate();
 
@@ -68,15 +76,28 @@ export function AdultosMayoresTable({
                           </ActionIcon>
                         </Tooltip>
                       )}
-                      {adultoMayor.activo === "Inactivo" && (
-                        <Tooltip label="Activar registro">
+                      {adultoMayor.activo === "Inactivo" &&
+                        estadoListado === "INACTIVO" && (
+                          <Tooltip label="Activar registro">
+                            <ActionIcon
+                              variant="subtle"
+                              color="green"
+                              aria-label="Activar registro"
+                              onClick={() => onActivar(adultoMayor)}
+                            >
+                              <BsPersonCheck size={17} />
+                            </ActionIcon>
+                          </Tooltip>
+                        )}
+                      {estadoListado !== "FALLECIDO" && (
+                        <Tooltip label="Registrar fallecimiento">
                           <ActionIcon
                             variant="subtle"
-                            color="green"
-                            aria-label="Activar registro"
-                            onClick={() => onActivar(adultoMayor)}
+                            color="gray"
+                            aria-label="Registrar fallecimiento"
+                            onClick={() => onFallecimiento(adultoMayor)}
                           >
-                            <BsPersonCheck size={17} />
+                            <BsPersonX size={17} />
                           </ActionIcon>
                         </Tooltip>
                       )}
