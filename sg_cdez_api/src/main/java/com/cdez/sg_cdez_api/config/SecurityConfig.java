@@ -61,7 +61,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auditorias/**").hasRole("ADMIN")
                         .requestMatchers("/api/personal/**").hasRole("ADMIN")
 
-                        .requestMatchers("/api/consulta/**").hasAnyRole("PERSONAL")
+                        .requestMatchers("/api/consulta/**").hasRole("PERSONAL")
+                        .requestMatchers("/api/consulta-nutricional/**").hasRole("PERSONAL")
 
                         .requestMatchers("/error").permitAll()
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()

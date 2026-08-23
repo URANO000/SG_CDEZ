@@ -1,6 +1,10 @@
 package com.cdez.sg_cdez_api.repository;
 
 import com.cdez.sg_cdez_api.entity.Consulta;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
@@ -8,4 +12,10 @@ import java.util.UUID;
 
 
 public interface ConsultaRepository extends JpaRepository<Consulta, UUID>, JpaSpecificationExecutor<Consulta> {
+    @Override
+    @EntityGraph(attributePaths = {"consultaNutricional"})
+    Page<Consulta> findAll(
+            Specification<Consulta> spec,
+            Pageable pageable
+    );
 }
