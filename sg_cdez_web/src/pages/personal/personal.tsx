@@ -9,6 +9,7 @@ import { Group, Title, Select, Button, TextInput, Pagination } from "@mantine/co
 import { AiOutlineSearch } from "react-icons/ai";
 import { Link } from "react-router";
 import { generarReportePDF } from "../../services/personalService";
+import { ESPECIALIDADES } from "../../services/interfaces/personalCreateRequest";
 
 export function Personal() {
     const [filtros, setFiltros] = useState<PersonalFiltro>({
@@ -74,20 +75,24 @@ export function Personal() {
                     <Select
                         placeholder="Todas las especialidades"
                         value={filtros.especialidad ?? ""}
-                        onChange={(value) => setFiltros({ ...filtros, especialidad: value === "" ? null : value })}
+                        onChange={(value) =>
+                            setFiltros({
+                                ...filtros,
+                                especialidad:
+                                    value === "" ? null : value,
+                            })
+                        }
                         data={[
-                            { value: "", label: "Todas las especialidades" },
-                            { value: "Medicina", label: "Medicina" },
-                            { value: "Enfermería", label: "Enfermería" },
-                            { value: "Psicología", label: "Psicología" },
-                            { value: "Nutrición", label: "Nutrición" },
-                            { value: "Trabajo Social", label: "Trabajo Social" },
-                            { value: "Terapia Física", label: "Terapia Física" },
-                            { value: "Terapia Respiratoria", label: "Terapia Respiratoria" },
-                            { value: "Terapia de Lenguaje", label: "Terapia de Lenguaje" },
-
+                            {
+                                value: "",
+                                label: "Todas las especialidades",
+                            },
+                            ...ESPECIALIDADES,
                         ]}
-                        classNames={{ input: classes.input, root: classes.field }}
+                        classNames={{
+                            input: classes.input,
+                            root: classes.field,
+                        }}
                     />
 
                     <Select
@@ -107,7 +112,7 @@ export function Personal() {
                     </Button>
                 </div>
 
-                <PersonalTable personal={pageData?.content ?? []}  onRefresh={handleRefresh}/>
+                <PersonalTable personal={pageData?.content ?? []} onRefresh={handleRefresh} />
 
                 <Group justify="center" className={classes.paginationBar}>
                     <Pagination

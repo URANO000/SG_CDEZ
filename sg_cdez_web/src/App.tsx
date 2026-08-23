@@ -55,7 +55,11 @@ function App() {
               }
             >
               <Route path="/" element={<Home />} />
-              <Route path="/consultas" element={<Consultas />} />
+              <Route path="/consultas" element={
+                <ProtectedRoute roles={["ROLE_PERSONAL"]}>
+                  <Consultas />
+                </ProtectedRoute>
+              } />
               <Route path="/adultosMayores" element={<AdultosMayores />} />
               <Route
                 path="/adultosMayores/:adultoId/expediente"

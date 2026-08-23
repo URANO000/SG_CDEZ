@@ -10,8 +10,7 @@ interface ConsultaTableProps {
     onRefresh: () => void;
 }
 
-export function ConsultaTable({consultas, onRefresh,
-}: ConsultaTableProps) {
+export function ConsultaTable({consultas, onRefresh}: ConsultaTableProps) {
 
     const hasData = consultas.length > 0;
 
@@ -59,15 +58,9 @@ export function ConsultaTable({consultas, onRefresh,
 
                             consultas.map((consulta) => (
 
-                                <Table.Tr
-                                    key={consulta.consultaId}
-                                >
-
+                                <Table.Tr key={consulta.consultaId}>
                                     <Table.Td>
-                                        <Group
-                                            gap={4}
-                                            wrap="nowrap"
-                                        >
+                                        <Group gap={4} wrap="nowrap">
 
                                             <Tooltip label="Ver detalles">
 
@@ -76,11 +69,10 @@ export function ConsultaTable({consultas, onRefresh,
                                                     className={classes.actionView}
                                                     onClick={() =>
                                                         navigate(
-                                                            `/consulta/${consulta.consultaId}/detalle`
+                                                            `/consulta/${consulta.consultaId}`
                                                         )
                                                     }
-                                                    aria-label="Ver detalles"
-                                                >
+                                                    aria-label="Ver detalles">
                                                     <BsEye size={16} />
                                                 </ActionIcon>
 
@@ -103,18 +95,14 @@ export function ConsultaTable({consultas, onRefresh,
 
                                     <Table.Td>
 
-                                        <span
-                                            className={
+                                        <span className={
                                                 consulta.activo === "Activo"
                                                     ? classes.badgeActive
-                                                    : classes.badgeInactive
-                                            }
-                                        >
+                                                    : classes.badgeInactive}>
                                             {consulta.activo}
                                         </span>
 
                                     </Table.Td>
-
                                 </Table.Tr>
 
                             ))
@@ -122,11 +110,7 @@ export function ConsultaTable({consultas, onRefresh,
                         ) : (
 
                             <Table.Tr>
-
-                                <Table.Td
-                                    colSpan={5}
-                                    className={classes.emptyState}
-                                >
+                                <Table.Td colSpan={5} className={classes.emptyState}>
                                     Sin datos
                                 </Table.Td>
 

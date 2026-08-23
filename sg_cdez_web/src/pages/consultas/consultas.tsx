@@ -88,8 +88,7 @@ export function Consultas() {
                             ? "mis-consultas"
                             : "todas-consultas"
                     }
-                    onChange={handleTabChange}
-                >
+                    onChange={handleTabChange}>
                     <Tabs.List>
                         <Tabs.Tab value="mis-consultas">
                             Mis consultas
@@ -104,10 +103,8 @@ export function Consultas() {
                 <div className={classes.filterBar}>
 
                     <TextInput
-                        placeholder="Buscar por nombre..."
-                        leftSection={
-                            <AiOutlineSearch size={16} />
-                        }
+                        placeholder="Buscar por nombre de especialista o adulto mayor..."
+                        leftSection={ <AiOutlineSearch size={16} />}
                         value={filtros.searchTerm ?? ""}
                         onChange={(e) =>
                             setFiltros({

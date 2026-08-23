@@ -9,6 +9,8 @@ import type { PersonalCreateRequest } from "../../services/interfaces/personalCr
 import { registrarPersonal } from "../../services/personalService";
 import { notifications } from "@mantine/notifications";
 import axios from "axios";
+import { TIPOIDENTIFICACION } from "../../services/interfaces/personalCreateRequest";
+import { ESPECIALIDADES } from "../../services/interfaces/personalCreateRequest";
 
 function formatBytes(bytes: number): string {
     if (bytes === 0) return "0 KB";
@@ -215,17 +217,14 @@ export function PersonalRegistrar() {
                     </div>
 
                     <div className={classes.fieldGroup}>
-                        <label className={classes.fieldLabel}>Tipo de identificación<span className={classes.required}>*</span></label>
+                        <label className={classes.fieldLabel}>
+                            Tipo de identificación<span className={classes.required}>*</span>
+                        </label>
                         <select className={classes.select} name="tipoIdentificacion" defaultValue="" required>
                             <option value="" disabled>Tipo de identificación</option>
-                            <option value="CIC">CIC</option>
-                            <option value="CRP">CRP</option>
-                            <option value="CRR">CRR</option>
-                            <option value="RE">RE</option>
-                            <option value="APO">APO</option>
-                            <option value="CRT">CRT</option>
-                            <option value="CRE">CRE</option>
-                            <option value="PEX">PEX</option>
+                            {TIPOIDENTIFICACION.map(({ value, label }) => (
+                                <option key={value} value={value}>{label}</option>
+                            ))}
                         </select>
                         <button type="button" className={classes.infoLink}>
                             ¿Qué significan estas siglas?
@@ -277,17 +276,14 @@ export function PersonalRegistrar() {
                     </div>
 
                     <div className={classes.fieldGroup}>
-                        <label className={classes.fieldLabel}>Especialidad<span className={classes.required}>*</span></label>
+                        <label className={classes.fieldLabel}>
+                            Especialidad<span className={classes.required}>*</span>
+                        </label>
                         <select className={classes.select} name="especialidad" defaultValue="" required>
                             <option value="" disabled>Seleccionar especialidad</option>
-                            <option value="Medicina">Medicina</option>
-                            <option value="Enfermería">Enfermería</option>
-                            <option value="Psicología">Psicología</option>
-                            <option value="Nutrición">Nutrición</option>
-                            <option value="Trabajo Social">Trabajo Social</option>
-                            <option value="Terapia Física">Terapia Física</option>
-                            <option value="Terapia Respiratoria">Terapia Respiratoria</option>
-                            <option value="Terapia de Lenguaje">Terapia de Lenguaje</option>
+                            {ESPECIALIDADES.map(({ value, label }) => (
+                                <option key={value} value={value}>{label}</option>
+                            ))}
                         </select>
                     </div>
                 </div>

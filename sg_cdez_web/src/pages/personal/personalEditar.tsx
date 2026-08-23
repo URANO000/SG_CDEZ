@@ -12,6 +12,8 @@ import classes from "../../components/ui/forms/PersonalForm.module.css";
 import { useRef } from "react";
 import axios from "axios";
 import { notifications } from "@mantine/notifications";
+import { TIPOIDENTIFICACION } from "../../services/interfaces/personalCreateRequest";
+import { ESPECIALIDADES } from "../../services/interfaces/personalCreateRequest";
 
 function formatBytes(bytes: number): string {
     if (bytes === 0) return "0 KB";
@@ -403,14 +405,9 @@ export function PersonalEditar() {
                             onChange={e => actualizarCampo("tipoIdentificacion", e.target.value)}
                             required>
                             <option value="" disabled>Tipo de identificación</option>
-                            <option value="CIC">CIC</option>
-                            <option value="CRP">CRP</option>
-                            <option value="CRR">CRR</option>
-                            <option value="RE">RE</option>
-                            <option value="APO">APO</option>
-                            <option value="CRT">CRT</option>
-                            <option value="CRE">CRE</option>
-                            <option value="PEX">PEX</option>
+                            {TIPOIDENTIFICACION.map(({ value, label }) => (
+                                <option key={value} value={value}>{label}</option>
+                            ))}
                         </select>
                     </div>
 
@@ -486,14 +483,9 @@ export function PersonalEditar() {
                             onChange={e => actualizarCampo("especialidad", e.target.value)}
                             required>
                             <option value="" disabled>Seleccionar especialidad</option>
-                            <option value="Medicina">Medicina</option>
-                            <option value="Enfermería">Enfermería</option>
-                            <option value="Psicología">Psicología</option>
-                            <option value="Nutrición">Nutrición</option>
-                            <option value="Trabajo Social">Trabajo Social</option>
-                            <option value="Terapia Física">Terapia Física</option>
-                            <option value="Terapia Respiratoria">Terapia Respiratoria</option>
-                            <option value="Terapia de Lenguaje">Terapia de Lenguaje</option>
+                            {ESPECIALIDADES.map(({ value, label }) => (
+                                <option key={value} value={value}>{label}</option>
+                            ))}
                         </select>
                     </div>
                 </div>

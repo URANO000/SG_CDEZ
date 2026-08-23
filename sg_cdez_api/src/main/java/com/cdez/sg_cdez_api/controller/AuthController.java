@@ -92,7 +92,7 @@ public class AuthController {
                         personal.primerNombre() + " " + personal.primerApellido(),
                         user.getUsuario(),
                         rol,
-                        personal.especialidad()
+                        personal.especialidad().getLabel()
 
                 )
         );
