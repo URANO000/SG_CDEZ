@@ -1,4 +1,4 @@
-import {apiClient} from "../utils/helper";
+import {apiClient} from "../utils/apiHelper";
 import type { Session } from "./interfaces/sessionInterface";
 
 export const iniciarSesion = async (usuario: string, contrasena: string) => {

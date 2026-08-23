@@ -7,6 +7,8 @@ import classes from "../../components/ui/forms/PersonalForm.module.css";
 import type { ContactoCreateRequest } from "../../services/interfaces/personalCreateRequest";
 import type { PersonalCreateRequest } from "../../services/interfaces/personalCreateRequest";
 import { registrarPersonal } from "../../services/personalService";
+import { notifications } from "@mantine/notifications";
+import axios from "axios";
 
 function formatBytes(bytes: number): string {
     if (bytes === 0) return "0 KB";
@@ -142,14 +144,38 @@ export function PersonalRegistrar() {
             documentos.forEach(documento => { formData.append("documentos", documento); });
 
             await registrarPersonal(formData);
+            notifications.show({
+                title: "Personal registrado",
+                message: "El miembro del personal se registró correctamente.",
+                color: "green",
+            });
+
             navigate("/personal");
 
         } catch (error) {
-            console.error(error);
+            if (axios.isAxiosError(error) && error.response?.status === 409) {
+                notifications.show({
+                    title: "Usuario registrado",
+                    message: error.response.data?.message,
+                    color: "orange"
+                });
+                return;
+            }
 
-            alert(
-                "Ocurrió un error al registrar el personal."
-            );
+            if (axios.isAxiosError(error) && error.response?.status === 401) {
+                notifications.show({
+                    title: "Falta de permisos",
+                    message: error.response.data?.message,
+                    color: "orange"
+                });
+                return;
+            }
+
+            notifications.show({
+                title: "Error al registrar",
+                message: "No se pudo registrar el miembro del personal.",
+                color: "red",
+            });
         } finally {
             setLoading(false);
         }
@@ -355,7 +381,7 @@ export function PersonalRegistrar() {
                     tabIndex={0}>
                     <BsUpload
                         size={18}
-                        className={classes.dropzoneIcon}/>
+                        className={classes.dropzoneIcon} />
 
                     <span>Haga clic para seleccionar archivos</span>
 

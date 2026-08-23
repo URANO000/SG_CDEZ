@@ -5,6 +5,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { activarCuenta, reenviarVerificacion } from "../../../services/authService";
 import { useForm } from "@mantine/form";
+import { PasswordStrengthInput } from "../../../components/common/Passwordstrengthinput";
+import axios from "axios";
+import { notifications } from "@mantine/notifications";
 
 export function ActivateAccountForm({ token }: { token: string }) {
     const [loading, setLoading] = useState(false);
@@ -38,13 +41,27 @@ export function ActivateAccountForm({ token }: { token: string }) {
 
         try {
             await activarCuenta(token, values.contrasena, values.confirmarContrasena);
+            notifications.show({
+                title: "Cuenta activada",
+                message: "La cuenta fue activada con éxito.",
+                color: "green",
+            });
             navigate("/login");
 
         } catch (error: any) {
-            if (error.response?.status === 410) {
+            if (axios.isAxiosError(error) && error.response?.status === 410) {
+                notifications.show({
+                    title: "Error de activación",
+                    message: error.response.data?.message,
+                    color: "red",
+                });
                 setTokenExpired(true);
             } else {
-                alert("Error al activar la cuenta/ voy a cambiar esto a un modal");
+                notifications.show({
+                    title: "Error de activación",
+                    message: "No fue posible activar la cuenta.",
+                    color: "red",
+                });
             }
 
         } finally {
@@ -56,21 +73,12 @@ export function ActivateAccountForm({ token }: { token: string }) {
 
     return (
         <AuthFormLayout title="Activar Cuenta" onSubmit={form.onSubmit(handleSubmit)} subtitle="Ingresa una contraseña para activar tu cuenta.">
-            <PasswordInput
-                label="Contraseña"
-                placeholder="Tu contraseña"
-                {...form.getInputProps('contrasena')}
-                required
+
+            <PasswordStrengthInput
+                {...form.getInputProps("contrasena")}
                 mt="md"
                 radius="md"
             />
-            <Anchor
-                c="bright"
-                opacity={0.85}
-                size="xs"
-            >
-                Tu contraseña debe tener al menos 8 caracteres y contener letras mayúsculas y minúsculas, un número y un carácter especial.
-            </Anchor>
 
             <PasswordInput
                 label="Confirmar contraseña"
@@ -103,11 +111,18 @@ export function ActivateAccountForm({ token }: { token: string }) {
 
                             try {
                                 await reenviarVerificacion(token);
-
-                                alert("Se ha enviado un nuevo correo de verificación. Por favor revisa tu bandeja de entrada.");
+                                notifications.show({
+                                    title: "Reenviar verificacion",
+                                    message: "Se ha enviado un nuevo correo de verificación. Por favor revisa tu bandeja de entrada.",
+                                    color: "orange",
+                                });
                                 setTokenExpired(false);
                             } catch (error) {
-                                alert("No se puedo reenviar el código.");
+                                notifications.show({
+                                    title: "Reenviar verificacion",
+                                    message: "No se pudo reenviar el código.",
+                                    color: "red",
+                                });
                             } finally {
                                 setResending(false);
                             }

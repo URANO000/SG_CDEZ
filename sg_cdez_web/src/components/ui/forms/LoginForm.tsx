@@ -14,6 +14,7 @@ import { iniciarSesion } from "../../../services/authService";
 import { useAuth } from "../../../services/authContext";
 import { AuthFormLayout } from "./AuthFormLayout";
 import axios from "axios";
+import { notifications } from "@mantine/notifications";
 
 export function LoginForm() {
   const [usuario, setUsuario] = useState("");
@@ -33,12 +34,19 @@ export function LoginForm() {
       navigate("/");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 429) {
-        alert(
-          "Demasiados intentos de inicio de sesión. " +
-            "Intente nuevamente más tarde.",
-        );
+
+        notifications.show({
+          title: "Demasiados intentos de inicio de sesión. ",
+          message: "Intente nuevamente más tarde.",
+          color: "orange",
+        });
+
       } else {
-        alert("Usuario o contraseña incorrectos");
+        notifications.show({
+          title: "Error de inicio de sesión",
+          message: "Usuario o contraseña incorrectos.",
+          color: "red",
+        });
       }
     } finally {
       setLoading(false);
