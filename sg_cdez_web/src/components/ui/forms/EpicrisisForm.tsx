@@ -115,7 +115,7 @@ export function EpicrisisForm({
           </Button>
 
           <Button type="submit" loading={loading}>
-            Registrar encargado
+            Registrar epicrisis
           </Button>
         </Group>
       </Stack>
