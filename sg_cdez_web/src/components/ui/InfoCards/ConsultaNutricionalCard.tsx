@@ -103,7 +103,17 @@ export function ConsultaNutricionalCard({
                             </Text>
 
                             <Text className={classes.value}>
-                                {nutricional.frecuenciaEvaluaciones}
+                                {nutricional.frecuenciaEvacuaciones}
+                            </Text>
+                        </div>
+
+                        <div>
+                            <Text className={classes.label}>
+                                Consistencia Btristol
+                            </Text>
+
+                            <Text className={classes.value}>
+                                {nutricional.consistenciaBristol}
                             </Text>
                         </div>
 
@@ -142,23 +152,23 @@ export function ConsultaNutricionalCard({
 
                         <BooleanField
                             label="Náuseas"
-                            value={nutricional.nauseas}/>
+                            value={nutricional.nauseas} />
 
                         <BooleanField
                             label="Vómitos"
-                            value={nutricional.vomitos}/>
+                            value={nutricional.vomitos} />
 
                         <BooleanField
                             label="Distensión"
-                            value={nutricional.distension}/>
+                            value={nutricional.distension} />
 
                         <BooleanField
                             label="Gases"
-                            value={nutricional.gases}/>
+                            value={nutricional.gases} />
 
                         <BooleanField
                             label="Reflujo"
-                            value={nutricional.reflujo}/>
+                            value={nutricional.reflujo} />
 
                     </SimpleGrid>
 
@@ -364,25 +374,25 @@ export function ConsultaNutricionalCard({
                         spacing="lg"
                         className={classes.infoGrid}>
 
-                        <DecimalField label="Peso actual" value={nutricional.antropometria.pesoActual}/>
+                        <DecimalField label="Peso actual" value={nutricional.antropometria.pesoActual} />
 
-                        <DecimalField label="Peso habitual" value={nutricional.antropometria.pesoHabitual}/>
+                        <DecimalField label="Peso habitual" value={nutricional.antropometria.pesoHabitual} />
 
-                        <DecimalField label="Peso hace 6 meses" value={nutricional.antropometria.pesoHace6Meses}/>
+                        <DecimalField label="Peso hace 6 meses" value={nutricional.antropometria.pesoHace6Meses} />
 
-                        <DecimalField label="Talla" value={nutricional.antropometria.talla}/>
+                        <DecimalField label="Talla" value={nutricional.antropometria.talla} />
 
-                        <DecimalField label="Altura estimada" value={nutricional.antropometria.alturaEstimada}/>
+                        <DecimalField label="Altura estimada" value={nutricional.antropometria.alturaEstimada} />
 
-                        <DecimalField label="IMC" value={nutricional.antropometria.imc}/>
+                        <DecimalField label="IMC" value={nutricional.antropometria.imc} />
 
-                        <DecimalField label="Circunferencia de pantorrilla" value={nutricional.antropometria.circumferenciaPantorrilla}/>
+                        <DecimalField label="Circunferencia de pantorrilla" value={nutricional.antropometria.circunferenciaPantorrilla} />
 
-                        <DecimalField label="Circunferencia braquial" value={nutricional.antropometria.circumferenciaBraquial}/>
+                        <DecimalField label="Circunferencia braquial" value={nutricional.antropometria.circunferenciaBraquial} />
 
-                        <DecimalField label="Circunferencia de cintura" value={nutricional.antropometria.circumferenciaCintura}/>
+                        <DecimalField label="Circunferencia de cintura" value={nutricional.antropometria.circunferenciaCintura} />
 
-                        <DecimalField label="Pérdida de peso" value={nutricional.antropometria.perdidaPesoPorcentaje} suffix="%"/>
+                        <DecimalField label="Pérdida de peso" value={nutricional.antropometria.perdidaPesoPorcentaje} suffix="%" />
 
                     </SimpleGrid>
 

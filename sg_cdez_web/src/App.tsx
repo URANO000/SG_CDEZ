@@ -49,6 +49,7 @@ import {
   loadAccessibilitySettings,
 } from "./utils/accessibility";
 import { ConsultaRegistrar } from "./pages/consultas/consultaRegistrar";
+import { ConsultaEditar } from "./pages/consultas/consultaEditar";
 
 const colorSchemeManager = localStorageColorSchemeManager({
   key: "sg-cdez-color-scheme",
@@ -117,13 +118,22 @@ function App() {
                 }
               />
 
-              <Route 
-              path="consulta/registrar"
-              element={
-                <ProtectedRoute roles={["ROLE_PERSONAL"]}>
-                  <ConsultaRegistrar />
-                </ProtectedRoute>
-              }
+              <Route
+                path="/consulta/:consultaId/editar"
+                element={
+                  <ProtectedRoute roles={["ROLE_PERSONAL"]}>
+                    <ConsultaEditar />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="consulta/registrar"
+                element={
+                  <ProtectedRoute roles={["ROLE_PERSONAL"]}>
+                    <ConsultaRegistrar />
+                  </ProtectedRoute>
+                }
               />
 
               {/* AJUSTES */}

@@ -552,20 +552,7 @@ export function ConsultaNutricionalRegistrarForm() {
                                 .perdidaPesoPorcentaje
                         ),
                 },
-            } as unknown as ConsultaNutricionalCreateRequest;
-
-            console.log("FORM VALUES:", values);
-
-            console.log("BOOLEANOS:", {
-                nauseas: values.nauseas,
-                vomitos: values.vomitos,
-                distencion: values.distension,
-                gases: values.gases,
-                reflujo: values.reflujo,
-            });
-
-            console.log("REQUEST:", consulta);
-
+            }
 
             await registrarConsultaNutricional(consulta);
 

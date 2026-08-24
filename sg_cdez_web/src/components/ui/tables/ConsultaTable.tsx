@@ -1,6 +1,6 @@
 import type { ConsultaPageResponse } from "../../../services/interfaces/consultasInterface";
 import { ActionIcon, Group, Table, Tooltip, Modal, Text, Button } from "@mantine/core";
-import { BsEye, BsClipboardMinus } from "react-icons/bs";
+import { BsEye, BsClipboardMinus, BsPencilSquare } from "react-icons/bs";
 import { useNavigate } from "react-router";
 import classes from './Table.module.css';
 import { useState } from 'react';
@@ -123,12 +123,25 @@ export function ConsultaTable({ consultas, onRefresh }: ConsultaTableProps) {
                                                     </ActionIcon>
 
                                                 </Tooltip>
+                                                {
+                                                    user?.usuarioId === consulta.createdBy.personalId && (
+                                                        <Tooltip label="Editar">
+                                                            <ActionIcon
+                                                                variant="subtle"
+                                                                className={classes.actionEdit}
+                                                                aria-label="Editar"
+                                                                onClick={() => navigate(`/consulta/${consulta.consultaId}/editar`)}>
+                                                                <BsPencilSquare size={16} />
+                                                            </ActionIcon>
+                                                        </Tooltip>
+                                                    )
+                                                }
                                                 {user?.usuarioId === consulta.createdBy.personalId && (
-                                                    <Tooltip label="Desactivar registro">
+                                                    <Tooltip label="Desactivar consulta">
                                                         <ActionIcon
                                                             variant="subtle"
                                                             color="red"
-                                                            aria-label="Desactivar registro"
+                                                            aria-label="Desactivar consulta"
                                                             onClick={() => abrirConfirmacion(consulta)}>
                                                             <BsClipboardMinus size={17} />
                                                         </ActionIcon>
