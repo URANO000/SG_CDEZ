@@ -64,4 +64,22 @@ public class PersonalController {
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
     }
+
+    @GetMapping("/reporteExcel")
+    public ResponseEntity<byte[]> generarReportePersonalExcel() throws IOException{
+
+        byte[] reporte = SERVICE.generarReportePersonalExcel();
+
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=reporte-personal.xlsx"
+                )
+                .contentType(
+                        MediaType.parseMediaType(
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        )
+                )
+                .body(reporte);
+    }
 }

@@ -11,6 +11,7 @@ import com.cdez.sg_cdez_api.util.*;
 import com.itextpdf.layout.properties.TextAlignment;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
@@ -21,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -282,6 +284,169 @@ public class PersonalServiceImpl implements PersonalService {
             return REPORT_SERVICE.generarTablaPDF(reporte);
         }catch(IOException ex){
             throw new RuntimeException("Error de fuente.");
+        }
+    }
+
+    @Override
+    public byte[] generarReportePersonalExcel() {
+        try {
+            if (!AUTH_HELPER.isUsuarioAdmin()) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "Sólo un usuario administrador puede generar reportes del personal."
+                );
+            }
+
+            AUTH_HELPER.validarUsuarioActivo();
+
+            List<PersonalResponse> personal = listarPersonal();
+
+            ExcelTableReport<PersonalResponse> reporte =
+                    ExcelTableReport.<PersonalResponse>builder()
+                            .titulo("Reporte de Personal")
+                            .datos(personal)
+                            .columnas(List.of(
+                                    new ExcelColumn<>(
+                                            "Rol",
+                                            p -> p.rol().nombre(),
+                                            18,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+
+                                    new ExcelColumn<>(
+                                            "Especialidad",
+                                            p -> p.especialidad() != null
+                                                    ? p.especialidad().getLabel()
+                                                    : "",
+                                            25,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+
+                                    new ExcelColumn<>(
+                                            "Tipo Identificación",
+                                            p -> p.tipoIdentificacion() != null
+                                                    ? p.tipoIdentificacion().getLabel()
+                                                    : "",
+                                            25,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+
+                                    new ExcelColumn<>(
+                                            "Identificación",
+                                            PersonalResponse::identificacion,
+                                            20,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+
+                                    new ExcelColumn<>(
+                                            "Nombre Completo",
+                                            p -> {
+                                                List<String> parts = new ArrayList<>();
+
+                                                if (p.primerNombre() != null && !p.primerNombre().isBlank()) {
+                                                    parts.add(p.primerNombre());
+                                                }
+
+                                                if (p.segundoNombre() != null && !p.segundoNombre().isBlank()) {
+                                                    parts.add(p.segundoNombre());
+                                                }
+
+                                                if (p.primerApellido() != null && !p.primerApellido().isBlank()) {
+                                                    parts.add(p.primerApellido());
+                                                }
+
+                                                if (p.segundoApellido() != null && !p.segundoApellido().isBlank()) {
+                                                    parts.add(p.segundoApellido());
+                                                }
+
+                                                return String.join(" ", parts);
+                                            },
+                                            35,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Dirección",
+                                            PersonalResponse::direccion,
+                                            35,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+
+                                    new ExcelColumn<>(
+                                            "Carné",
+                                            PersonalResponse::carnet,
+                                            15,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+
+                                    new ExcelColumn<>(
+                                            "Usuario",
+                                            PersonalResponse::usuario,
+                                            35,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Contactos",
+                                            p -> p.contactos() == null || p.contactos().isEmpty()
+                                                    ? "Sin contactos"
+                                                    : p.contactos().stream()
+                                                    .map(c -> c.tipoValor() + ": " + c.valor())
+                                                    .collect(Collectors.joining("\n")),
+                                            40,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+
+                                    new ExcelColumn<>(
+                                            "Estado",
+                                            PersonalResponse::activo,
+                                            15,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.CENTER
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Creado Por",
+                                            PersonalResponse::createdBy,
+                                            35,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Fecha Creación",
+                                            r -> r.createdAt()
+                                                    .atZone(ZoneOffset.UTC)
+                                                    .withZoneSameInstant(ZoneId.of("America/Costa_Rica"))
+                                                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+                                            30,
+                                            HorizontalAlignment.LEFT
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Última Actualización Por",
+                                            PersonalResponse::updatedBy,
+                                            35,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Última Actualización En",
+                                            r -> r.updatedAt() != null ?
+                                            r.updatedAt().atZone(ZoneOffset.UTC)
+                                                    .withZoneSameInstant(ZoneId.of("America/Costa_Rica"))
+                                                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+                                            : "",
+                                            30,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    )
+                            ))
+                            .showTimestamp(true)
+                            .zebraRows(true)
+                            .autoFilter(true)
+                            .freezeHeader(true)
+                            .build();
+
+            return REPORT_SERVICE.generarTablaExcel(reporte);
+
+        } catch (IOException ex) {
+            throw new RuntimeException(
+                    "Error al generar el reporte de personal en Excel.",
+                    ex
+            );
         }
     }
 

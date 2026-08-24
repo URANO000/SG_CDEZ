@@ -46,9 +46,9 @@ interface AntropometriaFormValues {
     talla: string;
     alturaEstimada: string;
     imc: string;
-    circumferenciaPantorrilla: string;
-    circumferenciaBraquial: string;
-    circumferenciaCintura: string;
+    circunferenciaPantorrilla: string;
+    circunferenciaBraquial: string;
+    circunferenciaCintura: string;
     perdidaPesoPorcentaje: string;
 }
 
@@ -85,7 +85,7 @@ interface ConsultaNutricionalFormValues {
 
     nauseas: boolean;
     vomitos: boolean;
-    distencion: boolean;
+    distension: boolean;
     gases: boolean;
     reflujo: boolean;
 
@@ -134,7 +134,7 @@ export function ConsultaNutricionalRegistrarForm() {
 
             nauseas: false,
             vomitos: false,
-            distencion: false,
+            distension: false,
             gases: false,
             reflujo: false,
 
@@ -153,9 +153,9 @@ export function ConsultaNutricionalRegistrarForm() {
                 talla: "",
                 alturaEstimada: "",
                 imc: "",
-                circumferenciaPantorrilla: "",
-                circumferenciaBraquial: "",
-                circumferenciaCintura: "",
+                circunferenciaPantorrilla: "",
+                circunferenciaBraquial: "",
+                circunferenciaCintura: "",
                 perdidaPesoPorcentaje: "",
             },
         },
@@ -254,20 +254,20 @@ export function ConsultaNutricionalRegistrarForm() {
             );
 
             validarDecimalPositivo(
-                values.antropometria.circumferenciaPantorrilla,
-                "antropometria.circumferenciaPantorrilla",
+                values.antropometria.circunferenciaPantorrilla,
+                "antropometria.circunferenciaPantorrilla",
                 "La circunferencia de pantorrilla"
             );
 
             validarDecimalPositivo(
-                values.antropometria.circumferenciaBraquial,
-                "antropometria.circumferenciaBraquial",
+                values.antropometria.circunferenciaBraquial,
+                "antropometria.circunferenciaBraquial",
                 "La circunferencia braquial"
             );
 
             validarDecimalPositivo(
-                values.antropometria.circumferenciaCintura,
-                "antropometria.circumferenciaCintura",
+                values.antropometria.circunferenciaCintura,
+                "antropometria.circunferenciaCintura",
                 "La circunferencia de cintura"
             );
 
@@ -455,8 +455,8 @@ export function ConsultaNutricionalRegistrarForm() {
                 vomitos:
                     values.vomitos,
 
-                distencion:
-                    values.distencion,
+                distension:
+                    values.distension,
 
                 gases:
                     values.gases,
@@ -528,22 +528,22 @@ export function ConsultaNutricionalRegistrarForm() {
                     imc:
                         Number(values.antropometria.imc),
 
-                    circumferenciaPantorrilla:
+                    circunferenciaPantorrilla:
                         Number(
                             values.antropometria
-                                .circumferenciaPantorrilla
+                                .circunferenciaPantorrilla
                         ),
 
-                    circumferenciaBraquial:
+                    circunferenciaBraquial:
                         Number(
                             values.antropometria
-                                .circumferenciaBraquial
+                                .circunferenciaBraquial
                         ),
 
-                    circumferenciaCintura:
+                    circunferenciaCintura:
                         Number(
                             values.antropometria
-                                .circumferenciaCintura
+                                .circunferenciaCintura
                         ),
 
                     perdidaPesoPorcentaje:
@@ -553,6 +553,18 @@ export function ConsultaNutricionalRegistrarForm() {
                         ),
                 },
             } as unknown as ConsultaNutricionalCreateRequest;
+
+            console.log("FORM VALUES:", values);
+
+            console.log("BOOLEANOS:", {
+                nauseas: values.nauseas,
+                vomitos: values.vomitos,
+                distencion: values.distension,
+                gases: values.gases,
+                reflujo: values.reflujo,
+            });
+
+            console.log("REQUEST:", consulta);
 
 
             await registrarConsultaNutricional(consulta);
@@ -1021,7 +1033,7 @@ export function ConsultaNutricionalRegistrarForm() {
                             <Switch
                                 label="Distensión"
                                 {...form.getInputProps(
-                                    "distencion",
+                                    "distension",
                                     { type: "checkbox" }
                                 )}
                             />
@@ -1227,7 +1239,7 @@ export function ConsultaNutricionalRegistrarForm() {
                                 step="0.01"
                                 min="0"
                                 {...form.getInputProps(
-                                    "antropometria.circumferenciaPantorrilla"
+                                    "antropometria.circunferenciaPantorrilla"
                                 )}
                             />
 
@@ -1245,7 +1257,7 @@ export function ConsultaNutricionalRegistrarForm() {
                                 step="0.01"
                                 min="0"
                                 {...form.getInputProps(
-                                    "antropometria.circumferenciaBraquial"
+                                    "antropometria.circunferenciaBraquial"
                                 )}
                             />
 
@@ -1263,7 +1275,7 @@ export function ConsultaNutricionalRegistrarForm() {
                                 step="0.01"
                                 min="0"
                                 {...form.getInputProps(
-                                    "antropometria.circumferenciaCintura"
+                                    "antropometria.circunferenciaCintura"
                                 )}
                             />
 

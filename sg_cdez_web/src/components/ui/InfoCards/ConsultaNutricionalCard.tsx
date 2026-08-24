@@ -11,6 +11,7 @@ import {
 import classes from "../styleModules/ConsultaDetalle.module.css";
 
 import type { ConsultaNutricionalDetailResponse } from "../../../services/interfaces/consultasDetailsResponse";
+import { obtenerFechaSinHora } from "../../../utils/formatHelper";
 
 interface ConsultaNutricionalCardProps {
     nutricional: ConsultaNutricionalDetailResponse;
@@ -149,7 +150,7 @@ export function ConsultaNutricionalCard({
 
                         <BooleanField
                             label="Distensión"
-                            value={nutricional.distencion}/>
+                            value={nutricional.distension}/>
 
                         <BooleanField
                             label="Gases"
@@ -314,7 +315,7 @@ export function ConsultaNutricionalCard({
                                                 </Table.Td>
 
                                                 <Table.Td>
-                                                    {examen.fecha}
+                                                    {obtenerFechaSinHora(examen.fecha)}
                                                 </Table.Td>
 
                                                 <Table.Td>

@@ -2,6 +2,7 @@ package com.cdez.sg_cdez_api.util.Exceptions;
 
 import lombok.*;
 import org.springframework.http.*;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -49,6 +50,24 @@ public class GlobalExceptionHandler {
         body.put("message", ex.getReason());
         body.put("status", ex.getStatusCode().value());
         return ResponseEntity.status(ex.getStatusCode()).body(body);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex
+    ) {
+
+        Throwable cause = ex.getMostSpecificCause();
+
+        System.err.println("JSON ERROR:");
+        System.err.println(cause.getMessage());
+
+        return ResponseEntity
+                .badRequest()
+                .body(Map.of(
+                        "message",
+                        cause.getMessage()
+                ));
     }
 
 
