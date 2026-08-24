@@ -1,22 +1,34 @@
 import { ActionIcon, Group, Table, Tooltip } from "@mantine/core";
 
-import { BsEye, BsPersonDash } from "react-icons/bs";
+import {
+  BsEye,
+  BsPencilSquare,
+  BsPersonDash,
+  BsPersonCheck,
+} from "react-icons/bs";
 
 import { useNavigate } from "react-router";
 
-import type { AdultoMayorResponse } from "../../../services/interfaces/adultoMayorInterface";
+import type {
+  AdultoMayorResponse,
+  EstadoAdultoMayor,
+} from "../../../services/interfaces/adultoMayorInterface";
 
 import classes from "./Table.module.css";
 
 interface AdultosMayoresTableProps {
   adultosMayores: AdultoMayorResponse[];
+  estadoListado: EstadoAdultoMayor;
 
   onDesactivar: (adultoMayor: AdultoMayorResponse) => void;
+  onActivar: (adultoMayor: AdultoMayorResponse) => void;
 }
 
 export function AdultosMayoresTable({
   adultosMayores,
+  estadoListado,
   onDesactivar,
+  onActivar,
 }: AdultosMayoresTableProps) {
   const navigate = useNavigate();
 
@@ -54,6 +66,20 @@ export function AdultosMayoresTable({
                           <BsEye size={16} />
                         </ActionIcon>
                       </Tooltip>
+                      <Tooltip label="Editar">
+                        <ActionIcon
+                          variant="subtle"
+                          className={classes.actionEdit}
+                          aria-label="Editar"
+                          onClick={() =>
+                            navigate(
+                              `/adultosMayores/${adultoMayor.adultoId}/editar`,
+                            )
+                          }
+                        >
+                          <BsPencilSquare size={16} />
+                        </ActionIcon>
+                      </Tooltip>
 
                       {adultoMayor.activo === "Activo" && (
                         <Tooltip label="Desactivar registro">
@@ -67,6 +93,19 @@ export function AdultosMayoresTable({
                           </ActionIcon>
                         </Tooltip>
                       )}
+                      {adultoMayor.activo === "Inactivo" &&
+                        estadoListado === "INACTIVO" && (
+                          <Tooltip label="Activar registro">
+                            <ActionIcon
+                              variant="subtle"
+                              color="green"
+                              aria-label="Activar registro"
+                              onClick={() => onActivar(adultoMayor)}
+                            >
+                              <BsPersonCheck size={17} />
+                            </ActionIcon>
+                          </Tooltip>
+                        )}
                     </Group>
                   </Table.Td>
 
@@ -88,7 +127,9 @@ export function AdultosMayoresTable({
                           : classes.badgeInactive
                       }
                     >
-                      {adultoMayor.activo}
+                      {estadoListado === "FALLECIDO"
+                        ? "Fallecido"
+                        : adultoMayor.activo}
                     </span>
                   </Table.Td>
                 </Table.Tr>

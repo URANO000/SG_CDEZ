@@ -62,6 +62,8 @@ import { notifications } from "@mantine/notifications";
 
 import type { PageResponse } from "../../services/interfaces/pageResponse";
 
+import { EncargadoLegalForm } from "../../components/ui/forms/EncargadoLegalForm";
+
 interface CampoInformacion {
   etiqueta: string;
   valor: string;
@@ -114,6 +116,8 @@ export function AdultoMayorExpediente() {
   const [encargadosLoading, setEncargadosLoading] = useState(true);
 
   const [encargadosError, setEncargadosError] = useState(false);
+
+  const [modalEncargadoAbierto, setModalEncargadoAbierto] = useState(false);
 
   const [epicrisisVigente, setEpicrisisVigente] =
     useState<EpicrisisResponse | null>(null);
@@ -189,6 +193,25 @@ export function AdultoMayorExpediente() {
     }
   }
 
+  async function cargarEncargados() {
+    if (!adultoId) {
+      return;
+    }
+
+    try {
+      setEncargadosLoading(true);
+      setEncargadosError(false);
+
+      const response = await listarEncargadosPorAdulto(adultoId);
+
+      setEncargados(response);
+    } catch {
+      setEncargadosError(true);
+    } finally {
+      setEncargadosLoading(false);
+    }
+  }
+
   useEffect(() => {
     if (!adultoId) {
       return;
@@ -218,15 +241,14 @@ export function AdultoMayorExpediente() {
       .finally(() => {
         setLoading(false);
       });
+  }, [adultoId]);
 
-    listarEncargadosPorAdulto(id)
-      .then(setEncargados)
-      .catch(() => {
-        setEncargadosError(true);
-      })
-      .finally(() => {
-        setEncargadosLoading(false);
-      });
+  useEffect(() => {
+    if (!adultoId) {
+      return;
+    }
+
+    void cargarEncargados();
   }, [adultoId]);
 
   useEffect(() => {
@@ -511,6 +533,18 @@ export function AdultoMayorExpediente() {
     });
   }
 
+  function manejarEncargadoRegistrado() {
+    setModalEncargadoAbierto(false);
+
+    void cargarEncargados();
+
+    notifications.show({
+      title: "Encargado registrado",
+      message: "El encargado legal se registró correctamente.",
+      color: "green",
+    });
+  }
+
   function solicitarDesactivacionDocumento(documento: DocumentoResponse) {
     setDocumentoADesactivar(documento);
   }
@@ -649,6 +683,21 @@ export function AdultoMayorExpediente() {
         </Tabs.Panel>
 
         <Tabs.Panel value="encargados" className={classes.panel}>
+          <Group justify="space-between" align="center" mb="lg">
+            <div>
+              <Title order={4} className={classes.personName}>
+                Encargados legales
+              </Title>
+
+              <Text size="sm" className={classes.secondaryText}>
+                Información de contacto asociada al adulto mayor.
+              </Text>
+            </div>
+
+            <Button onClick={() => setModalEncargadoAbierto(true)}>
+              + Registrar encargado
+            </Button>
+          </Group>
           {encargadosLoading ? (
             <div className={classes.loadingState}>
               <Loader color="var(--color-primary)" />
@@ -742,6 +791,27 @@ export function AdultoMayorExpediente() {
               })}
             </Stack>
           )}
+          <Modal
+            opened={modalEncargadoAbierto}
+            onClose={() => setModalEncargadoAbierto(false)}
+            title={
+              <Stack gap={2}>
+                <Title order={3}>Registrar encargado legal</Title>
+
+                <Text size="sm" c="dimmed" fw={400}>
+                  Agregue la información de contacto asociada al adulto mayor.
+                </Text>
+              </Stack>
+            }
+            centered
+            size="lg"
+          >
+            <EncargadoLegalForm
+              adultoId={adultoId}
+              onRegistrado={manejarEncargadoRegistrado}
+              onCancelar={() => setModalEncargadoAbierto(false)}
+            />
+          </Modal>
         </Tabs.Panel>
 
         <Tabs.Panel value="epicrisis" className={classes.panel}>
@@ -904,9 +974,17 @@ export function AdultoMayorExpediente() {
           <Modal
             opened={modalEpicrisisAbierto}
             onClose={() => setModalEpicrisisAbierto(false)}
-            title="Registrar nueva epicrisis"
+            title={
+              <Stack gap={2}>
+                <Title order={3}>Registrar nueva epicrisis</Title>
+
+                <Text size="sm" c="dimmed" fw={400}>
+                  Ingrese la información correspondiente a la epicrisis.
+                </Text>
+              </Stack>
+            }
             centered
-            closeOnClickOutside
+            size="md"
           >
             <EpicrisisForm
               adultoId={adultoId}
@@ -956,9 +1034,17 @@ export function AdultoMayorExpediente() {
           <Modal
             opened={modalDocumentoAbierto}
             onClose={() => setModalDocumentoAbierto(false)}
-            title="Adjuntar documento"
+            title={
+              <Stack gap={2}>
+                <Title order={3}>Adjuntar documento</Title>
+
+                <Text size="sm" c="dimmed" fw={400}>
+                  Seleccione el archivo que desea asociar al expediente.
+                </Text>
+              </Stack>
+            }
             centered
-            closeOnClickOutside
+            size="md"
           >
             <DocumentoForm
               adultoId={adultoId}
@@ -984,7 +1070,7 @@ export function AdultoMayorExpediente() {
                 eliminado del sistema.
               </Text>
 
-              <Group justify="flex-end">
+              <Group justify="flex-end" gap="sm" mt="md">
                 <Button
                   variant="default"
                   disabled={desactivandoDocumento}
