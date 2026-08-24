@@ -1,6 +1,11 @@
 import { ActionIcon, Group, Table, Tooltip } from "@mantine/core";
 
-import { BsEye, BsPersonDash, BsPersonCheck, BsPersonX } from "react-icons/bs";
+import {
+  BsEye,
+  BsPencilSquare,
+  BsPersonDash,
+  BsPersonCheck,
+} from "react-icons/bs";
 
 import { useNavigate } from "react-router";
 
@@ -17,7 +22,6 @@ interface AdultosMayoresTableProps {
 
   onDesactivar: (adultoMayor: AdultoMayorResponse) => void;
   onActivar: (adultoMayor: AdultoMayorResponse) => void;
-  onFallecimiento: (adultoMayor: AdultoMayorResponse) => void;
 }
 
 export function AdultosMayoresTable({
@@ -25,7 +29,6 @@ export function AdultosMayoresTable({
   estadoListado,
   onDesactivar,
   onActivar,
-  onFallecimiento,
 }: AdultosMayoresTableProps) {
   const navigate = useNavigate();
 
@@ -63,6 +66,20 @@ export function AdultosMayoresTable({
                           <BsEye size={16} />
                         </ActionIcon>
                       </Tooltip>
+                      <Tooltip label="Editar">
+                        <ActionIcon
+                          variant="subtle"
+                          className={classes.actionEdit}
+                          aria-label="Editar"
+                          onClick={() =>
+                            navigate(
+                              `/adultosMayores/${adultoMayor.adultoId}/editar`,
+                            )
+                          }
+                        >
+                          <BsPencilSquare size={16} />
+                        </ActionIcon>
+                      </Tooltip>
 
                       {adultoMayor.activo === "Activo" && (
                         <Tooltip label="Desactivar registro">
@@ -89,18 +106,6 @@ export function AdultosMayoresTable({
                             </ActionIcon>
                           </Tooltip>
                         )}
-                      {estadoListado !== "FALLECIDO" && (
-                        <Tooltip label="Registrar fallecimiento">
-                          <ActionIcon
-                            variant="subtle"
-                            color="gray"
-                            aria-label="Registrar fallecimiento"
-                            onClick={() => onFallecimiento(adultoMayor)}
-                          >
-                            <BsPersonX size={17} />
-                          </ActionIcon>
-                        </Tooltip>
-                      )}
                     </Group>
                   </Table.Td>
 
@@ -122,7 +127,9 @@ export function AdultosMayoresTable({
                           : classes.badgeInactive
                       }
                     >
-                      {adultoMayor.activo}
+                      {estadoListado === "FALLECIDO"
+                        ? "Fallecido"
+                        : adultoMayor.activo}
                     </span>
                   </Table.Td>
                 </Table.Tr>

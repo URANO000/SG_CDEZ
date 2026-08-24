@@ -14,6 +14,7 @@ import { ResendVerification } from "./pages/auth/resendVerification";
 import { Consultas } from "./pages/consultas/consultas";
 import { AdultosMayores } from "./pages/adultosMayores/adultosMayores";
 import { AdultoMayorExpediente } from "./pages/adultosMayores/adultoMayorExpediente";
+import { AdultoMayorEditar } from "./pages/adultosMayores/adultoMayorEditar";
 import { Personal } from "./pages/personal/personal";
 import { Auditoria } from "./pages/auditoria/auditoria";
 import { Documentacion } from "./pages/documentacion/documentacion";
@@ -68,6 +69,10 @@ function App() {
                     <AdultoMayorRegistrar />
                   </ProtectedRoute>
                 }
+              />
+              <Route
+                path="/adultosMayores/:adultoId/editar"
+                element={<AdultoMayorEditar />}
               />
               <Route path="/documentacion" element={<Documentacion />} />
 

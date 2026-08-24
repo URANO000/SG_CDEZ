@@ -322,3 +322,16 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Los campos en editar se vean bloqueados */
+.input:disabled,
+.select:disabled {
+  background-color: rgba(107, 99, 117, 0.07);
+  color: var(--text);
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.select:disabled {
+  background-image: none;
+}

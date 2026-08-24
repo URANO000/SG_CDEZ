@@ -2,6 +2,7 @@ import { apiClient } from "../utils/apiHelper";
 
 import type {
   AdultoMayorCreateRequest,
+  AdultoMayorUpdateRequest,
   AdultoMayorFallecimientoRequest,
   AdultoMayorDesactivarRequest,
   AdultoMayorFiltro,
@@ -29,6 +30,18 @@ export async function listarAdultosMayoresFiltrados(
   const response = await apiClient.post<PageResponse<AdultoMayorResponse>>(
     `/adultos-mayores/listarFiltrado?page=${page}&size=${size}`,
     filtros,
+  );
+
+  return response.data;
+}
+
+export async function actualizarAdultoMayor(
+  adultoId: string,
+  request: AdultoMayorUpdateRequest,
+): Promise<AdultoMayorResponse> {
+  const response = await apiClient.put<AdultoMayorResponse>(
+    `/adultos-mayores/${adultoId}`,
+    request,
   );
 
   return response.data;
