@@ -14,3 +14,11 @@ export function mostrarFecha(fecha: string | null): string {
         timeStyle: "short"
     }).format(utcDate);
 }
+
+export function obtenerFechaSinHora(fecha: string | null): string {
+  if (!fecha) {
+    return "N/A";
+  }
+
+  return fecha.split("T")[0].replace(/-/g, "/");
+}

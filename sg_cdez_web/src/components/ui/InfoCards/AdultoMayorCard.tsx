@@ -8,6 +8,7 @@ import {
 import classes from "../styleModules/ConsultaDetalle.module.css";
 
 import type { AdultoMayorConsultaResponse } from "../../../services/interfaces/consultasInterface";
+import { obtenerFechaSinHora } from "../../../utils/formatHelper";
 
 interface AdultoMayorCardProps {
     adultoMayor: AdultoMayorConsultaResponse;
@@ -73,7 +74,7 @@ export function AdultoMayorCard({
                     </Text>
 
                     <Text className={classes.value}>
-                        {adultoMayor.fechaNacimiento}
+                        {obtenerFechaSinHora(adultoMayor.fechaNacimiento)}
                     </Text>
                 </div>
 

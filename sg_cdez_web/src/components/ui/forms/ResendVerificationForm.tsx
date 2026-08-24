@@ -1,12 +1,13 @@
-import { Button, TextInput} from "@mantine/core";
+import { Button, TextInput } from "@mantine/core";
 import { AuthFormLayout } from "./AuthFormLayout";
 import { useState } from "react";
 import { useForm } from "@mantine/form";
 import { reenviarVerificacion } from "../../../services/authService";
+import { notifications } from "@mantine/notifications";
 
 
 
-export function ResendVerificationForm(){
+export function ResendVerificationForm() {
     const [loading, setLoading] = useState(false);
 
     const form = useForm({
@@ -23,10 +24,18 @@ export function ResendVerificationForm(){
         setLoading(true);
         try {
             await reenviarVerificacion(values.email);
-            alert("Si el correo ingresado está registrado, recibirá un enlace para activar su cuenta.");
+            notifications.show({
+                title: "Correo enviado",
+                message: "Si el correo ingresado está registrado, recibirá un enlace para activar su cuenta.",
+                color: "green",
+            });
 
         } catch (error) {
-            alert("Error :(");
+            notifications.show({
+                title: "Correo no enviado",
+                message: "Ocurrió un error al enviar el correo. Intente más tarde.",
+                color: "red",
+            });
         } finally {
             setLoading(false);
         }

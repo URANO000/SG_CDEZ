@@ -8,6 +8,7 @@ import { Group, Title, Select, Button, TextInput, Pagination, Tabs } from "@mant
 import { AiOutlineSearch } from "react-icons/ai";
 import { ConsultaTable } from "../../components/ui/tables/ConsultaTable";
 import { ESPECIALIDADES } from "../../services/interfaces/personalCreateRequest";
+import { Link } from "react-router";
 
 export function Consultas() {
 
@@ -99,6 +100,17 @@ export function Consultas() {
                         </Tabs.Tab>
                     </Tabs.List>
                 </Tabs>
+
+                <div className={classes.btnBar}>
+                    <Link to={'/consulta/registrar'} className={classes.createBtn}>
+                        <Button>
+                            Registrar Consulta
+                        </Button>
+                    </Link>
+                    <Button className={classes.reportBtn}>
+                        Generar Reporte
+                    </Button>
+                </div>
 
                 <div className={classes.filterBar}>
 

@@ -1,4 +1,5 @@
 import { apiClient } from "../utils/apiHelper";
+import type { ConsultaCreateRequest, ConsultaNutricionalCreateRequest } from "./interfaces/consultasCreateInterface";
 import type { ConsultaDetailResponse } from "./interfaces/consultasDetailsResponse";
 import type { ConsultaFiltro, ConsultaPageResponse } from "./interfaces/consultasInterface";
 import type { PageResponse } from "./interfaces/pageResponse";
@@ -20,5 +21,21 @@ export const obtenerConsultaPorId = async (consultaId: string): Promise<Consulta
 
 export const desactivarConsulta = async (consultaId: string): Promise<ConsultaDetailResponse> => {
     const response = await apiClient.post(`/consulta/desactivarConsulta/${consultaId}`)
+    return response.data;
+}
+
+export const registrarConsulta = async (
+    consulta: ConsultaCreateRequest
+) => {
+    const response = await apiClient.post(
+        `/consulta/crearConsulta`,
+        consulta
+    );
+
+    return response.data;
+};
+
+export const registrarConsultaNutricional = async (consulta: ConsultaNutricionalCreateRequest) => {
+    const response = await apiClient.post(`/consulta-nutricional/crearConsulta`, consulta);
     return response.data;
 }
