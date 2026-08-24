@@ -98,6 +98,9 @@ export function AdultosMayores() {
   const [registrandoFallecimiento, setRegistrandoFallecimiento] =
     useState(false);
 
+  const [adultoAProcesarBaja, setAdultoAProcesarBaja] =
+    useState<AdultoMayorResponse | null>(null);
+
   const pageSize = 10;
 
   async function cargarAdultos(
@@ -199,6 +202,30 @@ export function AdultosMayores() {
     setAdultoAFallecimiento(adultoMayor);
     setFechaFallecimiento("");
     setObservacionFallecimiento("");
+  }
+
+  function seleccionarDesactivacion() {
+    if (!adultoAProcesarBaja) {
+      return;
+    }
+
+    const adultoMayor = adultoAProcesarBaja;
+
+    setAdultoAProcesarBaja(null);
+
+    abrirDesactivacion(adultoMayor);
+  }
+
+  function seleccionarFallecimiento() {
+    if (!adultoAProcesarBaja) {
+      return;
+    }
+
+    const adultoMayor = adultoAProcesarBaja;
+
+    setAdultoAProcesarBaja(null);
+
+    abrirFallecimiento(adultoMayor);
   }
 
   function cerrarFallecimiento() {
@@ -356,9 +383,8 @@ export function AdultosMayores() {
           <AdultosMayoresTable
             adultosMayores={pageData?.content ?? []}
             estadoListado={filtros.estado}
-            onDesactivar={abrirDesactivacion}
+            onDesactivar={setAdultoAProcesarBaja}
             onActivar={setAdultoAActivar}
-            onFallecimiento={abrirFallecimiento}
           />
 
           <Group justify="center" className={filterClasses.paginationBar}>
@@ -376,6 +402,72 @@ export function AdultosMayores() {
           </Group>
         </>
       )}
+
+      <Modal
+        opened={adultoAProcesarBaja !== null}
+        onClose={() => setAdultoAProcesarBaja(null)}
+        title={
+          <Stack gap={2}>
+            <Title order={3}>Desactivar adulto mayor</Title>
+
+            <Text size="sm" c="dimmed" fw={400}>
+              Seleccione la situación correspondiente al registro.
+            </Text>
+          </Stack>
+        }
+        centered
+      >
+        <Text size="sm" mb="lg">
+          Adulto mayor: <strong>{adultoAProcesarBaja?.nombreCompleto}</strong>
+        </Text>
+
+        <Stack gap="lg">
+          <div>
+            <Text fw={600}>Desactivar registro</Text>
+
+            <Text size="sm" c="dimmed" mt={3} mb="sm">
+              Utilice esta opción cuando el adulto mayor se retire del centro o
+              exista otro motivo de retiro.
+            </Text>
+
+            <Button
+              variant="light"
+              color="orange"
+              fullWidth
+              onClick={seleccionarDesactivacion}
+            >
+              Desactivar registro
+            </Button>
+          </div>
+
+          <div>
+            <Text fw={600}>Registrar fallecimiento</Text>
+
+            <Text size="sm" c="dimmed" mt={3} mb="sm">
+              Utilice esta opción para registrar el fallecimiento del adulto
+              mayor en su expediente.
+            </Text>
+
+            <Button
+              variant="light"
+              color="red"
+              fullWidth
+              onClick={seleccionarFallecimiento}
+            >
+              Registrar fallecimiento
+            </Button>
+          </div>
+
+          <Group justify="flex-end">
+            <Button
+              variant="default"
+              onClick={() => setAdultoAProcesarBaja(null)}
+            >
+              Cancelar
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
 
       <Modal
         opened={seleccionado !== null}
