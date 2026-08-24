@@ -27,3 +27,22 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* MODO OSCURO */
+[data-mantine-color-scheme="dark"] {
+  --text: #e7e4ea;
+
+  --card-bg: #181b1a;
+  --table-color-light: #222624;
+
+  --color-navbar: #496d64;
+
+  --color-sidebar: #08120d;
+  --color-sidebar-clc: #0d1c12;
+  --color-sidebar-hv: rgba(193, 201, 142, 0.10);
+  --color-sidebar-border: rgba(193, 201, 142, 0.18);
+
+  --shadow:
+    rgba(0, 0, 0, 0.30) 0 10px 15px -3px,
+    rgba(0, 0, 0, 0.18) 0 4px 6px -2px;
+}
