@@ -18,7 +18,7 @@ import {
   type FontSizePreference,
 } from "../../utils/accessibility";
 
-import classes from "../../components/ui/forms/PersonalForm.module.css";
+import classes from "../../components/ui/styleModules/PersonalForm.module.css";
 
 export function Accesibilidad() {
   const [settings, setSettings] = useState<AccessibilitySettings>(
