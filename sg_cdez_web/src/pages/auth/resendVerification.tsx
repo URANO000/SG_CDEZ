@@ -1,5 +1,5 @@
 import { ResendVerificationForm } from "../../components/ui/forms/ResendVerificationForm";
-import classes from "./AuthForm.module.css";
+import classes from "../../components/ui/styleModules/AuthForm.module.css";
 
 export function ResendVerification() {
     return (

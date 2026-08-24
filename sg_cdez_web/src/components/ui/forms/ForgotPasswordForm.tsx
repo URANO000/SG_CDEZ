@@ -5,6 +5,7 @@ import { useForm } from "@mantine/form";
 import { forgotPassword } from "../../../services/authService";
 import { BsArrowLeftShort } from "react-icons/bs";
 import { Link } from "react-router";
+import { notifications } from "@mantine/notifications";
 
 
 export function ForgotPasswordForm() {
@@ -24,10 +25,18 @@ export function ForgotPasswordForm() {
         setLoading(true);
         try {
             await forgotPassword(values.email);
-            alert("Si el correo ingresado está registrado, recibirá un enlace para restablecer su contraseña.");
+            notifications.show({
+                title: "Éxito",
+                color: 'green',
+                message: 'Si existe el correo en la base de datos, se enviará un código de confirmación.',
+            });
 
         } catch (error) {
-            alert("Error :(");
+            notifications.show({
+                title: "Error",
+                color: 'red',
+                message: 'Ocurrió un error, intenta de más tarde nuevo',
+            });
         } finally {
             setLoading(false);
         }

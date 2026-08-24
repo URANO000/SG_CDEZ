@@ -30,6 +30,7 @@ import { PersonalDetalle } from "./pages/personal/personalDetalle";
 import { PersonalEditar } from "./pages/personal/personalEditar";
 import { PersonalRegistrar } from "./pages/personal/personalRegistrar";
 import { AdultoMayorRegistrar } from "./pages/adultosMayores/adultoMayorRegistrar";
+import { ConsultaDetalle } from "./pages/consultas/consultaDetalle";
 import { Ajustes } from "./pages/ajustes/ajustes";
 import { Apariencia } from "./pages/ajustes/apariencia";
 
@@ -40,10 +41,10 @@ const colorSchemeManager = localStorageColorSchemeManager({
 function App() {
   return (
     <MantineProvider
-  theme={zurquiTheme}
-  colorSchemeManager={colorSchemeManager}
-  defaultColorScheme="light"
->
+      theme={zurquiTheme}
+      colorSchemeManager={colorSchemeManager}
+      defaultColorScheme="light"
+    >
       <Notifications position="top-right" />
       <AuthProvider>
         <Router>
@@ -69,10 +70,22 @@ function App() {
               }
             >
               <Route path="/" element={<Home />} />
+              <Route path="/consultas" element={
+                <ProtectedRoute roles={["ROLE_PERSONAL"]}>
+                  <Consultas />
+                </ProtectedRoute>
+              } />
+              <Route path="/consulta/:consultaId/detalle"
+                element={
+                  <ProtectedRoute roles={["ROLE_PERSONAL"]}>
+                    <ConsultaDetalle />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/consultas" element={<Consultas />} />
               <Route path="/perfil" element={<Ajustes />} />
               <Route path="/apariencia" element={<Apariencia />}
-/>
+              />
               <Route path="/adultosMayores" element={<AdultosMayores />} />
               <Route
                 path="/adultosMayores/:adultoId/expediente"

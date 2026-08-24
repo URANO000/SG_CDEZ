@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router"
-import classes from "./AuthForm.module.css";
+import classes from "../../components/ui/styleModules/AuthForm.module.css";
 import { ActivateAccountForm } from "../../components/ui/forms/ActivateAccountForm";
 
 export function Activar(){

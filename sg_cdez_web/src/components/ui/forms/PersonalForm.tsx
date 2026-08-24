@@ -1,7 +1,7 @@
 import { Container, Paper, Title, Text, Group, ActionIcon } from "@mantine/core";
 import { useNavigate } from "react-router";
 import { BsArrowLeft } from "react-icons/bs";
-import classes from "./PersonalForm.module.css";
+import classes from "../styleModules/PersonalForm.module.css";
 
 interface PersonalFormProps {
     title: string;
