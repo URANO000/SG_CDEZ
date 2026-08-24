@@ -737,9 +737,12 @@ export function ConsultaNutricionalRegistrarForm() {
                                                     .nombreCompleto
                                             }
                                             readOnly
-                                            className={
-                                                classes.readonlyField
-                                            }
+                                            disabled
+                                            classNames={{
+                                                root: classes.readonlyField,
+                                                label: classes.fieldLabel,
+                                                input: classes.input,
+                                            }}
                                         />
 
                                         <Button
@@ -771,6 +774,12 @@ export function ConsultaNutricionalRegistrarForm() {
                                                     .identificacion
                                             }
                                             readOnly
+                                            disabled
+                                            classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.input,
+                                            }}
                                         />
 
                                         <TextInput
@@ -781,6 +790,12 @@ export function ConsultaNutricionalRegistrarForm() {
                                                     : "No registrada"
                                             }
                                             readOnly
+                                            classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.input,
+                                            }}
+                                            disabled
                                         />
 
                                         <TextInput
@@ -790,6 +805,12 @@ export function ConsultaNutricionalRegistrarForm() {
                                                     .tipoIdentificacion
                                             }
                                             readOnly
+                                            classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.input,
+                                            }}
+                                            disabled
                                         />
 
                                     </SimpleGrid>

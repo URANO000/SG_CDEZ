@@ -11,6 +11,7 @@ import { notifications } from "@mantine/notifications";
 import axios from "axios";
 import { TIPOIDENTIFICACION } from "../../services/interfaces/personalCreateRequest";
 import { ESPECIALIDADES } from "../../services/interfaces/personalCreateRequest";
+import { useForm } from "@mantine/form";
 
 function formatBytes(bytes: number): string {
     if (bytes === 0) return "0 KB";
@@ -22,52 +23,105 @@ function formatBytes(bytes: number): string {
 export function PersonalRegistrar() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
     const [documentos, setDocumentos] = useState<File[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [contactos, setContactos] = useState<ContactoCreateRequest[]>([
-        {
-            tipoValor: "",
-            valor: ""
-        }
-    ]);
-
     const usuarioInputRef = useRef<HTMLInputElement>(null);
 
+    const form = useForm({
+        initialValues: {
+            rol: "",
+            especialidad: "",
+            tipoIdentificacion: "",
+            identificacion: "",
+            primerNombre: "",
+            segundoNombre: "",
+            primerApellido: "",
+            segundoApellido: "",
+            direccion: "",
+            carnet: "",
+            usuario: "",
+            contactos: [
+                {
+                    tipoValor: "",
+                    valor: ""
+                }
+            ] as ContactoCreateRequest[]
+        },
+
+        validate: {
+            primerNombre: (value) =>
+                value.trim().length === 0
+                    ? "El primer nombre es obligatorio."
+                    : null,
+
+            primerApellido: (value) =>
+                value.trim().length === 0
+                    ? "El primer apellido es obligatorio."
+                    : null,
+
+            tipoIdentificacion: (value) =>
+                value.length === 0
+                    ? "Debe seleccionar un tipo de identificación."
+                    : null,
+
+            identificacion: (value) =>
+                value.trim().length === 0
+                    ? "La identificación es obligatoria."
+                    : null,
+
+            rol: (value) =>
+                value.length === 0
+                    ? "Debe seleccionar un rol."
+                    : null,
+
+            especialidad: (value) =>
+                value.length === 0
+                    ? "Debe seleccionar una especialidad."
+                    : null,
+
+            contactos: {
+                tipoValor: (value) =>
+                    value.length === 0
+                        ? "Debe seleccionar un tipo de contacto."
+                        : null,
+
+                valor: (value, values, path) => {
+                    if (value.trim().length === 0) {
+                        return "El contacto es obligatorio.";
+                    }
+
+                    const index = Number(path.split(".")[1]);
+                    const contacto = values.contactos[index];
+
+                    if (contacto?.tipoValor === "CORREO") {
+                        const correoRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                        if (!correoRegex.test(value.trim())) {
+                            return "Ingrese un correo electrónico válido.";
+                        }
+                    }
+
+                    return null;
+                }
+            }
+        }
+    });
+
     const eliminarContacto = (index: number) => {
-        setContactos(
-            contactos.filter((_, i) => i !== index)
-        );
+        form.removeListItem("contactos", index);
     };
 
     const agregarContacto = () => {
-        setContactos([
-            ...contactos,
-            {
-                tipoValor: "",
-                valor: ""
-            }
-        ]);
-    };
-
-    const actualizarContacto = (
-        index: number,
-        campo: keyof ContactoCreateRequest,
-        valor: string
-    ) => {
-        setContactos(prev =>
-            prev.map((contacto, i) =>
-                i === index
-                    ? { ...contacto, [campo]: valor }
-                    : contacto
-            )
-        );
+        form.insertListItem("contactos", {
+            tipoValor: "",
+            valor: ""
+        });
     };
 
     const usarComoUsuario = (correo: string) => {
-        if (usuarioInputRef.current) {
-            usuarioInputRef.current.value = correo;
-            usuarioInputRef.current.focus();
-        }
+        form.setFieldValue("usuario", correo);
+        usuarioInputRef.current?.focus();
     };
 
     const manejarDocumentos = (
@@ -86,66 +140,50 @@ export function PersonalRegistrar() {
     };
 
     const eliminarDocumento = (index: number) => {
-        setDocumentos(
-            documentos.filter((_, i) => i !== index)
+        setDocumentos(prev =>
+            prev.filter((_, i) => i !== index)
         );
     };
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
+    const handleSubmit = async (
+        values: typeof form.values
+    ) => {
         setLoading(true);
 
         try {
             const formData = new FormData();
-            const form = e.currentTarget;
 
             const personal: PersonalCreateRequest = {
-                rol: Number(
-                    (form.elements.namedItem("rol") as HTMLInputElement).value
-                ),
-                especialidad:
-                    (form.elements.namedItem("especialidad") as HTMLInputElement).value,
-                tipoIdentificacion:
-                    (form.elements.namedItem("tipoIdentificacion") as HTMLSelectElement).value,
-
-                identificacion:
-                    (form.elements.namedItem("identificacion") as HTMLInputElement).value,
-
-                primerNombre:
-                    (form.elements.namedItem("primerNombre") as HTMLInputElement).value,
-
-                segundoNombre:
-                    (form.elements.namedItem("segundoNombre") as HTMLInputElement).value,
-
-                primerApellido:
-                    (form.elements.namedItem("primerApellido") as HTMLInputElement).value,
-
-                segundoApellido:
-                    (form.elements.namedItem("segundoApellido") as HTMLInputElement).value,
-
-                direccion:
-                    (form.elements.namedItem("direccion") as HTMLInputElement).value,
-
-                carnet:
-                    (form.elements.namedItem("carnet") as HTMLInputElement).value,
-
-                usuario:
-                    (form.elements.namedItem("usuario") as HTMLInputElement).value,
-
-                contactos
+                rol: Number(values.rol),
+                especialidad: values.especialidad,
+                tipoIdentificacion: values.tipoIdentificacion,
+                identificacion: values.identificacion.trim(),
+                primerNombre: values.primerNombre.trim(),
+                segundoNombre: values.segundoNombre.trim(),
+                primerApellido: values.primerApellido.trim(),
+                segundoApellido: values.segundoApellido.trim(),
+                direccion: values.direccion.trim(),
+                carnet: values.carnet.trim(),
+                usuario: values.usuario.trim(),
+                contactos: values.contactos
             };
 
-            formData.append("personal", new Blob([JSON.stringify(personal)],
-                {
-                    type: "application/json"
-                }
-            )
+            formData.append(
+                "personal",
+                new Blob(
+                    [JSON.stringify(personal)],
+                    {
+                        type: "application/json"
+                    }
+                )
             );
 
-            documentos.forEach(documento => { formData.append("documentos", documento); });
+            documentos.forEach(documento => {
+                formData.append("documentos", documento);
+            });
 
             await registrarPersonal(formData);
+
             notifications.show({
                 title: "Personal registrado",
                 message: "El miembro del personal se registró correctamente.",
@@ -155,21 +193,29 @@ export function PersonalRegistrar() {
             navigate("/personal");
 
         } catch (error) {
-            if (axios.isAxiosError(error) && error.response?.status === 409) {
+            if (
+                axios.isAxiosError(error) &&
+                error.response?.status === 409
+            ) {
                 notifications.show({
                     title: "Usuario registrado",
                     message: error.response.data?.message,
                     color: "orange"
                 });
+
                 return;
             }
 
-            if (axios.isAxiosError(error) && error.response?.status === 401) {
+            if (
+                axios.isAxiosError(error) &&
+                error.response?.status === 401
+            ) {
                 notifications.show({
                     title: "Falta de permisos",
                     message: error.response.data?.message,
                     color: "orange"
                 });
+
                 return;
             }
 
@@ -187,7 +233,7 @@ export function PersonalRegistrar() {
         <PersonalForm
             title="Registrar Personal"
             subtitle="Registrar nuevo miembro del personal."
-            onSubmit={handleSubmit}>
+            onSubmit={form.onSubmit(handleSubmit)}>
 
             {/* INFORMACIÓN GENERAL */}
             <Paper className={classes.card}>
@@ -198,52 +244,109 @@ export function PersonalRegistrar() {
                 <div className={classes.formGrid}>
                     <div className={classes.fieldGroup}>
                         <label className={classes.fieldLabel}>Primer nombre<span className={classes.required}>*</span></label>
-                        <input className={classes.input} type="text" name="primerNombre" required />
+                        <input
+                            className={classes.input}
+                            type="text"
+                            {...form.getInputProps("primerNombre")}
+                        />
+
+                        {form.errors.primerNombre && (
+                            <Text size="xs" c="red">
+                                {form.errors.primerNombre}
+                            </Text>
+                        )}
                     </div>
 
                     <div className={classes.fieldGroup}>
                         <label className={classes.fieldLabel}>Segundo nombre</label>
-                        <input className={classes.input} type="text" name="segundoNombre" />
+                        <input
+                            className={classes.input}
+                            type="text"
+                            {...form.getInputProps("segundoNombre")}
+                        />
                     </div>
 
                     <div className={classes.fieldGroup}>
                         <label className={classes.fieldLabel}>Primer apellido<span className={classes.required}>*</span></label>
-                        <input className={classes.input} type="text" name="primerApellido" required />
+                        <input
+                            className={classes.input}
+                            type="text"
+                            {...form.getInputProps("primerApellido")}
+                        />
+
+                        {form.errors.primerApellido && (
+                            <Text size="xs" c="red">
+                                {form.errors.primerApellido}
+                            </Text>
+                        )}
                     </div>
 
                     <div className={classes.fieldGroup}>
                         <label className={classes.fieldLabel}>Segundo apellido</label>
-                        <input className={classes.input} type="text" name="segundoApellido" />
+                        <input
+                            className={classes.input}
+                            type="text"
+                            {...form.getInputProps("segundoApellido")}
+                        />
                     </div>
 
                     <div className={classes.fieldGroup}>
                         <label className={classes.fieldLabel}>
                             Tipo de identificación<span className={classes.required}>*</span>
                         </label>
-                        <select className={classes.select} name="tipoIdentificacion" defaultValue="" required>
-                            <option value="" disabled>Tipo de identificación</option>
+                        <select
+                            className={classes.select}
+                            {...form.getInputProps("tipoIdentificacion")}
+                        >
+                            <option value="" disabled>
+                                Tipo de identificación
+                            </option>
+
                             {TIPOIDENTIFICACION.map(({ value, label }) => (
-                                <option key={value} value={value}>{label}</option>
+                                <option key={value} value={value}>
+                                    {label}
+                                </option>
                             ))}
                         </select>
-                        <button type="button" className={classes.infoLink}>
-                            ¿Qué significan estas siglas?
-                        </button>
+
+                        {form.errors.tipoIdentificacion && (
+                            <Text size="xs" c="red">
+                                {form.errors.tipoIdentificacion}
+                            </Text>
+                        )}
                     </div>
 
                     <div className={classes.fieldGroup}>
                         <label className={classes.fieldLabel}>Identificación<span className={classes.required}>*</span></label>
-                        <input className={classes.input} type="text" name="identificacion" required />
+                        <input
+                            className={classes.input}
+                            type="text"
+                            {...form.getInputProps("identificacion")}
+                        />
+
+                        {form.errors.identificacion && (
+                            <Text size="xs" c="red">
+                                {form.errors.identificacion}
+                            </Text>
+                        )}
                     </div>
 
                     <div className={classes.fieldGroup}>
                         <label className={classes.fieldLabel}>Carné</label>
-                        <input className={classes.input} type="text" name="carnet" />
+                        <input
+                            className={classes.input}
+                            type="text"
+                            {...form.getInputProps("carnet")}
+                        />
                     </div>
 
                     <div className={classes.fieldGroup}>
                         <label className={classes.fieldLabel}>Dirección</label>
-                        <input className={classes.input} type="text" name="direccion" />
+                        <input
+                            className={classes.input}
+                            type="text"
+                            {...form.getInputProps("direccion")}
+                        />
                     </div>
 
                     <div className={`${classes.fieldGroup} ${classes.fieldFull}`}>
@@ -252,8 +355,8 @@ export function PersonalRegistrar() {
                             ref={usuarioInputRef}
                             className={classes.input}
                             type="text"
-                            name="usuario"
                             placeholder="Puede completarse desde un contacto de correo abajo"
+                            {...form.getInputProps("usuario")}
                         />
                     </div>
                 </div>
@@ -267,24 +370,56 @@ export function PersonalRegistrar() {
 
                 <div className={classes.formGrid}>
                     <div className={classes.fieldGroup}>
-                        <label className={classes.fieldLabel}>Rol<span className={classes.required}>*</span></label>
-                        <select className={classes.select} name="rol" defaultValue="" required>
-                            <option value="" disabled>Seleccionar rol</option>
+                        <label className={classes.fieldLabel}>
+                            Rol
+                            <span className={classes.required}>*</span>
+                        </label>
+
+                        <select
+                            className={classes.select}
+                            {...form.getInputProps("rol")}
+                        >
+                            <option value="" disabled>
+                                Seleccionar rol
+                            </option>
                             <option value="1">Administrador</option>
                             <option value="2">Usuario Normal</option>
+                            <option value="3">Ayudante Administrativo</option>
                         </select>
+
+                        {form.errors.rol && (
+                            <Text size="xs" c="red">
+                                {form.errors.rol}
+                            </Text>
+                        )}
                     </div>
 
                     <div className={classes.fieldGroup}>
                         <label className={classes.fieldLabel}>
-                            Especialidad<span className={classes.required}>*</span>
+                            Especialidad
+                            <span className={classes.required}>*</span>
                         </label>
-                        <select className={classes.select} name="especialidad" defaultValue="" required>
-                            <option value="" disabled>Seleccionar especialidad</option>
+
+                        <select
+                            className={classes.select}
+                            {...form.getInputProps("especialidad")}
+                        >
+                            <option value="" disabled>
+                                Seleccionar especialidad
+                            </option>
+
                             {ESPECIALIDADES.map(({ value, label }) => (
-                                <option key={value} value={value}>{label}</option>
+                                <option key={value} value={value}>
+                                    {label}
+                                </option>
                             ))}
                         </select>
+
+                        {form.errors.especialidad && (
+                            <Text size="xs" c="red">
+                                {form.errors.especialidad}
+                            </Text>
+                        )}
                     </div>
                 </div>
             </Paper>
@@ -303,59 +438,97 @@ export function PersonalRegistrar() {
                     </Button>
                 </Group>
 
-                {contactos.length === 0 ? (
-                    <Text className={classes.emptyText}>Sin contactos agregados.</Text>
+                {form.values.contactos.length === 0 ? (
+                    <Text className={classes.emptyText}>
+                        Sin contactos agregados.
+                    </Text>
                 ) : (
                     <Stack gap="sm">
-                        {contactos.map((contacto, index) => (
-                            <div key={index} className={classes.contactRow}>
-                                <select
-                                    className={classes.select}
-                                    value={contacto.tipoValor}
-                                    onChange={e =>
-                                        actualizarContacto(index, "tipoValor", e.target.value)
-                                    }
-                                    required>
-                                    <option value="" disabled>Tipo</option>
-                                    <option value="TELEFONO">Número Telefónico</option>
-                                    <option value="CORREO">Correo Electrónico</option>
-                                </select>
+                        {form.values.contactos.map((contacto, index) => {
+                            const tipoError =
+                                form.errors[`contactos.${index}.tipoValor`];
 
-                                <input
-                                    className={classes.input}
-                                    type={contacto.tipoValor === "CORREO" ? "email" : "text"}
-                                    placeholder={contacto.tipoValor === "CORREO" ? "correo@ejemplo.com" : "Número de teléfono"}
-                                    value={contacto.valor}
-                                    onChange={e =>
-                                        actualizarContacto(index, "valor", e.target.value)
-                                    }
-                                    required
-                                />
+                            const valorError =
+                                form.errors[`contactos.${index}.valor`];
 
-                                <Group gap={4} wrap="nowrap" className={classes.contactActions}>
-                                    {contacto.tipoValor === "CORREO" && contacto.valor && (
-                                        <Tooltip label="Utilizar como usuario">
+                            return (
+                                <div key={index}>
+                                    <div className={classes.contactRow}>
+                                        <select
+                                            className={classes.select}
+                                            {...form.getInputProps(
+                                                `contactos.${index}.tipoValor`
+                                            )}
+                                        >
+                                            <option value="" disabled>
+                                                Tipo
+                                            </option>
+                                            <option value="TELEFONO">
+                                                Número Telefónico
+                                            </option>
+                                            <option value="CORREO">
+                                                Correo Electrónico
+                                            </option>
+                                        </select>
+
+                                        <input
+                                            className={classes.input}
+                                            type="text"
+                                            placeholder={
+                                                contacto.tipoValor === "CORREO"
+                                                    ? "correo@ejemplo.com"
+                                                    : "Número de teléfono"
+                                            }
+                                            {...form.getInputProps(
+                                                `contactos.${index}.valor`
+                                            )}
+                                        />
+
+                                        <Group
+                                            gap={4}
+                                            wrap="nowrap"
+                                            className={classes.contactActions}
+                                        >
+                                            {contacto.tipoValor === "CORREO" &&
+                                                contacto.valor && (
+                                                    <Tooltip label="Utilizar como usuario">
+                                                        <ActionIcon
+                                                            type="button"
+                                                            variant="subtle"
+                                                            className={classes.actionEmail}
+                                                            title="Usar como usuario"
+                                                            aria-label="Usar como usuario"
+                                                            onClick={() =>
+                                                                usarComoUsuario(contacto.valor)
+                                                            }
+                                                        >
+                                                            <BsPersonCheck size={16} />
+                                                        </ActionIcon>
+                                                    </Tooltip>
+                                                )}
+
                                             <ActionIcon
+                                                type="button"
                                                 variant="subtle"
-                                                className={classes.actionEmail}
-                                                title="Usar como usuario"
-                                                aria-label="Usar como usuario"
-                                                onClick={() => usarComoUsuario(contacto.valor)}>
-                                                <BsPersonCheck size={16} />
+                                                color="red"
+                                                aria-label="Eliminar contacto"
+                                                onClick={() =>
+                                                    eliminarContacto(index)
+                                                }
+                                            >
+                                                <BsTrash size={16} />
                                             </ActionIcon>
-                                        </Tooltip>
-                                    )}
+                                        </Group>
+                                    </div>
 
-                                    <ActionIcon
-                                        variant="subtle"
-                                        color="red"
-                                        aria-label="Eliminar contacto"
-                                        onClick={() => eliminarContacto(index)}>
-                                        <BsTrash size={16} />
-                                    </ActionIcon>
-                                </Group>
-                            </div>
-                        ))}
+                                    {(tipoError || valorError) && (
+                                        <Text size="xs" c="red" mt={4}>
+                                            {String(tipoError || valorError)}
+                                        </Text>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </Stack>
                 )}
             </Paper>
