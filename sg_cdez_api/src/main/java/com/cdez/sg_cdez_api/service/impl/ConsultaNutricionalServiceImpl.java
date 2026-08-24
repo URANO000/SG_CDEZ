@@ -22,15 +22,6 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
     private final ExamenLaboratorioService EXAMENLAB_SERVICE;
     private final AuthHelper AUTH_HELPER;
 
-//    @Override
-//    public List<ConsultaNutricionalDetailResponse> listarConsultasNutricionalesFiltradas(ConsultaFiltro filtro) {
-//        return REPOSITORY.findByConsultaActivoTrue().stream().map(this::mapDTO).toList();
-//    }
-//
-//    @Override
-//    public ConsultaNutricionalDetailResponse obtenerConsultaNutricionalPorId(UUID id) {
-//        return mapDTO(obtenerConsultaNutricionalCheck(id));
-//    }
 
     @Override
     @Transactional
@@ -168,7 +159,7 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
 
     private void validarEspecialidad(Personal personal){
         String especialidad = personal.getEspecialidad() != null
-                ? personal.getEspecialidad().toUpperCase().trim()
+                ? personal.getEspecialidad().getLabel()
                 : null;
         if(especialidad == null){
             throw new ResponseStatusException(

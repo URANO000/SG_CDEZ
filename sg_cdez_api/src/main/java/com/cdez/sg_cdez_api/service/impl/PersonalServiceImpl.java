@@ -252,8 +252,8 @@ public class PersonalServiceImpl implements PersonalService {
                             .datos(personal)
                             .columnas(List.of(
                                     new Column<>("Rol", p -> p.rol().nombre(), TextAlignment.LEFT, 1f),
-                                    new Column<>("Especialidad", PersonalResponse::especialidad, TextAlignment.LEFT, 1.5f),
-                                    new Column<>("Tipo Identificación", PersonalResponse::tipoIdentificacion, TextAlignment.LEFT, 2f),
+                                    new Column<>("Especialidad", p -> p.especialidad() != null ? p.especialidad().getLabel() : "", TextAlignment.LEFT, 1.5f),
+                                    new Column<>("Tipo Identificación", p -> p.tipoIdentificacion() != null ? p.tipoIdentificacion().getLabel() : "", TextAlignment.LEFT, 2f),
                                     new Column<>("Identificación", PersonalResponse::identificacion, TextAlignment.LEFT, 1.5f),
                                     new Column<>( "Nombre Completo",
                                             p -> {

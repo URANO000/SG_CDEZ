@@ -1,14 +1,14 @@
 import { NavLink, ScrollArea, Burger } from "@mantine/core";
 import { BsFillHouseDoorFill, BsClipboard2PulseFill, BsFillPeopleFill, BsPersonHeart, BsClipboardDataFill, BsMapFill } from "react-icons/bs";
 import { Link, useLocation } from "react-router";
-import classes from "./Sidebar.module.css";
+import classes from "../ui/styleModules/Sidebar.module.css";
 import { UserButton } from "../common/UserButton";
 import { useAuth } from "../../services/authContext";
 import { useDisclosure } from "@mantine/hooks";
 
 const links = [
   { label: "Inicio", to: "/", icon: BsFillHouseDoorFill },
-  { label: "Consultas", to: "/consultas", icon: BsClipboard2PulseFill },
+  { label: "Consultas", to: "/consultas", icon: BsClipboard2PulseFill, roles: ["ROLE_PERSONAL"]},
   { label: "Adultos Mayores", to: "/adultosMayores", icon: BsPersonHeart },
   { label: "Personal", to: "/personal", icon: BsFillPeopleFill, roles: ["ROLE_ADMIN"] },
   { label: "Auditoría", to: "/auditoria", icon: BsClipboardDataFill, roles: ["ROLE_ADMIN"] }

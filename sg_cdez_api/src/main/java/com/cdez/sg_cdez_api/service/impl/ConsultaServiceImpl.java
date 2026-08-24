@@ -179,7 +179,7 @@ public class ConsultaServiceImpl implements ConsultaService {
                         personal.getPersonalId(),
                         personal.getUsuario(),
                         personal.getNombreCompleto(),
-                        personal.getEspecialidad()
+                        personal.getEspecialidad().getLabel()
                 ),
                 consulta.getCreatedAt(),
                 consulta.getUpdatedAt(),
@@ -218,7 +218,7 @@ public class ConsultaServiceImpl implements ConsultaService {
                         personal.getPersonalId(),
                         personal.getUsuario(),
                         personal.getNombreCompleto(),
-                        personal.getEspecialidad()
+                        personal.getEspecialidad().getLabel()
                 ),
                 consulta.getCreatedAt(),
                 consulta.getUpdatedAt(),

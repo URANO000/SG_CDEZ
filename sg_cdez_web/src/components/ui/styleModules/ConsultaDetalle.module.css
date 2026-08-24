@@ -1,0 +1,207 @@
+.container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px 40px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.topBar {
+    margin-bottom: 0;
+    min-height: 36px;
+}
+
+.contentGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr);
+    gap: 20px;
+    align-items: stretch;
+}
+
+.mainColumn,
+.sideColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.headerCard {
+    background-color: var(--table-color-light);
+    border: 1px solid rgba(107, 99, 117, 0.15);
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+    padding: 28px 30px;
+}
+
+.name {
+    color: var(--text);
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+}
+
+.subText {
+    color: var(--text);
+    opacity: 0.65;
+}
+
+
+.card {
+    background-color: var(--table-color-light);
+    border: 1px solid rgba(107, 99, 117, 0.13);
+    border-radius: 6px;
+    box-shadow: none;
+    padding: 22px 26px;
+}
+
+
+.sectionTitle {
+    color: var(--text);
+    font-weight: 600;
+    font-size: 1rem;
+
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+
+    border-bottom: 1px solid rgba(107, 99, 117, 0.15);
+}
+
+
+.subSectionTitle {
+    color: var(--text);
+    font-size: 0.9rem;
+    font-weight: 600;
+
+    margin-bottom: 14px;
+}
+
+
+.infoGrid {
+    row-gap: 24px;
+    column-gap: 40px;
+}
+
+
+.label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+
+    color: var(--text);
+    opacity: 0.55;
+
+    margin-bottom: 5px;
+}
+
+
+.value {
+    color: var(--text);
+    font-size: 0.95rem;
+}
+
+
+.longValue {
+    color: var(--text);
+    font-size: 0.95rem;
+    line-height: 1.65;
+    white-space: pre-line;
+}
+
+
+.emptyText {
+    color: var(--text);
+    opacity: 0.5;
+    font-size: 0.9rem;
+}
+
+
+.badgeActive {
+    background-color: var(--color-primary) !important;
+    color: var(--color-sidebar) !important;
+    font-weight: 600;
+}
+
+
+.badgeInactive {
+    background-color: var(--color-secondary) !important;
+    color: var(--color-sidebar) !important;
+    font-weight: 600;
+    opacity: 0.75;
+}
+
+
+.loadingState {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+
+.errorState {
+    max-width: 800px;
+    margin: 80px auto;
+    text-align: center;
+}
+
+
+/* Tables inside consultation sections */
+
+.card table {
+    color: var(--text);
+}
+
+.card thead {
+    background-color: rgba(107, 99, 117, 0.035);
+}
+
+.card th {
+    color: var(--text);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.card td {
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+.card tbody tr {
+    border-bottom: 1px solid rgba(107, 99, 117, 0.1);
+}
+
+
+
+@media (max-width: 900px) {
+
+    .contentGrid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .container {
+        padding: 0 12px 32px;
+    }
+
+    .headerCard,
+    .card {
+        padding: 18px;
+    }
+
+    .headerCard .mantine-Group-root {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+}

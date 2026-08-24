@@ -1,5 +1,7 @@
 package com.cdez.sg_cdez_api.entity;
 
+import com.cdez.sg_cdez_api.entity.enums.Especialidad;
+import com.cdez.sg_cdez_api.entity.enums.TipoIdentificacion;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,8 +23,10 @@ public class Personal {
     @ManyToOne
     @JoinColumn(name = "rol_id")
     private Rol rol;
-    private String especialidad;
-    private String tipoIdentificacion;
+    @Enumerated(EnumType.STRING)
+    private Especialidad especialidad;
+    @Enumerated(EnumType.STRING)
+    private TipoIdentificacion tipoIdentificacion;
     private String identificacion;
     private String primerNombre;
     private String segundoNombre;

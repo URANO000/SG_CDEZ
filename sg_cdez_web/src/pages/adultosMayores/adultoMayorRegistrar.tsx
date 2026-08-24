@@ -19,7 +19,7 @@ import { registrarAdultoMayor } from "../../services/adultoMayorService";
 
 import type { AdultoMayorCreateRequest } from "../../services/interfaces/adultoMayorInterface";
 
-import classes from "../../components/ui/forms/PersonalForm.module.css";
+import classes from "../../components/ui/styleModules/PersonalForm.module.css";
 
 export function AdultoMayorRegistrar() {
   const navigate = useNavigate();

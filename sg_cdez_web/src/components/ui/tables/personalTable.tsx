@@ -89,16 +89,29 @@ export function PersonalTable({ personal, onRefresh }: PersonalTableProps) {
                                                         <BsEye size={16} />
                                                     </ActionIcon>
                                                 </Tooltip>
-                                                <Tooltip label="Editar">
-                                                    <ActionIcon
-                                                        variant="subtle"
-                                                        className={classes.actionEdit}
-                                                        onClick={() => navigate(`/personal/${persona.personalId}/editar`)}
-                                                        aria-label="Editar"
-                                                    >
-                                                        <BsPencilSquare size={16} />
-                                                    </ActionIcon>
-                                                </Tooltip>
+                                                {
+                                                    persona.activo === 'Activo' ? (
+                                                        <Tooltip label="Editar">
+                                                            <ActionIcon
+                                                                variant="subtle"
+                                                                className={classes.actionEdit}
+                                                                onClick={() => navigate(`/personal/${persona.personalId}/editar`)}
+                                                                aria-label="Editar"
+                                                            >
+                                                                <BsPencilSquare size={16} />
+                                                            </ActionIcon>
+                                                        </Tooltip>
+                                                    ) : (
+                                                        <Tooltip label="Editar">
+                                                            <ActionIcon
+                                                                variant="subtle"
+                                                                className={classes.actionEdit}
+                                                                aria-label="Editar">
+                                                                <BsPencilSquare size={16} className={classes.actionEditDisabled} />
+                                                            </ActionIcon>
+                                                        </Tooltip>
+                                                    )
+                                                }
                                                 {persona.activo === "Activo" ? (
                                                     <Tooltip label="Desactivar registro">
                                                         <ActionIcon

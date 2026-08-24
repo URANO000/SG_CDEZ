@@ -11,6 +11,7 @@ import axios from "axios";
 import { notifications } from "@mantine/notifications";
 import { mostrarFecha } from "../../utils/formatHelper";
 
+
 export function PersonalDetalle() {
     const { personalId } = useParams();
     const navigate = useNavigate();
@@ -41,7 +42,19 @@ export function PersonalDetalle() {
                 const response = await obtenerPersonalPorId(personalId);
                 setPersonal(response);
             } catch (error) {
-                console.error("Error obteniendo personal:", error);
+                if (axios.isAxiosError(error) && error.response?.status === 404) {
+                    notifications.show({
+                        title: "Error al cargar datos",
+                        message: error.response.data?.message,
+                        color: "orange"
+                    });
+                    return;
+                }
+                notifications.show({
+                    title: "Error al mostrar datos del personal",
+                    message: "No fue posible recuperar los datos del miembro del personal.",
+                    color: "red",
+                });
                 setError(true);
             } finally {
                 setLoading(false);
@@ -64,17 +77,9 @@ export function PersonalDetalle() {
             link.remove();
             window.URL.revokeObjectURL(url);
         } catch {
-            if (axios.isAxiosError(error) && error.response?.status === 404) {
-                notifications.show({
-                    title: "Error al cargar datos",
-                    message: error.response.data?.message,
-                    color: "orange"
-                });
-                return;
-            }
             notifications.show({
-                title: "Error al mostrar datos del personal",
-                message: "No fue posible recuperar los datos del miembro del personal.",
+                title: "Error al descargar",
+                message: "No fue posible descargar el documento.",
                 color: "red",
             });
         } finally {

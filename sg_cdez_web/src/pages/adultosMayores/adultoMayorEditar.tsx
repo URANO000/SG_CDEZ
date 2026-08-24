@@ -28,7 +28,7 @@ import type {
   AdultoMayorUpdateRequest,
 } from "../../services/interfaces/adultoMayorInterface";
 
-import classes from "../../components/ui/forms/PersonalForm.module.css";
+import classes from "../../components/ui/styleModules/PersonalForm.module.css";
 
 function obtenerFechaInput(fecha: string | null): string {
   if (!fecha) {
