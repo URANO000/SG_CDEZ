@@ -17,7 +17,7 @@ import {
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { useNavigate, useParams } from "react-router";
-import { BsArrowLeft, BsPlus, BsTrash } from "react-icons/bs";
+import { BsArrowLeft } from "react-icons/bs";
 import axios from "axios";
 
 import classes from "../styleModules/ConsultaRegistrarForm.module.css";

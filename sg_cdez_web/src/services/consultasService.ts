@@ -46,7 +46,7 @@ export const actualizarConsultaNutricional = async (consultaId: string, consulta
     return response.data;
 }
 
-export const actualizarConsulta = async (consulta: ConsultaUpdateRequest, consultaId: string) => {
-    const response = await apiClient.post(`/consulta/actualizarConsulta/${consultaId}`, consulta);
+export const actualizarConsulta = async (consultaId: string, consulta: ConsultaUpdateRequest) => {
+    const response = await apiClient.put(`/consulta/actualizarConsulta/${consultaId}`, consulta);
     return response.data;
 }
