@@ -8,7 +8,7 @@ import React, { useEffect, useState } from "react";
 import { actualizarPersonal, obtenerPersonalPorId } from "../../services/personalService";
 import { Paper, Title, Text, Group, Stack, Button, ActionIcon } from "@mantine/core";
 import { BsPlus, BsTrash, BsPersonCheck, BsUpload, BsFileEarmarkText, BsX } from "react-icons/bs";
-import classes from "../../components/ui/forms/PersonalForm.module.css";
+import classes from "../../components/ui/styleModules/PersonalForm.module.css";
 import { useRef } from "react";
 import axios from "axios";
 import { notifications } from "@mantine/notifications";

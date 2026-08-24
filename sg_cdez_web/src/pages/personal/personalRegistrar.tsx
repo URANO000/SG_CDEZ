@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { Paper, Title, Text, Group, Stack, Button, ActionIcon, Tooltip } from "@mantine/core";
 import { BsPlus, BsTrash, BsPersonCheck, BsUpload, BsFileEarmarkText, BsX } from "react-icons/bs";
 import { PersonalForm } from "../../components/ui/forms/PersonalForm";
-import classes from "../../components/ui/forms/PersonalForm.module.css";
+import classes from "../../components/ui/styleModules/PersonalForm.module.css";
 import type { ContactoCreateRequest } from "../../services/interfaces/personalCreateRequest";
 import type { PersonalCreateRequest } from "../../services/interfaces/personalCreateRequest";
 import { registrarPersonal } from "../../services/personalService";

@@ -1,7 +1,7 @@
 import { NavLink, ScrollArea, Burger } from "@mantine/core";
 import { BsFillHouseDoorFill, BsClipboard2PulseFill, BsFillPeopleFill, BsPersonHeart, BsClipboardDataFill, BsMapFill } from "react-icons/bs";
 import { Link, useLocation } from "react-router";
-import classes from "./Sidebar.module.css";
+import classes from "../ui/styleModules/Sidebar.module.css";
 import { UserButton } from "../common/UserButton";
 import { useAuth } from "../../services/authContext";
 import { useDisclosure } from "@mantine/hooks";

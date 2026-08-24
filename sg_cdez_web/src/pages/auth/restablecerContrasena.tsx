@@ -1,6 +1,6 @@
 import { ResetPasswordForm } from "../../components/ui/forms/ResetPasswordForm";
 import { useSearchParams } from "react-router"
-import classes from "./AuthForm.module.css";
+import classes from "../../components/ui/styleModules/AuthForm.module.css";
 
 export function RestablecerContrasena() {
     const [searchParams] = useSearchParams();

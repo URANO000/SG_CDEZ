@@ -4,7 +4,7 @@ import {
     Title,
     Text
 } from "@mantine/core";
-import classes from "./FormControl.module.css"
+import classes from "../styleModules/FormControl.module.css"
 
 interface AuthFormLayoutProps {
     title: string;
