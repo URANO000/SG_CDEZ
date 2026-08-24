@@ -12,7 +12,7 @@ import type {
 
 import type { ContactoCreateRequest } from "../../../services/interfaces/personalCreateRequest";
 
-import classes from "./PersonalForm.module.css";
+import classes from "../styleModules/PersonalForm.module.css";
 
 interface EncargadoLegalFormProps {
   adultoId: string;
