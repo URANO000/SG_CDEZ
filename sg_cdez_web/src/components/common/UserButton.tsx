@@ -75,10 +75,13 @@ export function UserButton() {
           <Menu.Item
             leftSection={<BsBrightnessHighFill size={20} />}
             onClick={() => navigate("/apariencia")}
-            >
+          >
             Apariencia
-            </Menu.Item>
-          <Menu.Item leftSection={<BsUniversalAccess size={20} />}>
+          </Menu.Item>
+          <Menu.Item
+            leftSection={<BsUniversalAccess size={20} />}
+            onClick={() => navigate("/accesibilidad")}
+          >
             Accesibilidad
           </Menu.Item>
           <Menu.Divider />
