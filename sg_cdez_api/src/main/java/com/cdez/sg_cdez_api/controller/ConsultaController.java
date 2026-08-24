@@ -38,7 +38,7 @@ public class ConsultaController {
         return SERVICE.crearConsulta(request);
     }
 
-    @PostMapping("/actualizarConsulta/{id}")
+    @PutMapping("/actualizarConsulta/{id}")
     public ConsultaDetailResponse actualizarConsulta(@PathVariable(name = "id") UUID id, @Valid @RequestBody ConsultaUpdateRequest request){
         return SERVICE.actualizarConsulta(request, id);
     }

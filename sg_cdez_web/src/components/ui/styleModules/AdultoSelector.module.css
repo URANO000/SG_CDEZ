@@ -158,6 +158,10 @@
     margin-top: 4px;
 }
 
+.disabled {
+    background-color: aqua;
+}
+
 
 @media (max-width: 800px) {
 

@@ -43,26 +43,26 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/iniciarSesion").permitAll()
                         .requestMatchers("/api/auth/forgot-password").permitAll()
                         .requestMatchers("/api/auth/restablecer-contrasena").permitAll()
-                        .requestMatchers("/api/auth/cambiarContrasena/**").hasAnyRole("PERSONAL", "ADMIN")
-                        .requestMatchers("/api/auth/session").hasAnyRole("PERSONAL", "ADMIN")
+                        .requestMatchers("/api/auth/cambiarContrasena/**").permitAll()
+                        .requestMatchers("/api/auth/session").hasAnyRole("PERSONAL", "ADMIN",  "AYUDANTE")
                         .requestMatchers("/api/auth/activar").permitAll()
                         .requestMatchers("/api/auth/reenviar-verificacion").permitAll()
 
-                        .requestMatchers("/api/perfil/**").hasAnyRole("PERSONAL", "ADMIN")
+                        .requestMatchers("/api/perfil/**").hasAnyRole("PERSONAL", "ADMIN",  "AYUDANTE")
                         // Solo el rol ADMIN puede registrar adultos mayores
-                        .requestMatchers(HttpMethod.POST, "/api/adultos-mayores").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/adultos-mayores").hasAnyRole("ADMIN",  "AYUDANTE")
 
                         // Los roles PERSONAL y ADMIN pueden acceder al resto de operaciones del módulo
-                        .requestMatchers("/api/adultos-mayores/**").hasAnyRole("PERSONAL", "ADMIN")
+                        .requestMatchers("/api/adultos-mayores/**").hasAnyRole("PERSONAL", "ADMIN",  "AYUDANTE")
 
-                        .requestMatchers("/api/epicrisis/**").hasAnyRole("ADMIN", "PERSONAL")
-                        .requestMatchers("/api/encargados/**").hasAnyRole("PERSONAL", "ADMIN")
-                        .requestMatchers("/api/documentos/**").hasAnyRole("PERSONAL", "ADMIN")
-                        .requestMatchers("/api/auditorias/**").hasRole("ADMIN")
+                        .requestMatchers("/api/epicrisis/**").hasAnyRole("ADMIN", "PERSONAL",  "AYUDANTE")
+                        .requestMatchers("/api/encargados/**").hasAnyRole("PERSONAL", "ADMIN",  "AYUDANTE")
+                        .requestMatchers("/api/documentos/**").hasAnyRole("PERSONAL", "ADMIN",  "AYUDANTE")
+                        .requestMatchers("/api/auditorias/**").hasAnyRole("ADMIN",  "AYUDANTE")
                         .requestMatchers("/api/personal/**").hasRole("ADMIN")
 
-                        .requestMatchers("/api/consulta/**").hasRole("PERSONAL")
-                        .requestMatchers("/api/consulta-nutricional/**").hasRole("PERSONAL")
+                        .requestMatchers("/api/consulta/**").hasAnyRole("PERSONAL", "AYUDANTE")
+                        .requestMatchers("/api/consulta-nutricional/**").hasAnyRole("PERSONAL",  "AYUDANTE")
 
                         .requestMatchers("/error").permitAll()
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()

@@ -19,6 +19,7 @@ import type { AdultoMayorFiltro } from "../../services/interfaces/adultoMayorInt
 import type { AdultoMayorResponse } from "../../services/interfaces/adultoMayorInterface";
 
 import type { PageResponse } from "../../services/interfaces/pageResponse";
+import { obtenerFechaSinHora } from "../../utils/formatHelper";
 
 interface AdultoSelectorProps {
     onSelect: (adulto: AdultoMayorResponse) => void;
@@ -216,7 +217,7 @@ export function AdultoSelector({
                                                 key={adulto.adultoId}
                                             >
 
-                                                <Table.Td>
+                                                <Table.Td >
                                                     {adulto.nombreCompleto}
                                                 </Table.Td>
 
@@ -225,7 +226,7 @@ export function AdultoSelector({
                                                 </Table.Td>
 
                                                 <Table.Td>
-                                                    {adulto.fechaNacimiento ??
+                                                    {obtenerFechaSinHora(adulto.fechaNacimiento) ??
                                                         "No registrada"}
                                                 </Table.Td>
 

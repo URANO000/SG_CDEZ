@@ -1,11 +1,10 @@
-import {BigDecimal} from 'bigdecimal.js';
 export type Apetito = "BUENO" | "REGULAR" | "MALO";
 export type TipoTamizaje = "MNA" | "SARC_F" | "MUST" | "NRS";
 
 export interface TamizajeResponse {
     tamizajeId: string;
     tipo: TipoTamizaje;
-    puntaje: BigDecimal;
+    puntaje: number;
     resultado: string;
     observaciones: string;
 }
@@ -21,16 +20,16 @@ export interface ExamenLaboratorioResponse {
 
 export interface AntropometriaResponse {
     antropometriaId: string;
-    pesoActual: BigDecimal;
-    pesoHabitual: BigDecimal;
-    pesoHace6Meses: BigDecimal;
-    talla: BigDecimal;
-    alturaEstimada: BigDecimal;
-    imc: BigDecimal;
-    circumferenciaPantorrilla: BigDecimal;
-    circumferenciaBraquial: BigDecimal;
-    circumferenciaCintura: BigDecimal;
-    perdidaPesoPorcentaje: BigDecimal;
+    pesoActual: number;
+    pesoHabitual: number;
+    pesoHace6Meses: number;
+    talla: number;
+    alturaEstimada: number;
+    imc: number;
+    circunferenciaPantorrilla: number;
+    circunferenciaBraquial: number;
+    circunferenciaCintura: number;
+    perdidaPesoPorcentaje: number;
 }
 
 export interface ConsultaNutricionalDetailResponse {
@@ -44,7 +43,8 @@ export interface ConsultaNutricionalDetailResponse {
     distension: boolean;
     gases: boolean;
     reflujo: boolean;
-    frecuenciaEvaluaciones: string;
+    frecuenciaEvacuaciones: string;
+    consistenciaBristol: string;
     estadoCognitivo: string;
     tamizajes: TamizajeResponse[];
     examenesLaboratorio: ExamenLaboratorioResponse[];

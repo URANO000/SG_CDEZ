@@ -8,10 +8,10 @@ import { useDisclosure } from "@mantine/hooks";
 
 const links = [
   { label: "Inicio", to: "/", icon: BsFillHouseDoorFill },
-  { label: "Consultas", to: "/consultas", icon: BsClipboard2PulseFill, roles: ["ROLE_PERSONAL"]},
+  { label: "Consultas", to: "/consultas", icon: BsClipboard2PulseFill, roles: ["ROLE_PERSONAL", "ROLE_AYUDANTE"]},
   { label: "Adultos Mayores", to: "/adultosMayores", icon: BsPersonHeart },
   { label: "Personal", to: "/personal", icon: BsFillPeopleFill, roles: ["ROLE_ADMIN"] },
-  { label: "Auditoría", to: "/auditoria", icon: BsClipboardDataFill, roles: ["ROLE_ADMIN"] }
+  { label: "Auditoría", to: "/auditoria", icon: BsClipboardDataFill, roles: ["ROLE_ADMIN", "ROLE_AYUDANTE"] }
 ];
 
 const footer = [

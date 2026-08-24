@@ -425,7 +425,12 @@ export function ConsultaRegistrarForm() {
                                                 adultoSeleccionado.nombreCompleto
                                             }
                                             readOnly
-                                            className={classes.readonlyField} />
+                                            disabled
+                                            classNames={{
+                                                root: classes.readonlyField,
+                                                label: classes.fieldLabel,
+                                                input: classes.input,
+                                            }} />
 
                                         <Button
                                             type="button"
@@ -452,6 +457,12 @@ export function ConsultaRegistrarForm() {
                                             value={
                                                 adultoSeleccionado.identificacion
                                             }
+                                            classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.input,
+                                            }}
+                                            disabled
                                             readOnly
                                         />
 
@@ -463,6 +474,12 @@ export function ConsultaRegistrarForm() {
                                                     ? `${edad} años`
                                                     : "No registrada"
                                             }
+                                            classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.input,
+                                            }}
+                                            disabled
                                             readOnly
                                         />
 
@@ -472,6 +489,12 @@ export function ConsultaRegistrarForm() {
                                             value={
                                                 adultoSeleccionado.tipoIdentificacion
                                             }
+                                            classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.input,
+                                            }}
+                                            disabled
                                             readOnly
                                         />
 
@@ -625,33 +648,33 @@ export function ConsultaRegistrarForm() {
 
                     </Paper>
 
-                    
-                {/* BOTONES */}
 
-                <Group
-                    justify="flex-end"
-                    className={classes.submitBar}
-                >
+                    {/* BOTONES */}
 
-                    <Button
-                        type="button"
-                        variant="default"
-                        onClick={() => navigate(-1)}
-                        disabled={loading}
+                    <Group
+                        justify="flex-end"
+                        className={classes.submitBar}
                     >
-                        Cancelar
-                    </Button>
+
+                        <Button
+                            type="button"
+                            variant="default"
+                            onClick={() => navigate(-1)}
+                            disabled={loading}
+                        >
+                            Cancelar
+                        </Button>
 
 
-                    <Button
-                        type="submit"
-                        loading={loading}
-                        disabled={!adultoSeleccionado}
-                    >
-                        Registrar consulta
-                    </Button>
+                        <Button
+                            type="submit"
+                            loading={loading}
+                            disabled={!adultoSeleccionado}
+                        >
+                            Registrar consulta
+                        </Button>
 
-                </Group>
+                    </Group>
 
 
                 </form>

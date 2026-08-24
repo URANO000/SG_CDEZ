@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     ActionIcon,
     Button,
     Group,
-    Modal,
     Paper,
     SimpleGrid,
     Switch,
@@ -11,35 +10,35 @@ import {
     TextInput,
     Textarea,
     Title,
-    Select
+    Select,
+    Loader,
+    Center,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { BsArrowLeft, BsPlus, BsTrash } from "react-icons/bs";
 import axios from "axios";
 
 import classes from "../styleModules/ConsultaRegistrarForm.module.css";
 
-import { registrarConsultaNutricional } from "../../../services/consultasService";
+import {
+    actualizarConsultaNutricional,
+    obtenerConsultaPorId,
+} from "../../../services/consultasService";
 
 import type {
-    ConsultaNutricionalCreateRequest,
-} from "../../../services/interfaces/consultasCreateInterface";
+    ConsultaNutricionalUpdateRequest,
+} from "../../../services/interfaces/consultasUpdateInterface";
 
 import type {
     Apetito,
+    ConsultaDetailResponse,
     TipoTamizaje,
 } from "../../../services/interfaces/consultasDetailsResponse";
 
-import type {
-    AdultoMayorResponse,
-} from "../../../services/interfaces/adultoMayorInterface";
-
-import { AdultoSelector } from "../../common/AdultoSelector";
-
-
 interface AntropometriaFormValues {
+    antropometriaId: string;
     pesoActual: string;
     pesoHabitual: string;
     pesoHace6Meses: string;
@@ -53,6 +52,7 @@ interface AntropometriaFormValues {
 }
 
 interface TamizajeFormValues {
+    tamizajeId: string;
     tipo: TipoTamizaje | null;
     puntaje: string;
     resultado: string;
@@ -60,6 +60,7 @@ interface TamizajeFormValues {
 }
 
 interface ExamenLaboratorioFormValues {
+    examenId: string;
     nombre: string;
     valor: string;
     unidad: string;
@@ -95,30 +96,27 @@ interface ConsultaNutricionalFormValues {
 
     tamizajes: TamizajeFormValues[];
     examenesLaboratorio: ExamenLaboratorioFormValues[];
-
     antropometria: AntropometriaFormValues;
 }
 
-
-export function ConsultaNutricionalRegistrarForm() {
+export function ConsultaNutricionalEditarForm() {
 
     const navigate = useNavigate();
+    const { consultaId } = useParams();
 
     const [loading, setLoading] = useState(false);
-
-    const [adultoSeleccionado, setAdultoSeleccionado] =
-        useState<AdultoMayorResponse | null>(null);
-
-    const [selectorAbierto, setSelectorAbierto] =
-        useState(false);
-
+    const [loadingConsulta, setLoadingConsulta] = useState(true);
+    const [adultoMayor, setAdultoMayor] =
+        useState<ConsultaDetailResponse["adultoMayor"] | null>(null);
+    const [consultaNutricionalId, setConsultaNutricionalId] =
+        useState<string | null>(null);
 
     const form = useForm<ConsultaNutricionalFormValues>({
         mode: "controlled",
 
         initialValues: {
             consultaGeneral: {
-                tipoConsulta: "NUTRICIONAL",
+                tipoConsulta: "",
                 motivo: "",
                 descripcion: "",
                 diagnostico: "",
@@ -143,10 +141,10 @@ export function ConsultaNutricionalRegistrarForm() {
             estadoCognitivo: "",
 
             tamizajes: [],
-
             examenesLaboratorio: [],
 
             antropometria: {
+                antropometriaId: "",
                 pesoActual: "",
                 pesoHabitual: "",
                 pesoHace6Meses: "",
@@ -171,7 +169,9 @@ export function ConsultaNutricionalRegistrarForm() {
             if (!values.consultaGeneral.motivo.trim()) {
                 errors["consultaGeneral.motivo"] =
                     "El motivo de la consulta es obligatorio.";
-            } else if (values.consultaGeneral.motivo.trim().length < 5) {
+            } else if (
+                values.consultaGeneral.motivo.trim().length < 5
+            ) {
                 errors["consultaGeneral.motivo"] =
                     "El motivo debe contener al menos 5 caracteres.";
             }
@@ -190,7 +190,6 @@ export function ConsultaNutricionalRegistrarForm() {
                 errors.estadoCognitivo =
                     "El estado cognitivo es obligatorio.";
             }
-
 
             const validarDecimalPositivo = (
                 valor: string,
@@ -215,7 +214,6 @@ export function ConsultaNutricionalRegistrarForm() {
                         `${nombre} debe ser mayor que cero.`;
                 }
             };
-
 
             validarDecimalPositivo(
                 values.antropometria.pesoActual,
@@ -275,7 +273,6 @@ export function ConsultaNutricionalRegistrarForm() {
                 errors["antropometria.perdidaPesoPorcentaje"] =
                     "El porcentaje de pérdida de peso es obligatorio.";
             } else {
-
                 const perdida = Number(
                     values.antropometria.perdidaPesoPorcentaje
                 );
@@ -307,9 +304,7 @@ export function ConsultaNutricionalRegistrarForm() {
                 }
             });
 
-
             values.examenesLaboratorio.forEach((examen, index) => {
-
                 if (!examen.nombre.trim()) {
                     errors[`examenesLaboratorio.${index}.nombre`] =
                         "El nombre del examen es obligatorio.";
@@ -324,7 +319,6 @@ export function ConsultaNutricionalRegistrarForm() {
                 }
             });
 
-
             return errors;
         },
     });
@@ -332,7 +326,6 @@ export function ConsultaNutricionalRegistrarForm() {
     const calcularEdad = (
         fechaNacimiento: string | null
     ): number | null => {
-
         if (!fechaNacimiento) {
             return null;
         }
@@ -359,20 +352,194 @@ export function ConsultaNutricionalRegistrarForm() {
         return edad;
     };
 
+    const edad = adultoMayor
+        ? calcularEdad(adultoMayor.fechaNacimiento)
+        : null;
 
-    const seleccionarAdulto = (
-        adulto: AdultoMayorResponse
-    ) => {
+    // Hydration
+    useEffect(() => {
+        if (!consultaId) {
+            notifications.show({
+                title: "Consulta inválida",
+                message: "No se encontró el identificador de la consulta.",
+                color: "red",
+            });
 
-        setAdultoSeleccionado(adulto);
-        setSelectorAbierto(false);
-    };
+            navigate("/consultas");
+            return;
+        }
 
+        const cargarConsulta = async () => {
+            try {
+                setLoadingConsulta(true);
+
+                const data = await obtenerConsultaPorId(consultaId);
+
+                if (!data.consultaNutricional) {
+                    notifications.show({
+                        title: "Consulta inválida",
+                        message:
+                            "La consulta seleccionada no contiene información nutricional.",
+                        color: "orange",
+                    });
+
+                    navigate("/consultas");
+                    return;
+                }
+
+                const nutricional = data.consultaNutricional;
+                const antropometria = nutricional.antropometria;
+                setConsultaNutricionalId(
+                    nutricional.consultaNutricionalId);
+
+                form.setValues({
+                    consultaGeneral: {
+                        tipoConsulta: data.tipoConsulta ?? "",
+                        motivo: data.motivo ?? "",
+                        descripcion: data.descripcion ?? "",
+                        diagnostico: data.diagnostico ?? "",
+                        resultadosEvaluaciones:
+                            data.resultadosEvaluaciones ?? "",
+                        recomendaciones: data.recomendaciones ?? "",
+                        notas: data.notas ?? "",
+                    },
+
+                    historiaAlimentaria:
+                        nutricional.historiaAlimentaria ?? "",
+
+                    apetito:
+                        nutricional.apetito ?? null,
+
+                    masticacion:
+                        nutricional.masticacion ?? "",
+
+                    deglucion:
+                        nutricional.deglucion ?? "",
+
+                    nauseas:
+                        nutricional.nauseas ?? false,
+
+                    vomitos:
+                        nutricional.vomitos ?? false,
+
+                    distension:
+                        nutricional.distension ?? false,
+
+                    gases:
+                        nutricional.gases ?? false,
+
+                    reflujo:
+                        nutricional.reflujo ?? false,
+
+                    frecuenciaEvacuaciones:
+                        nutricional.frecuenciaEvacuaciones ?? "",
+
+                    consistenciaBristol:
+                        nutricional.consistenciaBristol ?? "",
+
+                    estadoCognitivo:
+                        nutricional.estadoCognitivo ?? "",
+
+                    tamizajes:
+                        nutricional.tamizajes?.map((tamizaje) => ({
+                            tamizajeId: tamizaje.tamizajeId,
+                            tipo: tamizaje.tipo,
+                            puntaje:
+                                tamizaje.puntaje != null
+                                    ? String(tamizaje.puntaje)
+                                    : "",
+                            resultado:
+                                tamizaje.resultado ?? "",
+                            observaciones:
+                                tamizaje.observaciones ?? "",
+                        })) ?? [],
+
+                    examenesLaboratorio:
+                        nutricional.examenesLaboratorio?.map(
+                            (examen) => ({
+                                examenId: examen.examenId,
+                                nombre: examen.nombre ?? "",
+                                valor: examen.valor ?? "",
+                                unidad: examen.unidad ?? "",
+
+                                fecha: examen.fecha
+                                    ? examen.fecha.substring(0, 10)
+                                    : "",
+
+                                observaciones:
+                                    examen.observaciones ?? "",
+                            })
+                        ) ?? [],
+
+                    antropometria: {
+                        antropometriaId:
+                            antropometria.antropometriaId,
+
+                        pesoActual:
+                            String(antropometria.pesoActual ?? ""),
+
+                        pesoHabitual:
+                            String(antropometria.pesoHabitual ?? ""),
+
+                        pesoHace6Meses:
+                            String(antropometria.pesoHace6Meses ?? ""),
+
+                        talla:
+                            String(antropometria.talla ?? ""),
+
+                        alturaEstimada:
+                            String(antropometria.alturaEstimada ?? ""),
+
+                        imc:
+                            String(antropometria.imc ?? ""),
+
+                        circunferenciaPantorrilla:
+                            String(
+                                antropometria.circunferenciaPantorrilla ??
+                                ""
+                            ),
+
+                        circunferenciaBraquial:
+                            String(
+                                antropometria.circunferenciaBraquial ??
+                                ""
+                            ),
+
+                        circunferenciaCintura:
+                            String(
+                                antropometria.circunferenciaCintura ??
+                                ""
+                            ),
+
+                        perdidaPesoPorcentaje:
+                            String(
+                                antropometria.perdidaPesoPorcentaje ??
+                                ""
+                            ),
+                    },
+                });
+
+                setAdultoMayor(data.adultoMayor);
+
+                form.resetDirty();
+            } catch (error) {
+                notifications.show({
+                    title: "Error al cargar",
+                    message:
+                        "No se pudo cargar la consulta nutricional.",
+                    color: "red",
+                });
+            } finally {
+                setLoadingConsulta(false);
+            }
+        };
+
+        cargarConsulta();
+    }, [consultaId]);
 
     const nullable = (
         value: string
     ): string | null => {
-
         const limpio = value.trim();
 
         return limpio.length > 0
@@ -383,28 +550,22 @@ export function ConsultaNutricionalRegistrarForm() {
     const handleSubmit = async (
         values: ConsultaNutricionalFormValues
     ) => {
-
-        if (!adultoSeleccionado) {
-
+        if (!consultaNutricionalId) {
             notifications.show({
-                title: "Adulto mayor requerido",
+                title: "Consulta inválida",
                 message:
-                    "Debe seleccionar un adulto mayor para registrar la consulta nutricional.",
-                color: "orange",
+                    "No se encontró el identificador de la consulta nutricional.",
+                color: "red",
             });
 
             return;
         }
 
-
         setLoading(true);
 
         try {
-            const consulta = {
-                consultaGeneral: {
-                    adultoId:
-                        adultoSeleccionado.adultoId,
-
+            const consulta: ConsultaNutricionalUpdateRequest = {
+                consulta: {
                     tipoConsulta:
                         values.consultaGeneral.tipoConsulta.trim(),
 
@@ -423,7 +584,8 @@ export function ConsultaNutricionalRegistrarForm() {
 
                     resultadosEvaluaciones:
                         nullable(
-                            values.consultaGeneral.resultadosEvaluaciones
+                            values.consultaGeneral
+                                .resultadosEvaluaciones
                         ),
 
                     recomendaciones:
@@ -475,6 +637,9 @@ export function ConsultaNutricionalRegistrarForm() {
 
                 tamizajes:
                     values.tamizajes.map((tamizaje) => ({
+                        tamizajeId:
+                            tamizaje.tamizajeId,
+
                         tipo:
                             tamizaje.tipo,
 
@@ -491,42 +656,65 @@ export function ConsultaNutricionalRegistrarForm() {
                     })),
 
                 examenesLaboratorio:
-                    values.examenesLaboratorio.map((examen) => ({
-                        nombre:
-                            nullable(examen.nombre),
+                    values.examenesLaboratorio.map(
+                        (examen) => ({
+                            examenId:
+                                examen.examenId,
 
-                        valor:
-                            nullable(examen.valor),
+                            nombre:
+                                nullable(examen.nombre),
 
-                        unidad:
-                            nullable(examen.unidad),
+                            valor:
+                                nullable(examen.valor),
 
-                        fecha: nullable(
-                            examen.fecha ? `${examen.fecha}T00:00:00` : examen.fecha
-                        ),
+                            unidad:
+                                nullable(examen.unidad),
 
-                        observaciones:
-                            nullable(examen.observaciones),
-                    })),
+                            fecha:
+                                nullable(
+                                    examen.fecha
+                                        ? `${examen.fecha}T00:00:00`
+                                        : examen.fecha
+                                ),
+
+                            observaciones:
+                                nullable(examen.observaciones),
+                        })
+                    ),
 
                 antropometria: {
+                    antropometriaId:
+                        values.antropometria.antropometriaId,
+
                     pesoActual:
-                        Number(values.antropometria.pesoActual),
+                        Number(
+                            values.antropometria.pesoActual
+                        ),
 
                     pesoHabitual:
-                        Number(values.antropometria.pesoHabitual),
+                        Number(
+                            values.antropometria.pesoHabitual
+                        ),
 
                     pesoHace6Meses:
-                        Number(values.antropometria.pesoHace6Meses),
+                        Number(
+                            values.antropometria.pesoHace6Meses
+                        ),
 
                     talla:
-                        Number(values.antropometria.talla),
+                        Number(
+                            values.antropometria.talla
+                        ),
 
                     alturaEstimada:
-                        Number(values.antropometria.alturaEstimada),
+                        Number(
+                            values.antropometria.alturaEstimada
+                        ),
 
                     imc:
-                        Number(values.antropometria.imc),
+                        Number(
+                            values.antropometria.imc
+                        ),
 
                     circunferenciaPantorrilla:
                         Number(
@@ -552,39 +740,38 @@ export function ConsultaNutricionalRegistrarForm() {
                                 .perdidaPesoPorcentaje
                         ),
                 },
-            }
+            };
 
-            await registrarConsultaNutricional(consulta);
 
+            await actualizarConsultaNutricional(
+                consultaNutricionalId,
+                consulta
+            );
 
             notifications.show({
-                title: "Consulta nutricional registrada",
+                title: "Consulta nutricional actualizada",
                 message:
-                    "La consulta nutricional se registró correctamente.",
+                    "La consulta nutricional se actualizó correctamente.",
                 color: "green",
             });
-
 
             navigate("/consultas");
 
         } catch (error) {
-
             if (
                 axios.isAxiosError(error) &&
                 error.response?.status === 409
             ) {
-
                 notifications.show({
-                    title: "Consulta no registrada",
+                    title: "Consulta no actualizada",
                     message:
                         error.response.data?.message ??
-                        "Ya existe un registro que entra en conflicto.",
+                        "Existe un conflicto al actualizar la consulta.",
                     color: "orange",
                 });
 
                 return;
             }
-
 
             if (
                 axios.isAxiosError(error) &&
@@ -593,24 +780,21 @@ export function ConsultaNutricionalRegistrarForm() {
                     error.response?.status === 403
                 )
             ) {
-
                 notifications.show({
                     title: "Falta de permisos",
                     message:
                         error.response.data?.message ??
-                        "No tiene permisos para registrar la consulta.",
+                        "No tiene permisos para actualizar la consulta.",
                     color: "orange",
                 });
 
                 return;
             }
 
-
             if (
                 axios.isAxiosError(error) &&
                 error.response?.status === 400
             ) {
-
                 notifications.show({
                     title: "Datos inválidos",
                     message:
@@ -622,35 +806,30 @@ export function ConsultaNutricionalRegistrarForm() {
                 return;
             }
 
-
             notifications.show({
-                title: "Error al registrar",
+                title: "Error al actualizar",
                 message:
-                    "No se pudo registrar la consulta nutricional.",
+                    "No se pudo actualizar la consulta nutricional.",
                 color: "red",
             });
 
         } finally {
-
             setLoading(false);
         }
     };
 
-
-    const edad = adultoSeleccionado
-        ? calcularEdad(
-            adultoSeleccionado.fechaNacimiento
-        )
-        : null;
-
+    if (loadingConsulta) {
+        return (
+            <Center mih={300}>
+                <Loader />
+            </Center>
+        );
+    }
 
     return (
         <>
             <div className={classes.container}>
-
-                {/* HEADER */}
                 <div className={classes.topBar}>
-
                     <Group
                         justify="space-between"
                         className={classes.topBar}
@@ -663,33 +842,24 @@ export function ConsultaNutricionalRegistrarForm() {
                             <BsArrowLeft size={18} />
                         </ActionIcon>
                     </Group>
-
                     <Paper className={classes.headerCard}>
-
                         <Title
                             order={2}
                             className={classes.pageTitle}
                         >
-                            Registrar consulta nutricional
+                            Editar consulta nutricional
                         </Title>
 
                         <Text className={classes.subtitle}>
-                            Registrar una nueva evaluación nutricional
-                            del adulto mayor.
+                            Modifique la información de la evaluación nutricional.
                         </Text>
-
                     </Paper>
 
                 </div>
 
+                <form onSubmit={form.onSubmit(handleSubmit)}>
 
-                <form
-                    onSubmit={form.onSubmit(handleSubmit)}
-                >
-
-                    {/* ADULTO MAYOR */}
                     <Paper className={classes.card}>
-
                         <Group className={classes.sectionHeader}>
                             <Title
                                 order={4}
@@ -699,131 +869,71 @@ export function ConsultaNutricionalRegistrarForm() {
                             </Title>
                         </Group>
 
+                        {adultoMayor && (
+                            <div className={classes.adultoSelector}>
+                                <TextInput
+                                    label="Nombre completo"
+                                    value={adultoMayor.nombreCompleto}
+                                    readOnly
+                                    disabled
+                                    classNames={{
+                                        root: classes.readonlyField,
+                                        label: classes.fieldLabel,
+                                        input: classes.input,
+                                    }}
+                                />
 
-                        <div className={classes.adultoSelector}>
-
-                            {!adultoSeleccionado ? (
-
-                                <div className={classes.noAdulto}>
-
-                                    <Text className={classes.emptyText}>
-                                        No se ha seleccionado un adulto mayor.
-                                    </Text>
-
-                                    <Button
-                                        type="button"
-                                        onClick={() =>
-                                            setSelectorAbierto(true)
-                                        }
-                                    >
-                                        Buscar adulto mayor
-                                    </Button>
-
-                                </div>
-
-                            ) : (
-
-                                <>
-
-                                    <Group
-                                        justify="space-between"
-                                        align="flex-end"
-                                    >
-
-                                        <TextInput
-                                            label="Nombre completo"
-                                            value={
-                                                adultoSeleccionado
-                                                    .nombreCompleto
-                                            }
-                                            readOnly
-                                            disabled
-                                            classNames={{
-                                                root: classes.readonlyField,
-                                                label: classes.fieldLabel,
-                                                input: classes.input,
-                                            }}
-                                        />
-
-                                        <Button
-                                            type="button"
-                                            variant="light"
-                                            onClick={() =>
-                                                setSelectorAbierto(true)
-                                            }
-                                        >
-                                            Cambiar
-                                        </Button>
-
-                                    </Group>
-
-
-                                    <SimpleGrid
-                                        cols={{
-                                            base: 1,
-                                            sm: 2,
-                                            md: 3,
+                                <SimpleGrid
+                                    cols={{
+                                        base: 1,
+                                        sm: 2,
+                                        md: 3,
+                                    }}
+                                    mt="md"
+                                >
+                                    <TextInput
+                                        label="Identificación"
+                                        value={adultoMayor.identificacion}
+                                        readOnly
+                                        classNames={{
+                                            root: classes.fieldGroup,
+                                            label: classes.fieldLabel,
+                                            input: classes.input,
                                         }}
-                                        mt="md"
-                                    >
+                                        disabled
+                                    />
 
-                                        <TextInput
-                                            label="Identificación"
-                                            value={
-                                                adultoSeleccionado
-                                                    .identificacion
-                                            }
-                                            readOnly
-                                            disabled
-                                            classNames={{
-                                                root: classes.fieldGroup,
-                                                label: classes.fieldLabel,
-                                                input: classes.input,
-                                            }}
-                                        />
+                                    <TextInput
+                                        label="Edad"
+                                        value={
+                                            edad !== null
+                                                ? `${edad} años`
+                                                : "No registrada"
+                                        }
+                                        readOnly
+                                        classNames={{
+                                            root: classes.fieldGroup,
+                                            label: classes.fieldLabel,
+                                            input: classes.input,
+                                        }}
+                                        disabled
+                                    />
 
-                                        <TextInput
-                                            label="Edad"
-                                            value={
-                                                edad !== null
-                                                    ? `${edad} años`
-                                                    : "No registrada"
-                                            }
-                                            readOnly
-                                            classNames={{
-                                                root: classes.fieldGroup,
-                                                label: classes.fieldLabel,
-                                                input: classes.input,
-                                            }}
-                                            disabled
-                                        />
-
-                                        <TextInput
-                                            label="Tipo de identificación"
-                                            value={
-                                                adultoSeleccionado
-                                                    .tipoIdentificacion
-                                            }
-                                            readOnly
-                                            classNames={{
-                                                root: classes.fieldGroup,
-                                                label: classes.fieldLabel,
-                                                input: classes.input,
-                                            }}
-                                            disabled
-                                        />
-
-                                    </SimpleGrid>
-
-                                </>
-
-                            )}
-
-                        </div>
-
+                                    <TextInput
+                                        label="Tipo de identificación"
+                                        value={adultoMayor.tipoIdentificacion}
+                                        readOnly
+                                        classNames={{
+                                            root: classes.fieldGroup,
+                                            label: classes.fieldLabel,
+                                            input: classes.input,
+                                        }}
+                                        disabled
+                                    />
+                                </SimpleGrid>
+                            </div>
+                        )}
                     </Paper>
-
-
                     {/* INFORMACIÓN GENERAL */}
                     <Paper className={classes.card}>
 
@@ -1326,24 +1436,6 @@ export function ConsultaNutricionalRegistrarForm() {
                                 Tamizajes nutricionales
                             </Title>
 
-                            <Button
-                                type="button"
-                                variant="light"
-                                leftSection={<BsPlus />}
-                                onClick={() =>
-                                    form.insertListItem(
-                                        "tamizajes",
-                                        {
-                                            tipo: null,
-                                            puntaje: "",
-                                            resultado: "",
-                                            observaciones: "",
-                                        }
-                                    )
-                                }
-                            >
-                                Agregar tamizaje
-                            </Button>
 
                         </Group>
 
@@ -1376,19 +1468,6 @@ export function ConsultaNutricionalRegistrarForm() {
                                             Tamizaje {index + 1}
                                         </Text>
 
-                                        <ActionIcon
-                                            type="button"
-                                            color="red"
-                                            variant="subtle"
-                                            onClick={() =>
-                                                form.removeListItem(
-                                                    "tamizajes",
-                                                    index
-                                                )
-                                            }
-                                        >
-                                            <BsTrash />
-                                        </ActionIcon>
 
                                     </Group>
 
@@ -1399,6 +1478,11 @@ export function ConsultaNutricionalRegistrarForm() {
                                             label="Tipo de tamizaje"
                                             placeholder="Seleccione el tipo"
                                             withAsterisk
+                                            classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.textinput,
+                                            }}
                                             data={[
                                                 { value: "MNA", label: "MNA" },
                                                 { value: "SARC_F", label: "SARC-F" },
@@ -1418,6 +1502,11 @@ export function ConsultaNutricionalRegistrarForm() {
                                             {...form.getInputProps(
                                                 `tamizajes.${index}.puntaje`
                                             )}
+                                            classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.textinput,
+                                            }}
                                         />
 
 
@@ -1426,13 +1515,22 @@ export function ConsultaNutricionalRegistrarForm() {
                                             {...form.getInputProps(
                                                 `tamizajes.${index}.resultado`
                                             )}
+                                            classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.textinput,
+                                            }}
                                         />
 
 
                                         <Textarea
                                             label="Observaciones"
                                             minRows={3}
-                                            className={classes.fieldFull}
+                                            classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.textarea,
+                                            }}
                                             {...form.getInputProps(
                                                 `tamizajes.${index}.observaciones`
                                             )}
@@ -1462,26 +1560,6 @@ export function ConsultaNutricionalRegistrarForm() {
                             >
                                 Exámenes de laboratorio
                             </Title>
-
-                            <Button
-                                type="button"
-                                variant="light"
-                                leftSection={<BsPlus />}
-                                onClick={() =>
-                                    form.insertListItem(
-                                        "examenesLaboratorio",
-                                        {
-                                            nombre: "",
-                                            valor: "",
-                                            unidad: "",
-                                            fecha: "",
-                                            observaciones: "",
-                                        }
-                                    )
-                                }
-                            >
-                                Agregar examen
-                            </Button>
 
                         </Group>
 
@@ -1514,20 +1592,6 @@ export function ConsultaNutricionalRegistrarForm() {
                                             Examen {index + 1}
                                         </Text>
 
-                                        <ActionIcon
-                                            type="button"
-                                            color="red"
-                                            variant="subtle"
-                                            onClick={() =>
-                                                form.removeListItem(
-                                                    "examenesLaboratorio",
-                                                    index
-                                                )
-                                            }
-                                        >
-                                            <BsTrash />
-                                        </ActionIcon>
-
                                     </Group>
 
 
@@ -1536,6 +1600,11 @@ export function ConsultaNutricionalRegistrarForm() {
                                         <TextInput
                                             label="Nombre"
                                             withAsterisk
+                                            classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.textinput,
+                                            }}
                                             {...form.getInputProps(
                                                 `examenesLaboratorio.${index}.nombre`
                                             )}
@@ -1544,6 +1613,11 @@ export function ConsultaNutricionalRegistrarForm() {
 
                                         <TextInput
                                             label="Valor"
+                                             classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.textinput,
+                                            }}
                                             {...form.getInputProps(
                                                 `examenesLaboratorio.${index}.valor`
                                             )}
@@ -1552,6 +1626,11 @@ export function ConsultaNutricionalRegistrarForm() {
 
                                         <TextInput
                                             label="Unidad"
+                                             classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.textinput,
+                                            }}
                                             placeholder="Ej. mg/dL"
                                             {...form.getInputProps(
                                                 `examenesLaboratorio.${index}.unidad`
@@ -1562,6 +1641,11 @@ export function ConsultaNutricionalRegistrarForm() {
                                         <TextInput
                                             label="Fecha"
                                             type="date"
+                                             classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.textinput,
+                                            }}
                                             {...form.getInputProps(
                                                 `examenesLaboratorio.${index}.fecha`
                                             )}
@@ -1572,6 +1656,11 @@ export function ConsultaNutricionalRegistrarForm() {
                                             label="Observaciones"
                                             minRows={3}
                                             className={classes.fieldFull}
+                                             classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.textarea,
+                                            }}
                                             {...form.getInputProps(
                                                 `examenesLaboratorio.${index}.observaciones`
                                             )}
@@ -1606,35 +1695,15 @@ export function ConsultaNutricionalRegistrarForm() {
                         <Button
                             type="submit"
                             loading={loading}
-                            disabled={!adultoSeleccionado}
                         >
-                            Registrar consulta nutricional
+                            Actualizar consulta nutricional
                         </Button>
 
                     </Group>
 
                 </form>
-
             </div>
-
-
-            {/* SELECTOR ADULTO */}
-            <Modal
-                opened={selectorAbierto}
-                onClose={() =>
-                    setSelectorAbierto(false)
-                }
-                title="Seleccionar adulto mayor"
-                size="lg"
-                centered
-            >
-
-                <AdultoSelector
-                    onSelect={seleccionarAdulto}
-                />
-
-            </Modal>
-
         </>
-    );
+    )
+
 }

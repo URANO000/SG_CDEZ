@@ -11,8 +11,8 @@
 
 
 .topBar {
-  margin-bottom: 0;
-  min-height: 36px;
+    margin-bottom: 0;
+    min-height: 36px;
 }
 
 
@@ -60,11 +60,11 @@
 }
 
 .fieldLabel {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--text);
-  opacity: 0.75;
-  margin-bottom: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text);
+    opacity: 0.75;
+    margin-bottom: 6px;
 }
 
 
@@ -73,6 +73,7 @@
     flex-direction: column;
     gap: 16px;
 }
+
 .fieldGroup {
     display: flex;
     flex-direction: column;
@@ -108,6 +109,11 @@
     padding: 10px 12px;
 
     outline: none;
+}
+
+.input:disabled,
+.textarea:disabled{
+    color: var(--text);
 }
 
 
@@ -153,6 +159,9 @@
 
 .readonlyField {
     flex: 1;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text);
 }
 
 
@@ -161,12 +170,12 @@
 }
 
 .headerCard {
-  background-color: var(--table-color-light);
-  border: 1px solid rgba(107, 99, 117, 0.15);
-  border-radius: 8px;
-  box-shadow: var(--shadow);
+    background-color: var(--table-color-light);
+    border: 1px solid rgba(107, 99, 117, 0.15);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
 
-  padding: 26px 32px;
+    padding: 26px 32px;
 }
 
 

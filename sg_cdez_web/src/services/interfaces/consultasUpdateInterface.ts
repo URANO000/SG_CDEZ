@@ -1,13 +1,25 @@
 import type { Apetito, TipoTamizaje } from "./consultasDetailsResponse";
 
-export interface TamizajeNutricionalCreateRequest{
+export interface ConsultaUpdateRequest {
+    tipoConsulta: string;
+    motivo: string;
+    descripcion: string | null;
+    diagnostico: string | null;
+    resultadosEvaluaciones: string | null;
+    recomendaciones: string | null;
+    notas: string | null;
+}
+
+export interface TamizajeNutricionalUpdateRequest {
+    tamizajeId: string;
     tipo: TipoTamizaje | null;
     puntaje: number | null;
     resultado: string | null;
     observaciones: string | null;
 }
 
-export interface ExamenLaboratorioCreateRequest{
+export interface ExamenLaboratorioUpdateRequest {
+    examenId: string;
     nombre: string | null;
     valor: string | null;
     unidad: string | null;
@@ -15,7 +27,8 @@ export interface ExamenLaboratorioCreateRequest{
     observaciones: string | null;
 }
 
-export interface AntropometriaCreateRequest {
+export interface AntropometriaUpdateRequest {
+    antropometriaId: string;
     pesoActual: number;
     pesoHabitual: number;
     pesoHace6Meses: number;
@@ -28,19 +41,8 @@ export interface AntropometriaCreateRequest {
     perdidaPesoPorcentaje: number;
 }
 
-export interface ConsultaCreateRequest{
-    adultoId: string;
-    tipoConsulta: string;
-    motivo: string;
-    descripcion: string | null;
-    diagnostico: string | null;
-    resultadosEvaluaciones: string | null;
-    recomendaciones: string | null;
-    notas: string | null;
-}
-
-export interface ConsultaNutricionalCreateRequest{
-    consultaGeneral: ConsultaCreateRequest;
+export interface ConsultaNutricionalUpdateRequest {
+    consulta: ConsultaUpdateRequest;
     historiaAlimentaria: string | null;
     apetito: Apetito | null;
     masticacion: string | null;
@@ -53,7 +55,8 @@ export interface ConsultaNutricionalCreateRequest{
     frecuenciaEvacuaciones: string;
     consistenciaBristol: string;
     estadoCognitivo: string;
-    tamizajes: TamizajeNutricionalCreateRequest[];
-    examenesLaboratorio: ExamenLaboratorioCreateRequest[];
-    antropometria: AntropometriaCreateRequest;
+    tamizajes: TamizajeNutricionalUpdateRequest[];
+    examenesLaboratorio: ExamenLaboratorioUpdateRequest[];
+    antropometria: AntropometriaUpdateRequest;
+
 }

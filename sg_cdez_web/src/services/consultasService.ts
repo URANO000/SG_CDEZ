@@ -2,6 +2,7 @@ import { apiClient } from "../utils/apiHelper";
 import type { ConsultaCreateRequest, ConsultaNutricionalCreateRequest } from "./interfaces/consultasCreateInterface";
 import type { ConsultaDetailResponse } from "./interfaces/consultasDetailsResponse";
 import type { ConsultaFiltro, ConsultaPageResponse } from "./interfaces/consultasInterface";
+import type { ConsultaNutricionalUpdateRequest, ConsultaUpdateRequest } from "./interfaces/consultasUpdateInterface";
 import type { PageResponse } from "./interfaces/pageResponse";
 
 export const listarConsultasFiltradas = async (filtros: ConsultaFiltro, page = 0,
@@ -37,5 +38,15 @@ export const registrarConsulta = async (
 
 export const registrarConsultaNutricional = async (consulta: ConsultaNutricionalCreateRequest) => {
     const response = await apiClient.post(`/consulta-nutricional/crearConsulta`, consulta);
+    return response.data;
+}
+
+export const actualizarConsultaNutricional = async (consultaId: string, consulta: ConsultaNutricionalUpdateRequest) => {
+    const response = await apiClient.put(`/consulta-nutricional/actualizarConsulta/${consultaId}`, consulta);
+    return response.data;
+}
+
+export const actualizarConsulta = async (consulta: ConsultaUpdateRequest, consultaId: string) => {
+    const response = await apiClient.post(`/consulta/actualizarConsulta/${consultaId}`, consulta);
     return response.data;
 }

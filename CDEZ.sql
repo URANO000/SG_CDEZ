@@ -34,6 +34,7 @@ CREATE TABLE Personal (
 	credenciales_expiradas BOOL
 );
 
+
 CREATE TABLE AdultoMayor(
 	adulto_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	tipo_identificacion VARCHAR(100) NOT NULL,
@@ -138,7 +139,7 @@ CREATE TABLE EncargadoAdulto(
 
 /** Some data **/
 INSERT INTO Rol (nombre)
-VALUES ('ADMIN'), ('PERSONAL');
+VALUES ('ADMIN'), ('PERSONAL'), ('AYUDANTE');
 
 INSERT INTO Personal (primer_nombre, primer_apellido, rol_id, especialidad, tipo_identificacion, identificacion,
 direccion, carnet, usuario, contrasena, activo, created_at, credenciales_expiradas, cuenta_bloqueada, email_verificado)
@@ -304,3 +305,5 @@ CREATE TABLE Medicamento(
 	updated_at TIMESTAMP,
 	activo BOOl NOT NULL
 );
+
+

@@ -49,6 +49,7 @@ import {
   loadAccessibilitySettings,
 } from "./utils/accessibility";
 import { ConsultaRegistrar } from "./pages/consultas/consultaRegistrar";
+import { ConsultaEditar } from "./pages/consultas/consultaEditar";
 
 const colorSchemeManager = localStorageColorSchemeManager({
   key: "sg-cdez-color-scheme",
@@ -91,7 +92,7 @@ function App() {
             {/* RUTAS AUTENTICADAS */}
             <Route
               element={
-                <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_ADMIN"]}>
+                <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_ADMIN", "ROLE_AYUDANTE"]}>
                   <Layout />
                 </ProtectedRoute>
               }
@@ -102,7 +103,7 @@ function App() {
               <Route
                 path="/consultas"
                 element={
-                  <ProtectedRoute roles={["ROLE_PERSONAL"]}>
+                  <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_AYUDANTE"]}>
                     <Consultas />
                   </ProtectedRoute>
                 }
@@ -111,19 +112,28 @@ function App() {
               <Route
                 path="/consulta/:consultaId/detalle"
                 element={
-                  <ProtectedRoute roles={["ROLE_PERSONAL"]}>
+                  <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_AYUDANTE"]}>
                     <ConsultaDetalle />
                   </ProtectedRoute>
                 }
               />
 
-              <Route 
-              path="consulta/registrar"
-              element={
-                <ProtectedRoute roles={["ROLE_PERSONAL"]}>
-                  <ConsultaRegistrar />
-                </ProtectedRoute>
-              }
+              <Route
+                path="/consulta/:consultaId/editar"
+                element={
+                  <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_AYUDANTE"]}>
+                    <ConsultaEditar />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="consulta/registrar"
+                element={
+                  <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_AYUDANTE"]}>
+                    <ConsultaRegistrar />
+                  </ProtectedRoute>
+                }
               />
 
               {/* AJUSTES */}
@@ -144,7 +154,7 @@ function App() {
               <Route
                 path="/adultosMayores/registrar"
                 element={
-                  <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                  <ProtectedRoute roles={["ROLE_ADMIN", "ROLE_AYUDANTE"]}>
                     <AdultoMayorRegistrar />
                   </ProtectedRoute>
                 }
@@ -199,7 +209,7 @@ function App() {
               <Route
                 path="/auditoria"
                 element={
-                  <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                  <ProtectedRoute roles={["ROLE_ADMIN", "ROLE_AYUDANTE"]}>
                     <Auditoria />
                   </ProtectedRoute>
                 }

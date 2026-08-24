@@ -472,6 +472,7 @@ export function PersonalEditar() {
                             <option value="" disabled>Seleccionar rol</option>
                             <option value="1">Administrador</option>
                             <option value="2">Usuario Normal</option>
+                            <option value="3">Ayudante Administrativo</option>
                         </select>
                     </div>
 
