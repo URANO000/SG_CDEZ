@@ -41,7 +41,7 @@ export interface ConsultaNutricionalDetailResponse {
     deglucion: string;
     nauseas: boolean;
     vomitos: boolean;
-    distencion: boolean;
+    distension: boolean;
     gases: boolean;
     reflujo: boolean;
     frecuenciaEvaluaciones: string;

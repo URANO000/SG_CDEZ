@@ -168,7 +168,7 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
             );
         }
 
-        if(!especialidad.equals("NUTRICION")){
+        if(!especialidad.equals("Nutrición")){
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,
                     "Sólo personal de nutrición puede realizar acciones sobre consulta nutricional."

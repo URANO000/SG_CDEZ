@@ -5,11 +5,12 @@ import type { PersonalFiltro } from "../../services/interfaces/personalFiltroInt
 import { listarPersonalFiltrado } from "../../services/personalService";
 import type { PageResponse } from "../../services/interfaces/pageResponse";
 import classes from '../../components/ui/tables/Filter.module.css';
-import { Group, Title, Select, Button, TextInput, Pagination } from "@mantine/core";
+import { Group, Title, Select, Button, TextInput, Pagination, Menu } from "@mantine/core";
 import { AiOutlineSearch } from "react-icons/ai";
 import { Link } from "react-router";
-import { generarReportePDF } from "../../services/personalService";
+import { generarReportePDF, generarReporteExcel } from "../../services/personalService";
 import { ESPECIALIDADES } from "../../services/interfaces/personalCreateRequest";
+import {TbFileTypePdf, TbFileTypeXls, TbChevronDown} from "react-icons/tb";
 
 export function Personal() {
     const [filtros, setFiltros] = useState<PersonalFiltro>({
@@ -22,16 +23,26 @@ export function Personal() {
     const [pageData, setPageData] = useState<PageResponse<PersonalResponse> | null>(null);
     const [currentPage, setCurrentPage] = useState(0);
 
-    const handleGenerateReport = async () => {
-        const blob = await generarReportePDF();
+    function downloadBlob(blob: Blob, filename: string) {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'reporte_de_personal.pdf';
+        link.download = filename;
         document.body.appendChild(link);
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
+    }
+
+
+    const handleGenerateReport = async (type: 'pdf' | 'excel') => {
+        if (type === 'pdf') {
+            const blob = await generarReportePDF();
+            downloadBlob(blob, 'reporte_de_personal.pdf');
+        } else {
+            const blob = await generarReporteExcel();
+            downloadBlob(blob, 'reporte_de_personal.xlsx');
+        }
     };
 
     const cargarPersonal = async (page: number) => {
@@ -59,9 +70,27 @@ export function Personal() {
                             Registrar Personal
                         </Button>
                     </Link>
-                    <Button onClick={handleGenerateReport} className={classes.reportBtn}>
-                        Generar Reporte
-                    </Button>
+                    <Menu position="top-end" withinPortal radius="md">
+                        <Menu.Target>
+                            <Button rightSection={<TbChevronDown size={18}/>} className={classes.reportBtn}>
+                                Generar Reporte
+                            </Button>
+                        </Menu.Target>
+                        <Menu.Dropdown>
+                            <Menu.Item
+                                leftSection={<TbFileTypePdf size={16} />}
+                                onClick={() => handleGenerateReport('pdf')}
+                            >
+                                PDF
+                            </Menu.Item>
+                            <Menu.Item
+                                leftSection={<TbFileTypeXls size={16}  />}
+                                onClick={() => handleGenerateReport('excel')}
+                            >
+                                Excel
+                            </Menu.Item>
+                        </Menu.Dropdown>
+                    </Menu>
                 </div>
                 <div className={classes.filterBar}>
                     <TextInput

@@ -107,9 +107,6 @@ export function Consultas() {
                             Registrar Consulta
                         </Button>
                     </Link>
-                    <Button className={classes.reportBtn}>
-                        Generar Reporte
-                    </Button>
                 </div>
 
                 <div className={classes.filterBar}>

@@ -50,3 +50,10 @@ export const generarReportePDF = async () => {
   });
   return response.data; 
 };
+
+export const generarReporteExcel = async () => {
+  const response = await apiClient.get(`/personal/reporteExcel`, {
+    responseType: 'blob', 
+  });
+  return response.data; 
+};

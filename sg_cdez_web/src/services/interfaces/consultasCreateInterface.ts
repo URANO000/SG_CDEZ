@@ -23,9 +23,9 @@ export interface AntropometriaCreateRequest {
     talla: BigDecimal;
     alturaEstimada: BigDecimal;
     imc: BigDecimal;
-    circumferenciaPantorrilla: BigDecimal;
-    circumferenciaBraquial: BigDecimal;
-    circumferenciaCintura: BigDecimal;
+    circunferenciaPantorrilla: BigDecimal;
+    circunferenciaBraquial: BigDecimal;
+    circunferenciaCintura: BigDecimal;
     perdidaPesoPorcentaje: BigDecimal;
 }
 
@@ -46,10 +46,10 @@ export interface ConsultaNutricionalCreateRequest{
     apetito: Apetito | null;
     masticacion: string | null;
     deglucion: string | null;
-    nauseas: boolean | null;
-    vomitos: boolean | null;
-    distencion: boolean | null;
-    gases: boolean | null;
+    nauseas: boolean;
+    vomitos: boolean;
+    distension: boolean;
+    gases: boolean;
     reflujo: boolean | null;
     frecuenciaEvacuaciones: string;
     consistenciaBristol: string;

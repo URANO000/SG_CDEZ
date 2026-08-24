@@ -39,10 +39,6 @@ import type {
 import { AdultoSelector } from "../../common/AdultoSelector";
 
 
-/*
- * Los inputs numéricos permanecen como string mientras
- * el usuario llena el formulario.
- */
 interface AntropometriaFormValues {
     pesoActual: string;
     pesoHabitual: string;
@@ -50,9 +46,9 @@ interface AntropometriaFormValues {
     talla: string;
     alturaEstimada: string;
     imc: string;
-    circumferenciaPantorrilla: string;
-    circumferenciaBraquial: string;
-    circumferenciaCintura: string;
+    circunferenciaPantorrilla: string;
+    circunferenciaBraquial: string;
+    circunferenciaCintura: string;
     perdidaPesoPorcentaje: string;
 }
 
@@ -89,7 +85,7 @@ interface ConsultaNutricionalFormValues {
 
     nauseas: boolean;
     vomitos: boolean;
-    distencion: boolean;
+    distension: boolean;
     gases: boolean;
     reflujo: boolean;
 
@@ -117,9 +113,6 @@ export function ConsultaNutricionalRegistrarForm() {
         useState(false);
 
 
-    /*
-     * FORMULARIO
-     */
     const form = useForm<ConsultaNutricionalFormValues>({
         mode: "controlled",
 
@@ -141,7 +134,7 @@ export function ConsultaNutricionalRegistrarForm() {
 
             nauseas: false,
             vomitos: false,
-            distencion: false,
+            distension: false,
             gases: false,
             reflujo: false,
 
@@ -160,9 +153,9 @@ export function ConsultaNutricionalRegistrarForm() {
                 talla: "",
                 alturaEstimada: "",
                 imc: "",
-                circumferenciaPantorrilla: "",
-                circumferenciaBraquial: "",
-                circumferenciaCintura: "",
+                circunferenciaPantorrilla: "",
+                circunferenciaBraquial: "",
+                circunferenciaCintura: "",
                 perdidaPesoPorcentaje: "",
             },
         },
@@ -170,9 +163,6 @@ export function ConsultaNutricionalRegistrarForm() {
         validate: (values) => {
             const errors: Record<string, string> = {};
 
-            /*
-             * CONSULTA GENERAL
-             */
             if (!values.consultaGeneral.tipoConsulta.trim()) {
                 errors["consultaGeneral.tipoConsulta"] =
                     "El tipo de consulta es obligatorio.";
@@ -186,10 +176,6 @@ export function ConsultaNutricionalRegistrarForm() {
                     "El motivo debe contener al menos 5 caracteres.";
             }
 
-
-            /*
-             * INFORMACIÓN NUTRICIONAL
-             */
             if (!values.frecuenciaEvacuaciones.trim()) {
                 errors.frecuenciaEvacuaciones =
                     "La frecuencia de evacuaciones es obligatoria.";
@@ -206,9 +192,6 @@ export function ConsultaNutricionalRegistrarForm() {
             }
 
 
-            /*
-             * ANTROPOMETRÍA
-             */
             const validarDecimalPositivo = (
                 valor: string,
                 campo: string,
@@ -271,27 +254,23 @@ export function ConsultaNutricionalRegistrarForm() {
             );
 
             validarDecimalPositivo(
-                values.antropometria.circumferenciaPantorrilla,
-                "antropometria.circumferenciaPantorrilla",
+                values.antropometria.circunferenciaPantorrilla,
+                "antropometria.circunferenciaPantorrilla",
                 "La circunferencia de pantorrilla"
             );
 
             validarDecimalPositivo(
-                values.antropometria.circumferenciaBraquial,
-                "antropometria.circumferenciaBraquial",
+                values.antropometria.circunferenciaBraquial,
+                "antropometria.circunferenciaBraquial",
                 "La circunferencia braquial"
             );
 
             validarDecimalPositivo(
-                values.antropometria.circumferenciaCintura,
-                "antropometria.circumferenciaCintura",
+                values.antropometria.circunferenciaCintura,
+                "antropometria.circunferenciaCintura",
                 "La circunferencia de cintura"
             );
 
-
-            /*
-             * La pérdida puede ser 0.
-             */
             if (!values.antropometria.perdidaPesoPorcentaje.trim()) {
                 errors["antropometria.perdidaPesoPorcentaje"] =
                     "El porcentaje de pérdida de peso es obligatorio.";
@@ -313,10 +292,6 @@ export function ConsultaNutricionalRegistrarForm() {
                 }
             }
 
-
-            /*
-             * TAMIZAJES
-             */
             values.tamizajes.forEach((tamizaje, index) => {
                 if (!tamizaje.tipo) {
                     errors[`tamizajes.${index}.tipo`] =
@@ -333,9 +308,6 @@ export function ConsultaNutricionalRegistrarForm() {
             });
 
 
-            /*
-             * EXÁMENES
-             */
             values.examenesLaboratorio.forEach((examen, index) => {
 
                 if (!examen.nombre.trim()) {
@@ -357,10 +329,6 @@ export function ConsultaNutricionalRegistrarForm() {
         },
     });
 
-
-    /*
-     * EDAD
-     */
     const calcularEdad = (
         fechaNacimiento: string | null
     ): number | null => {
@@ -392,9 +360,6 @@ export function ConsultaNutricionalRegistrarForm() {
     };
 
 
-    /*
-     * ADULTO MAYOR
-     */
     const seleccionarAdulto = (
         adulto: AdultoMayorResponse
     ) => {
@@ -404,9 +369,6 @@ export function ConsultaNutricionalRegistrarForm() {
     };
 
 
-    /*
-     * Convierte "" en null.
-     */
     const nullable = (
         value: string
     ): string | null => {
@@ -418,10 +380,6 @@ export function ConsultaNutricionalRegistrarForm() {
             : null;
     };
 
-
-    /*
-     * SUBMIT
-     */
     const handleSubmit = async (
         values: ConsultaNutricionalFormValues
     ) => {
@@ -497,8 +455,8 @@ export function ConsultaNutricionalRegistrarForm() {
                 vomitos:
                     values.vomitos,
 
-                distencion:
-                    values.distencion,
+                distension:
+                    values.distension,
 
                 gases:
                     values.gases,
@@ -543,8 +501,9 @@ export function ConsultaNutricionalRegistrarForm() {
                         unidad:
                             nullable(examen.unidad),
 
-                        fecha:
-                            nullable(examen.fecha),
+                        fecha: nullable(
+                            examen.fecha ? `${examen.fecha}T00:00:00` : examen.fecha
+                        ),
 
                         observaciones:
                             nullable(examen.observaciones),
@@ -569,22 +528,22 @@ export function ConsultaNutricionalRegistrarForm() {
                     imc:
                         Number(values.antropometria.imc),
 
-                    circumferenciaPantorrilla:
+                    circunferenciaPantorrilla:
                         Number(
                             values.antropometria
-                                .circumferenciaPantorrilla
+                                .circunferenciaPantorrilla
                         ),
 
-                    circumferenciaBraquial:
+                    circunferenciaBraquial:
                         Number(
                             values.antropometria
-                                .circumferenciaBraquial
+                                .circunferenciaBraquial
                         ),
 
-                    circumferenciaCintura:
+                    circunferenciaCintura:
                         Number(
                             values.antropometria
-                                .circumferenciaCintura
+                                .circunferenciaCintura
                         ),
 
                     perdidaPesoPorcentaje:
@@ -594,6 +553,18 @@ export function ConsultaNutricionalRegistrarForm() {
                         ),
                 },
             } as unknown as ConsultaNutricionalCreateRequest;
+
+            console.log("FORM VALUES:", values);
+
+            console.log("BOOLEANOS:", {
+                nauseas: values.nauseas,
+                vomitos: values.vomitos,
+                distencion: values.distension,
+                gases: values.gases,
+                reflujo: values.reflujo,
+            });
+
+            console.log("REQUEST:", consulta);
 
 
             await registrarConsultaNutricional(consulta);
@@ -863,10 +834,13 @@ export function ConsultaNutricionalRegistrarForm() {
                             <TextInput
                                 label="Tipo de consulta"
                                 withAsterisk
-                                className={classes.fieldFull}
-                                {...form.getInputProps(
-                                    "consultaGeneral.tipoConsulta"
-                                )}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
+                                {...form.getInputProps("consultaGeneral.tipoConsulta")}
                             />
 
 
@@ -874,60 +848,73 @@ export function ConsultaNutricionalRegistrarForm() {
                                 label="Motivo de consulta"
                                 withAsterisk
                                 minRows={4}
-                                className={classes.fieldFull}
-                                {...form.getInputProps(
-                                    "consultaGeneral.motivo"
-                                )}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("consultaGeneral.motivo")}
                             />
 
 
                             <Textarea
                                 label="Descripción"
                                 minRows={4}
-                                className={classes.fieldFull}
-                                {...form.getInputProps(
-                                    "consultaGeneral.descripcion"
-                                )}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("consultaGeneral.descripcion")}
                             />
 
 
                             <Textarea
                                 label="Diagnóstico"
                                 minRows={4}
-                                className={classes.fieldFull}
-                                {...form.getInputProps(
-                                    "consultaGeneral.diagnostico"
-                                )}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("consultaGeneral.diagnostico")}
                             />
 
 
                             <Textarea
                                 label="Resultados de evaluaciones"
                                 minRows={4}
-                                className={classes.fieldFull}
-                                {...form.getInputProps(
-                                    "consultaGeneral.resultadosEvaluaciones"
-                                )}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("consultaGeneral.resultadosEvaluaciones")}
                             />
 
 
                             <Textarea
                                 label="Recomendaciones"
                                 minRows={4}
-                                className={classes.fieldFull}
-                                {...form.getInputProps(
-                                    "consultaGeneral.recomendaciones"
-                                )}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("consultaGeneral.recomendaciones")}
                             />
 
 
                             <Textarea
                                 label="Notas"
                                 minRows={4}
-                                className={classes.fieldFull}
-                                {...form.getInputProps(
-                                    "consultaGeneral.notas"
-                                )}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("consultaGeneral.notas")}
                             />
 
                         </div>
@@ -953,10 +940,12 @@ export function ConsultaNutricionalRegistrarForm() {
                             <Textarea
                                 label="Historia alimentaria"
                                 minRows={4}
-                                className={classes.fieldFull}
-                                {...form.getInputProps(
-                                    "historiaAlimentaria"
-                                )}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("historiaAlimentaria")}
                             />
 
 
@@ -969,18 +958,33 @@ export function ConsultaNutricionalRegistrarForm() {
                                     { value: "MALO", label: "Malo" },
                                 ]}
                                 clearable
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.input,
+                                }}
                                 {...form.getInputProps("apetito")}
                             />
 
 
                             <TextInput
                                 label="Masticación"
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.input,
+                                }}
                                 {...form.getInputProps("masticacion")}
                             />
 
 
                             <TextInput
                                 label="Deglución"
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.input,
+                                }}
                                 {...form.getInputProps("deglucion")}
                             />
 
@@ -1008,8 +1012,7 @@ export function ConsultaNutricionalRegistrarForm() {
                                 sm: 2,
                                 md: 5,
                             }}
-                            mb="lg"
-                        >
+                            mb="lg">
 
                             <Switch
                                 label="Náuseas"
@@ -1030,7 +1033,7 @@ export function ConsultaNutricionalRegistrarForm() {
                             <Switch
                                 label="Distensión"
                                 {...form.getInputProps(
-                                    "distencion",
+                                    "distension",
                                     { type: "checkbox" }
                                 )}
                             />
@@ -1060,18 +1063,26 @@ export function ConsultaNutricionalRegistrarForm() {
                                 label="Frecuencia de evacuaciones"
                                 withAsterisk
                                 placeholder="Ej. 1 vez al día"
-                                {...form.getInputProps(
-                                    "frecuenciaEvacuaciones"
-                                )}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
+                                {...form.getInputProps("frecuenciaEvacuaciones")}
                             />
 
                             <TextInput
                                 label="Consistencia Bristol"
                                 withAsterisk
                                 placeholder="Ej. Tipo 4"
-                                {...form.getInputProps(
-                                    "consistenciaBristol"
-                                )}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
+                                {...form.getInputProps("consistenciaBristol")}
                             />
 
 
@@ -1079,12 +1090,14 @@ export function ConsultaNutricionalRegistrarForm() {
                                 label="Estado cognitivo"
                                 withAsterisk
                                 minRows={3}
-                                className={classes.fieldFull}
-                                {...form.getInputProps(
-                                    "estadoCognitivo"
-                                )}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("estadoCognitivo")}
                             />
-
                         </div>
 
                     </Paper>
@@ -1108,6 +1121,12 @@ export function ConsultaNutricionalRegistrarForm() {
                             <TextInput
                                 label="Peso actual (kg)"
                                 withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
                                 type="number"
                                 step="0.01"
                                 min="0"
@@ -1120,6 +1139,12 @@ export function ConsultaNutricionalRegistrarForm() {
                             <TextInput
                                 label="Peso habitual (kg)"
                                 withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
                                 type="number"
                                 step="0.01"
                                 min="0"
@@ -1132,6 +1157,12 @@ export function ConsultaNutricionalRegistrarForm() {
                             <TextInput
                                 label="Peso hace 6 meses (kg)"
                                 withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
                                 type="number"
                                 step="0.01"
                                 min="0"
@@ -1144,6 +1175,12 @@ export function ConsultaNutricionalRegistrarForm() {
                             <TextInput
                                 label="Talla (m)"
                                 withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
                                 type="number"
                                 step="0.01"
                                 min="0"
@@ -1156,6 +1193,12 @@ export function ConsultaNutricionalRegistrarForm() {
                             <TextInput
                                 label="Altura estimada (m)"
                                 withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
                                 type="number"
                                 step="0.01"
                                 min="0"
@@ -1168,6 +1211,12 @@ export function ConsultaNutricionalRegistrarForm() {
                             <TextInput
                                 label="IMC"
                                 withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
                                 type="number"
                                 step="0.01"
                                 min="0"
@@ -1180,11 +1229,17 @@ export function ConsultaNutricionalRegistrarForm() {
                             <TextInput
                                 label="Circunferencia de pantorrilla (cm)"
                                 withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
                                 type="number"
                                 step="0.01"
                                 min="0"
                                 {...form.getInputProps(
-                                    "antropometria.circumferenciaPantorrilla"
+                                    "antropometria.circunferenciaPantorrilla"
                                 )}
                             />
 
@@ -1192,11 +1247,17 @@ export function ConsultaNutricionalRegistrarForm() {
                             <TextInput
                                 label="Circunferencia braquial (cm)"
                                 withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
                                 type="number"
                                 step="0.01"
                                 min="0"
                                 {...form.getInputProps(
-                                    "antropometria.circumferenciaBraquial"
+                                    "antropometria.circunferenciaBraquial"
                                 )}
                             />
 
@@ -1204,11 +1265,17 @@ export function ConsultaNutricionalRegistrarForm() {
                             <TextInput
                                 label="Circunferencia de cintura (cm)"
                                 withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
                                 type="number"
                                 step="0.01"
                                 min="0"
                                 {...form.getInputProps(
-                                    "antropometria.circumferenciaCintura"
+                                    "antropometria.circunferenciaCintura"
                                 )}
                             />
 
@@ -1216,6 +1283,12 @@ export function ConsultaNutricionalRegistrarForm() {
                             <TextInput
                                 label="Pérdida de peso (%)"
                                 withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
                                 type="number"
                                 step="0.01"
                                 min="0"
