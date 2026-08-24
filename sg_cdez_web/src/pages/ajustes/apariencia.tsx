@@ -11,7 +11,7 @@ import {
   useMantineColorScheme,
 } from "@mantine/core";
 
-import classes from "../../components/ui/forms/PersonalForm.module.css";
+import classes from "../../components/ui/styleModules/PersonalForm.module.css";
 
 export function Apariencia() {
   const { setColorScheme } = useMantineColorScheme();

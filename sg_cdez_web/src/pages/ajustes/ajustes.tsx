@@ -16,7 +16,7 @@ import { actualizarPerfil, obtenerPerfil } from "../../services/perfilService";
 
 import type { PerfilResponse } from "../../services/interfaces/perfilInterface";
 
-import classes from "../../components/ui/forms/PersonalForm.module.css";
+import classes from "../../components/ui/styleModules/PersonalForm.module.css";
 
 export function Ajustes() {
   const [perfil, setPerfil] = useState<PerfilResponse | null>(null);
