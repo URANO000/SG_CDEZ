@@ -46,10 +46,10 @@ export interface ConsultaNutricionalCreateRequest{
     apetito: Apetito | null;
     masticacion: string | null;
     deglucion: string | null;
-    nauseas: boolean | null;
-    vomitos: boolean | null;
-    distencion: boolean | null;
-    gases: boolean | null;
+    nauseas: boolean;
+    vomitos: boolean;
+    distencion: boolean;
+    gases: boolean;
     reflujo: boolean | null;
     frecuenciaEvacuaciones: string;
     consistenciaBristol: string;
