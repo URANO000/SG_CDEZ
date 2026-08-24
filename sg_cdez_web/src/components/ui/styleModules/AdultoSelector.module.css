@@ -1,0 +1,192 @@
+.container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px 40px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+
+.topBar {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+
+.pageTitle {
+    color: var(--text);
+}
+
+
+.subtitle {
+    color: var(--text);
+    opacity: 0.65;
+}
+
+
+.card {
+    background-color: var(--table-color-light);
+    border: 1px solid rgba(107, 99, 117, 0.13);
+    border-radius: 6px;
+    box-shadow: none;
+
+    padding: 22px 26px;
+    margin-bottom: 20px;
+}
+
+
+.sectionHeader {
+    margin-bottom: 20px;
+}
+
+
+.sectionTitle {
+    color: var(--text);
+    font-weight: 600;
+
+    font-size: 1rem;
+
+    margin: 0;
+}
+
+
+.formGrid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 20px 24px;
+}
+
+
+.fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+
+.fieldFull {
+    grid-column: 1 / -1;
+}
+
+
+.fieldLabel {
+    color: var(--text);
+
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+
+.required {
+    color: var(--color-secondary);
+    margin-left: 3px;
+}
+
+
+.input,
+.textarea {
+    width: 100%;
+
+    border: 1px solid rgba(107, 99, 117, 0.25);
+    border-radius: 6px;
+
+    background-color: var(--table-color-light);
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 0.95rem;
+
+    padding: 10px 12px;
+
+    outline: none;
+}
+
+
+.input {
+    height: 40px;
+}
+
+
+.textarea {
+    min-height: 100px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+
+.input:focus,
+.textarea:focus {
+    border-color: var(--color-primary);
+}
+
+
+.adultoSelector {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+
+.noAdulto {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+
+.emptyText {
+    color: var(--text);
+    opacity: 0.55;
+    font-size: 0.9rem;
+}
+
+
+.readonlyField {
+    flex: 1;
+}
+
+
+.submitBar {
+    margin-top: 4px;
+}
+
+
+@media (max-width: 800px) {
+
+    .formGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .fieldFull {
+        grid-column: auto;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .container {
+        padding: 0 12px 32px;
+    }
+
+
+    .card {
+        padding: 18px;
+    }
+
+
+    .noAdulto {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+}

@@ -37,7 +37,7 @@ public class AntropometriaServiceImpl implements AntropometriaService {
         nuevaAntropometria.setAlturaEstimada(request.alturaEstimada());
         nuevaAntropometria.setImc(request.imc());
         nuevaAntropometria.setCircunferenciaPantorrilla(request.circunferenciaPantorrilla());
-        nuevaAntropometria.setCircunferenciaBraquial(request.circunferenciaBranquial());
+        nuevaAntropometria.setCircunferenciaBraquial(request.circunferenciaBraquial());
         nuevaAntropometria.setCircunferenciaCintura(request.circunferenciaCintura());
         nuevaAntropometria.setPerdidaPesoPorcentaje(request.perdidaPesoPorcentaje());
 
