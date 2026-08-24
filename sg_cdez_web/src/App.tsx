@@ -1,7 +1,10 @@
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import { Notifications } from "@mantine/notifications";
-import { MantineProvider } from "@mantine/core";
+import {
+  MantineProvider,
+  localStorageColorSchemeManager,
+} from "@mantine/core";
 import { zurquiTheme } from "./theme";
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router";
@@ -28,10 +31,19 @@ import { PersonalEditar } from "./pages/personal/personalEditar";
 import { PersonalRegistrar } from "./pages/personal/personalRegistrar";
 import { AdultoMayorRegistrar } from "./pages/adultosMayores/adultoMayorRegistrar";
 import { Ajustes } from "./pages/ajustes/ajustes";
+import { Apariencia } from "./pages/ajustes/apariencia";
+
+const colorSchemeManager = localStorageColorSchemeManager({
+  key: "sg-cdez-color-scheme",
+});
 
 function App() {
   return (
-    <MantineProvider theme={zurquiTheme}>
+    <MantineProvider
+  theme={zurquiTheme}
+  colorSchemeManager={colorSchemeManager}
+  defaultColorScheme="light"
+>
       <Notifications position="top-right" />
       <AuthProvider>
         <Router>
@@ -59,6 +71,8 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/consultas" element={<Consultas />} />
               <Route path="/perfil" element={<Ajustes />} />
+              <Route path="/apariencia" element={<Apariencia />}
+/>
               <Route path="/adultosMayores" element={<AdultosMayores />} />
               <Route
                 path="/adultosMayores/:adultoId/expediente"

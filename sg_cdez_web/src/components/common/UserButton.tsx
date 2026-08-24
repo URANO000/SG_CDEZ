@@ -72,9 +72,12 @@ export function UserButton() {
           >
             Perfil
           </Menu.Item>
-          <Menu.Item leftSection={<BsBrightnessHighFill size={20} />}>
+          <Menu.Item
+            leftSection={<BsBrightnessHighFill size={20} />}
+            onClick={() => navigate("/apariencia")}
+            >
             Apariencia
-          </Menu.Item>
+            </Menu.Item>
           <Menu.Item leftSection={<BsUniversalAccess size={20} />}>
             Accesibilidad
           </Menu.Item>
