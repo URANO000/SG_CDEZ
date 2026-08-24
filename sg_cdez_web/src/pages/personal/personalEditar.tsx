@@ -6,7 +6,7 @@ import type { ContactoCreateRequest } from "../../services/interfaces/personalCr
 import type { DocumentoResponse } from "../../services/interfaces/personalResponse";
 import React, { useEffect, useState } from "react";
 import { actualizarPersonal, obtenerPersonalPorId } from "../../services/personalService";
-import { Paper, Title, Text, Group, Stack, Button, ActionIcon } from "@mantine/core";
+import { Paper, Title, Text, Group, Stack, Button, ActionIcon, Tooltip } from "@mantine/core";
 import { BsPlus, BsTrash, BsPersonCheck, BsUpload, BsFileEarmarkText, BsX } from "react-icons/bs";
 import classes from "../../components/ui/styleModules/PersonalForm.module.css";
 import { useRef } from "react";
@@ -14,6 +14,7 @@ import axios from "axios";
 import { notifications } from "@mantine/notifications";
 import { TIPOIDENTIFICACION } from "../../services/interfaces/personalCreateRequest";
 import { ESPECIALIDADES } from "../../services/interfaces/personalCreateRequest";
+import { useForm } from "@mantine/form";
 
 function formatBytes(bytes: number): string {
     if (bytes === 0) return "0 KB";
@@ -25,30 +26,122 @@ function formatBytes(bytes: number): string {
 export function PersonalEditar() {
     const { personalId } = useParams();
     const navigate = useNavigate();
+
     const [loadingData, setLoadingData] = useState(true);
     const [loading, setLoading] = useState(false);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const [contactosExistentes, setContactosExistentes] = useState<ContactoResponse[]>([]);
-    const [contactosCrear, setContactosCrear] = useState<ContactoCreateRequest[]>([]);
     const [contactosDesactivar, setContactosDesactivar] = useState<number[]>([]);
 
     const [documentosExistentes, setDocumentosExistentes] = useState<DocumentoResponse[]>([]);
     const [documentosDesactivar, setDocumentosDesactivar] = useState<number[]>([]);
     const [documentosCrear, setDocumentosCrear] = useState<File[]>([]);
+    const usarComoUsuario = (correo: string) => {
+        form.setFieldValue("usuario", correo);
+    };
 
-    const [formData, setFormData] = useState({
-        rol: 0,
-        especialidad: "",
-        tipoIdentificacion: "",
-        identificacion: "",
-        primerNombre: "",
-        segundoNombre: "",
-        primerApellido: "",
-        segundoApellido: "",
-        direccion: "",
-        carnet: "",
-        usuario: ""
+    const form = useForm({
+        initialValues: {
+            rol: "",
+            especialidad: "",
+            tipoIdentificacion: "",
+            identificacion: "",
+            primerNombre: "",
+            segundoNombre: "",
+            primerApellido: "",
+            segundoApellido: "",
+            direccion: "",
+            carnet: "",
+            usuario: "",
+
+            contactosExistentes: [] as ContactoResponse[],
+            contactosCrear: [] as ContactoCreateRequest[],
+        },
+
+        validate: {
+            primerNombre: (value) =>
+                value.trim().length === 0
+                    ? "El primer nombre es obligatorio."
+                    : null,
+
+            primerApellido: (value) =>
+                value.trim().length === 0
+                    ? "El primer apellido es obligatorio."
+                    : null,
+
+            tipoIdentificacion: (value) =>
+                value.length === 0
+                    ? "Debe seleccionar un tipo de identificación."
+                    : null,
+
+            identificacion: (value) =>
+                value.trim().length === 0
+                    ? "La identificación es obligatoria."
+                    : null,
+
+            rol: (value) =>
+                value.length === 0
+                    ? "Debe seleccionar un rol."
+                    : null,
+
+            especialidad: (value) =>
+                value.length === 0
+                    ? "Debe seleccionar una especialidad."
+                    : null,
+
+            contactosExistentes: {
+                tipoValor: (value) =>
+                    !value
+                        ? "Debe seleccionar un tipo de contacto."
+                        : null,
+
+                valor: (value, values, path) => {
+                    if (!value?.trim()) {
+                        return "El contacto es obligatorio.";
+                    }
+
+                    const index = Number(path.split(".")[1]);
+                    const contacto = values.contactosExistentes[index];
+
+                    if (contacto?.tipoValor === "CORREO") {
+                        const correoRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                        if (!correoRegex.test(value.trim())) {
+                            return "Ingrese un correo electrónico válido.";
+                        }
+                    }
+
+                    return null;
+                }
+            },
+
+            contactosCrear: {
+                tipoValor: (value) =>
+                    !value
+                        ? "Debe seleccionar un tipo de contacto."
+                        : null,
+
+                valor: (value, values, path) => {
+                    if (!value?.trim()) {
+                        return "El contacto es obligatorio.";
+                    }
+
+                    const index = Number(path.split(".")[1]);
+                    const contacto = values.contactosCrear[index];
+
+                    if (contacto?.tipoValor === "CORREO") {
+                        const correoRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                        if (!correoRegex.test(value.trim())) {
+                            return "Ingrese un correo electrónico válido.";
+                        }
+                    }
+
+                    return null;
+                }
+            }
+        }
     });
 
     useEffect(() => {
@@ -60,22 +153,24 @@ export function PersonalEditar() {
 
                 const personal = await obtenerPersonalPorId(personalId);
 
-                setFormData({
-                    rol: personal.rol.id,
-                    especialidad: personal.especialidad,
-                    tipoIdentificacion: personal.tipoIdentificacion,
-                    identificacion: personal.identificacion,
-                    primerNombre: personal.primerNombre,
-                    segundoNombre: personal.segundoNombre,
-                    primerApellido: personal.primerApellido,
-                    segundoApellido: personal.segundoApellido,
-                    direccion: personal.direccion,
-                    carnet: personal.carnet,
-                    usuario: personal.usuario
+                form.setValues({
+                    rol: String(personal.rol.id),
+                    especialidad: personal.especialidad ?? "",
+                    tipoIdentificacion: personal.tipoIdentificacion ?? "",
+                    identificacion: personal.identificacion ?? "",
+                    primerNombre: personal.primerNombre ?? "",
+                    segundoNombre: personal.segundoNombre ?? "",
+                    primerApellido: personal.primerApellido ?? "",
+                    segundoApellido: personal.segundoApellido ?? "",
+                    direccion: personal.direccion ?? "",
+                    carnet: personal.carnet ?? "",
+                    usuario: personal.usuario ?? "",
+                    contactosExistentes: personal.contactos ?? [],
+                    contactosCrear: []
                 });
 
-                setContactosExistentes(personal.contactos ?? []);
-                setContactosCrear([]);
+                form.resetDirty();
+
                 setContactosDesactivar([]);
 
                 setDocumentosExistentes(personal.documentos ?? []);
@@ -83,121 +178,63 @@ export function PersonalEditar() {
                 setDocumentosDesactivar([]);
 
             } catch (error) {
-                if (axios.isAxiosError(error) && error.response?.status === 404) {
+                if (
+                    axios.isAxiosError(error) &&
+                    error.response?.status === 404
+                ) {
                     notifications.show({
                         title: "Error al cargar datos",
                         message: error.response.data?.message,
                         color: "orange"
                     });
+
                     return;
                 }
 
                 notifications.show({
                     title: "Error al mostrar datos del personal",
-                    message: "No fue posible recuperar los datos del miembro del personal.",
+                    message:
+                        "No fue posible recuperar los datos del miembro del personal.",
                     color: "red",
                 });
+
             } finally {
                 setLoadingData(false);
             }
         };
 
         cargarPersonal();
+
     }, [personalId]);
 
-    const actualizarCampo = (
-        campo: keyof typeof formData,
-        valor: string
-    ) => {
+    const eliminarContactoExistente = (index: number) => {
+        const contacto = form.values.contactosExistentes[index];
 
-        setFormData(prev => ({
-            ...prev,
-            [campo]:
-                campo === "rol"
-                    ? Number(valor)
-                    : valor
-        }));
-
-    };
-
-    const actualizarContactoExistente = (
-        index: number,
-        campo: keyof ContactoResponse,
-        valor: string
-    ) => {
-
-        setContactosExistentes(prev =>
-            prev.map((contacto, i) =>
-                i === index
-                    ? {
-                        ...contacto,
-                        [campo]: valor
-                    }
-                    : contacto
-            )
-        );
-    };
-    const eliminarContactoExistente = (
-        contactoId: number
-    ) => {
-
-        setContactosExistentes(prev =>
-            prev.filter(
-                contacto =>
-                    contacto.contactoId !== contactoId
-            )
-        );
+        if (!contacto) return;
 
         setContactosDesactivar(prev =>
-            prev.includes(contactoId)
+            prev.includes(contacto.contactoId)
                 ? prev
-                : [...prev, contactoId]
+                : [...prev, contacto.contactoId]
         );
+
+        form.removeListItem("contactosExistentes", index);
     };
+
     const agregarContacto = () => {
-
-        setContactosCrear(prev => [
-            ...prev,
-            {
-                tipoValor: "",
-                valor: ""
-            }
-        ]);
-    };
-    const actualizarContactoNuevo = (
-        index: number,
-        campo: keyof ContactoCreateRequest,
-        valor: string
-    ) => {
-
-        setContactosCrear(prev =>
-            prev.map((contacto, i) =>
-                i === index
-                    ? {
-                        ...contacto,
-                        [campo]: valor
-                    }
-                    : contacto
-            )
-        );
-    };
-    const eliminarContactoNuevo = (
-        index: number
-    ) => {
-
-        setContactosCrear(prev =>
-            prev.filter((_, i) => i !== index)
-        );
+        form.insertListItem("contactosCrear", {
+            tipoValor: "",
+            valor: ""
+        });
     };
 
-    const usarComoUsuario = (correo: string) => {
-        actualizarCampo("usuario", correo);
+    const eliminarContactoNuevo = (index: number) => {
+        form.removeListItem("contactosCrear", index);
     };
 
     const eliminarDocumentoExistente = (
         documentoId: number
     ) => {
-
         setDocumentosExistentes(prev =>
             prev.filter(
                 documento =>
@@ -205,147 +242,150 @@ export function PersonalEditar() {
             )
         );
 
-        setDocumentosDesactivar(prev => [
-            ...prev,
-            documentoId
-        ]);
+        setDocumentosDesactivar(prev =>
+            prev.includes(documentoId)
+                ? prev
+                : [...prev, documentoId]
+        );
     };
 
     const manejarDocumentos = (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
-
         const files = e.currentTarget.files;
 
         if (!files || files.length === 0) return;
 
-        const nuevosArchivos = Array.from(files);
-
-        setDocumentosCrear(prev => {
-            const resultado = [...prev, ...nuevosArchivos];
-
-
-            return resultado;
-        });
+        setDocumentosCrear(prev => [
+            ...prev,
+            ...Array.from(files)
+        ]);
 
         e.currentTarget.value = "";
     };
+
     const eliminarDocumentoNuevo = (
         index: number
     ) => {
-
         setDocumentosCrear(prev =>
             prev.filter((_, i) => i !== index)
         );
     };
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
+    const handleSubmit = async (
+        values: typeof form.values
+    ) => {
         if (!personalId) return;
 
         setLoading(true);
 
         try {
             const request = {
-                rol: formData.rol,
-                especialidad: formData.especialidad,
-                tipoIdentificacion: formData.tipoIdentificacion,
-                identificacion: formData.identificacion,
-                primerNombre: formData.primerNombre,
-                segundoNombre: formData.segundoNombre,
-                primerApellido: formData.primerApellido,
-                segundoApellido: formData.segundoApellido,
-                direccion: formData.direccion,
-                carnet: formData.carnet,
-                usuario: formData.usuario,
+                rol: Number(values.rol),
+                especialidad: values.especialidad,
+                tipoIdentificacion: values.tipoIdentificacion,
+                identificacion: values.identificacion.trim(),
+                primerNombre: values.primerNombre.trim(),
+                segundoNombre: values.segundoNombre.trim(),
+                primerApellido: values.primerApellido.trim(),
+                segundoApellido: values.segundoApellido.trim(),
+                direccion: values.direccion.trim(),
+                carnet: values.carnet.trim(),
+                usuario: values.usuario.trim(),
 
                 contactosActualizar:
-                    contactosExistentes.map(
+                    values.contactosExistentes.map(
                         contacto => ({
                             contactoId: contacto.contactoId,
                             valor: contacto.valor,
                             tipoValor: contacto.tipoValor
                         })
                     ),
+
                 contactosDesactivar,
-                contactosCrear,
+
+                contactosCrear: values.contactosCrear,
+
                 documentosDesactivar
             };
 
             const formDataMultipart = new FormData();
-            formDataMultipart.append("personal", new Blob(
-                [
-                    JSON.stringify(request)
-                ],
-                {
-                    type: "application/json"
-                }
-            ));
 
-            documentosCrear.forEach(
-                documento => {
-                    formDataMultipart.append(
-                        "documentosCrear",
-                        documento
-                    );
-                }
+            formDataMultipart.append(
+                "personal",
+                new Blob(
+                    [JSON.stringify(request)],
+                    {
+                        type: "application/json"
+                    }
+                )
             );
 
-            await actualizarPersonal(personalId, formDataMultipart);
+            documentosCrear.forEach(documento => {
+                formDataMultipart.append(
+                    "documentosCrear",
+                    documento
+                );
+            });
+
+            await actualizarPersonal(
+                personalId,
+                formDataMultipart
+            );
+
             notifications.show({
                 title: "Personal actualizado",
-                message: "El miembro del personal se actualizó correctamente.",
+                message:
+                    "El miembro del personal se actualizó correctamente.",
                 color: "green",
             });
 
-
-            navigate(`/personal`);
+            navigate("/personal");
 
         } catch (error) {
-            if (axios.isAxiosError(error) && error.response?.status === 401) {
+            if (
+                axios.isAxiosError(error) &&
+                error.response?.status === 401
+            ) {
                 notifications.show({
                     title: "Falta de permisos",
                     message: error.response.data?.message,
                     color: "orange"
                 });
+
                 return;
             }
 
-            if (axios.isAxiosError(error) && error.response?.status === 404) {
+            if (
+                axios.isAxiosError(error) &&
+                error.response?.status === 404
+            ) {
                 notifications.show({
                     title: "Error al actualizar",
                     message: error.response.data?.message,
                     color: "orange"
                 });
+
                 return;
             }
 
             notifications.show({
                 title: "Error al actualizar",
-                message: "No se pudo actualizar el miembro del personal.",
+                message:
+                    "No se pudo actualizar el miembro del personal.",
                 color: "red",
             });
+
         } finally {
             setLoading(false);
         }
     };
 
-    if (loadingData) {
-        return (
-            <div className={classes.container}>
-                <Paper className={classes.card}>
-                    <Text className={classes.emptyText}>Cargando información...</Text>
-                </Paper>
-            </div>
-        );
-    }
-
     return (
         <PersonalForm
             title="Editar Personal"
             subtitle="Edición de personal y sus componentes."
-            onSubmit={handleSubmit}>
+            onSubmit={form.onSubmit(handleSubmit)}>
 
             {/* INFORMACIÓN GENERAL */}
             <Paper className={classes.card}>
@@ -355,14 +395,22 @@ export function PersonalEditar() {
 
                 <div className={classes.formGrid}>
                     <div className={classes.fieldGroup}>
-                        <label className={classes.fieldLabel}>Primer nombre<span className={classes.required}>*</span></label>
+                        <label className={classes.fieldLabel}>
+                            Primer nombre
+                            <span className={classes.required}>*</span>
+                        </label>
+
                         <input
                             className={classes.input}
                             type="text"
-                            value={formData.primerNombre}
-                            onChange={e => actualizarCampo("primerNombre", e.target.value)}
-                            required
+                            {...form.getInputProps("primerNombre")}
                         />
+
+                        {form.errors.primerNombre && (
+                            <Text size="xs" c="red">
+                                {form.errors.primerNombre}
+                            </Text>
+                        )}
                     </div>
 
                     <div className={classes.fieldGroup}>
@@ -370,8 +418,7 @@ export function PersonalEditar() {
                         <input
                             className={classes.input}
                             type="text"
-                            value={formData.segundoNombre}
-                            onChange={e => actualizarCampo("segundoNombre", e.target.value)}
+                            {...form.getInputProps("segundoNombre")}
                         />
                     </div>
 
@@ -380,10 +427,14 @@ export function PersonalEditar() {
                         <input
                             className={classes.input}
                             type="text"
-                            value={formData.primerApellido}
-                            onChange={e => actualizarCampo("primerApellido", e.target.value)}
-                            required
+                            {...form.getInputProps("primerApellido")}
                         />
+
+                        {form.errors.primerApellido && (
+                            <Text size="xs" c="red">
+                                {form.errors.primerApellido}
+                            </Text>
+                        )}
                     </div>
 
                     {/* Was missing in the original edit form — segundoApellido had no input. */}
@@ -392,34 +443,55 @@ export function PersonalEditar() {
                         <input
                             className={classes.input}
                             type="text"
-                            value={formData.segundoApellido}
-                            onChange={e => actualizarCampo("segundoApellido", e.target.value)}
+                            {...form.getInputProps("segundoApellido")}
                         />
                     </div>
 
                     <div className={classes.fieldGroup}>
-                        <label className={classes.fieldLabel}>Tipo de identificación<span className={classes.required}>*</span></label>
+                        <label className={classes.fieldLabel}>
+                            Tipo de identificación
+                            <span className={classes.required}>*</span>
+                        </label>
+
                         <select
                             className={classes.select}
-                            value={formData.tipoIdentificacion}
-                            onChange={e => actualizarCampo("tipoIdentificacion", e.target.value)}
-                            required>
-                            <option value="" disabled>Tipo de identificación</option>
+                            {...form.getInputProps("tipoIdentificacion")}
+                        >
+                            <option value="" disabled>
+                                Tipo de identificación
+                            </option>
+
                             {TIPOIDENTIFICACION.map(({ value, label }) => (
-                                <option key={value} value={value}>{label}</option>
+                                <option key={value} value={value}>
+                                    {label}
+                                </option>
                             ))}
                         </select>
+
+                        {form.errors.tipoIdentificacion && (
+                            <Text size="xs" c="red">
+                                {form.errors.tipoIdentificacion}
+                            </Text>
+                        )}
                     </div>
 
                     <div className={classes.fieldGroup}>
-                        <label className={classes.fieldLabel}>Identificación<span className={classes.required}>*</span></label>
+                        <label className={classes.fieldLabel}>
+                            Identificación
+                            <span className={classes.required}>*</span>
+                        </label>
+
                         <input
                             className={classes.input}
                             type="text"
-                            value={formData.identificacion}
-                            onChange={e => actualizarCampo("identificacion", e.target.value)}
-                            required
+                            {...form.getInputProps("identificacion")}
                         />
+
+                        {form.errors.identificacion && (
+                            <Text size="xs" c="red">
+                                {form.errors.identificacion}
+                            </Text>
+                        )}
                     </div>
 
                     <div className={classes.fieldGroup}>
@@ -427,8 +499,7 @@ export function PersonalEditar() {
                         <input
                             className={classes.input}
                             type="text"
-                            value={formData.carnet}
-                            onChange={e => actualizarCampo("carnet", e.target.value)}
+                            {...form.getInputProps("carnet")}
                         />
                     </div>
 
@@ -437,8 +508,7 @@ export function PersonalEditar() {
                         <input
                             className={classes.input}
                             type="text"
-                            value={formData.direccion}
-                            onChange={e => actualizarCampo("direccion", e.target.value)}
+                            {...form.getInputProps("direccion")}
                         />
                     </div>
 
@@ -447,8 +517,7 @@ export function PersonalEditar() {
                         <input
                             className={classes.input}
                             type="text"
-                            value={formData.usuario}
-                            onChange={e => actualizarCampo("usuario", e.target.value)}
+                            {...form.getInputProps("usuario")}
                             placeholder="Puede completarse desde un contacto de correo abajo"
                         />
                     </div>
@@ -463,31 +532,59 @@ export function PersonalEditar() {
 
                 <div className={classes.formGrid}>
                     <div className={classes.fieldGroup}>
-                        <label className={classes.fieldLabel}>Rol<span className={classes.required}>*</span></label>
+                        <label className={classes.fieldLabel}>
+                            Rol
+                            <span className={classes.required}>*</span>
+                        </label>
+
                         <select
                             className={classes.select}
-                            value={formData.rol || ""}
-                            onChange={e => actualizarCampo("rol", e.target.value)}
-                            required>
-                            <option value="" disabled>Seleccionar rol</option>
-                            <option value="1">Administrador</option>
-                            <option value="2">Usuario Normal</option>
-                            <option value="3">Ayudante Administrativo</option>
+                            {...form.getInputProps("rol")}
+                        >
+                            <option value="" disabled>
+                                Seleccionar rol
+                            </option>
+                            <option value="1">
+                                Administrador
+                            </option>
+                            <option value="2">
+                                Usuario Normal
+                            </option>
                         </select>
+
+                        {form.errors.rol && (
+                            <Text size="xs" c="red">
+                                {form.errors.rol}
+                            </Text>
+                        )}
                     </div>
 
                     <div className={classes.fieldGroup}>
-                        <label className={classes.fieldLabel}>Especialidad<span className={classes.required}>*</span></label>
+                        <label className={classes.fieldLabel}>
+                            Especialidad
+                            <span className={classes.required}>*</span>
+                        </label>
+
                         <select
                             className={classes.select}
-                            value={formData.especialidad}
-                            onChange={e => actualizarCampo("especialidad", e.target.value)}
-                            required>
-                            <option value="" disabled>Seleccionar especialidad</option>
+                            {...form.getInputProps("especialidad")}
+                        >
+                            <option value="" disabled>
+                                Seleccionar especialidad
+                            </option>
+
                             {ESPECIALIDADES.map(({ value, label }) => (
-                                <option key={value} value={value}>{label}</option>
+                                <option key={value} value={value}>
+                                    {label}
+                                </option>
                             ))}
                         </select>
+
+                        {form.errors.especialidad && (
+                            <Text size="xs" c="red">
+                                {form.errors.especialidad}
+                            </Text>
+                        )}
                     </div>
                 </div>
             </Paper>
@@ -506,107 +603,207 @@ export function PersonalEditar() {
                     </Button>
                 </Group>
 
-                {contactosExistentes.length === 0 && contactosCrear.length === 0 ? (
-                    <Text className={classes.emptyText}>Sin contactos agregados.</Text>
-                ) : (
-                    <Stack gap="sm">
-                        {contactosExistentes.map((contacto, index) => (
-                            <div key={contacto.contactoId} className={classes.contactRow}>
-                                <select
-                                    className={classes.select}
-                                    value={contacto.tipoValor}
-                                    onChange={e =>
-                                        actualizarContactoExistente(index, "tipoValor", e.target.value)
-                                    }
-                                    required>
-                                    <option value="" disabled>Tipo</option>
-                                    <option value="TELEFONO">Número Telefónico</option>
-                                    <option value="CORREO">Correo Electrónico</option>
-                                </select>
+                <Stack>
+                    {form.values.contactosExistentes.map(
+                        (contacto, index) => (
+                            <div key={contacto.contactoId}>
+                                <div className={classes.contactRow}>
+                                    <select
+                                        className={classes.select}
+                                        {...form.getInputProps(
+                                            `contactosExistentes.${index}.tipoValor`
+                                        )}
+                                    >
+                                        <option value="" disabled>
+                                            Tipo
+                                        </option>
 
-                                <input
-                                    className={classes.input}
-                                    type={contacto.tipoValor === "CORREO" ? "email" : "text"}
-                                    placeholder={contacto.tipoValor === "CORREO" ? "correo@ejemplo.com" : "Número de teléfono"}
-                                    value={contacto.valor}
-                                    onChange={e =>
-                                        actualizarContactoExistente(index, "valor", e.target.value)
-                                    }
-                                    required
-                                />
+                                        <option value="TELEFONO">
+                                            Número Telefónico
+                                        </option>
 
-                                <Group gap={4} wrap="nowrap" className={classes.contactActions}>
-                                    {contacto.tipoValor === "CORREO" && contacto.valor && (
+                                        <option value="CORREO">
+                                            Correo Electrónico
+                                        </option>
+                                    </select>
+
+                                    <input
+                                        className={classes.input}
+                                        type={contacto.tipoValor === "CORREO" ? "email" : "text"}
+                                        placeholder={
+                                            contacto.tipoValor === "CORREO"
+                                                ? "correo@ejemplo.com"
+                                                : "Número de teléfono"
+                                        }
+                                        {...form.getInputProps(
+                                            `contactosExistentes.${index}.valor`
+                                        )}
+                                    />
+
+                                    <Group
+                                        gap={4}
+                                        wrap="nowrap"
+                                        className={classes.contactActions}
+                                    >
+                                        {contacto.tipoValor === "CORREO" &&
+                                            contacto.valor && (
+                                                <Tooltip label="Utilizar como usuario">
+                                                    <ActionIcon
+                                                        type="button"
+                                                        variant="subtle"
+                                                        className={classes.actionEmail}
+                                                        aria-label="Usar como usuario"
+                                                        onClick={() =>
+                                                            usarComoUsuario(
+                                                                contacto.valor
+                                                            )
+                                                        }
+                                                    >
+                                                        <BsPersonCheck size={16} />
+                                                    </ActionIcon>
+                                                </Tooltip>
+                                            )}
+
                                         <ActionIcon
+                                            type="button"
                                             variant="subtle"
-                                            className={classes.actionEmail}
-                                            title="Usar como usuario"
-                                            aria-label="Usar como usuario"
-                                            onClick={() => usarComoUsuario(contacto.valor)}>
-                                            <BsPersonCheck size={16} />
+                                            color="red"
+                                            aria-label="Eliminar contacto"
+                                            onClick={() =>
+                                                eliminarContactoExistente(index)
+                                            }
+                                        >
+                                            <BsTrash size={16} />
                                         </ActionIcon>
+                                    </Group>
+                                </div>
+
+                                {(form.errors[
+                                    `contactosExistentes.${index}.tipoValor`
+                                ] ||
+                                    form.errors[
+                                    `contactosExistentes.${index}.valor`
+                                    ]) && (
+                                        <Text size="xs" c="red" mt={4}>
+                                            {form.errors[`contactosExistentes.${index}.tipoValor`] && (
+                                                <Text size="xs" c="red" mt={4}>
+                                                    {form.errors[
+                                                        `contactosExistentes.${index}.tipoValor`
+                                                    ]}
+                                                </Text>
+                                            )}
+
+                                            {form.errors[`contactosExistentes.${index}.valor`] && (
+                                                <Text size="xs" c="red" mt={4}>
+                                                    {form.errors[
+                                                        `contactosExistentes.${index}.valor`
+                                                    ]}
+                                                </Text>
+                                            )}
+                                        </Text>
                                     )}
-
-                                    <ActionIcon
-                                        variant="subtle"
-                                        color="red"
-                                        aria-label="Eliminar contacto"
-                                        onClick={() => eliminarContactoExistente(contacto.contactoId)}>
-                                        <BsTrash size={16} />
-                                    </ActionIcon>
-                                </Group>
                             </div>
-                        ))}
+                        )
+                    )}
+                </Stack>
+                <Stack>
+                    {form.values.contactosCrear.map(
+                        (contacto, index) => (
+                            <div key={`nuevo-${index}`}>
+                                <div className={classes.contactRow}>
+                                    <select
+                                        className={classes.select}
+                                        {...form.getInputProps(
+                                            `contactosCrear.${index}.tipoValor`
+                                        )}
+                                    >
+                                        <option value="" disabled>
+                                            Tipo
+                                        </option>
 
-                        {contactosCrear.map((contacto, index) => (
-                            <div key={`nuevo-${index}`} className={classes.contactRow}>
-                                <select
-                                    className={classes.select}
-                                    value={contacto.tipoValor}
-                                    onChange={e =>
-                                        actualizarContactoNuevo(index, "tipoValor", e.target.value)
-                                    }
-                                    required>
-                                    <option value="" disabled>Tipo</option>
-                                    <option value="TELEFONO">Número Telefónico</option>
-                                    <option value="CORREO">Correo Electrónico</option>
-                                </select>
+                                        <option value="TELEFONO">
+                                            Número Telefónico
+                                        </option>
 
-                                <input
-                                    className={classes.input}
-                                    type={contacto.tipoValor === "CORREO" ? "email" : "text"}
-                                    placeholder={contacto.tipoValor === "CORREO" ? "correo@ejemplo.com" : "Número de teléfono"}
-                                    value={contacto.valor}
-                                    onChange={e =>
-                                        actualizarContactoNuevo(index, "valor", e.target.value)
-                                    }
-                                    required
-                                />
+                                        <option value="CORREO">
+                                            Correo Electrónico
+                                        </option>
+                                    </select>
 
-                                <Group gap={4} wrap="nowrap" className={classes.contactActions}>
-                                    {contacto.tipoValor === "CORREO" && contacto.valor && (
+                                    <input
+                                        className={classes.input}
+                                        type={contacto.tipoValor === "CORREO" ? "email" : "text"}
+                                        placeholder={
+                                            contacto.tipoValor === "CORREO"
+                                                ? "correo@ejemplo.com"
+                                                : "Número de teléfono"
+                                        }
+                                        {...form.getInputProps(
+                                            `contactosCrear.${index}.valor`
+                                        )}
+                                    />
+
+                                    <Group
+                                        gap={4}
+                                        wrap="nowrap"
+                                        className={classes.contactActions}
+                                    >
+                                        {contacto.tipoValor === "CORREO" &&
+                                            contacto.valor && (
+                                                <Tooltip label="Utilizar como usuario">
+                                                    <ActionIcon
+                                                        type="button"
+                                                        variant="subtle"
+                                                        className={classes.actionEmail}
+                                                        aria-label="Usar como usuario"
+                                                        onClick={() =>
+                                                            usarComoUsuario(
+                                                                contacto.valor
+                                                            )
+                                                        }
+                                                    >
+                                                        <BsPersonCheck size={16} />
+                                                    </ActionIcon>
+                                                </Tooltip>
+                                            )}
+
                                         <ActionIcon
+                                            type="button"
                                             variant="subtle"
-                                            className={classes.actionEmail}
-                                            title="Usar como usuario"
-                                            aria-label="Usar como usuario"
-                                            onClick={() => usarComoUsuario(contacto.valor)}>
-                                            <BsPersonCheck size={16} />
+                                            color="red"
+                                            aria-label="Eliminar contacto"
+                                            onClick={() =>
+                                                eliminarContactoNuevo(index)
+                                            }
+                                        >
+                                            <BsTrash size={16} />
                                         </ActionIcon>
-                                    )}
+                                    </Group>
+                                </div>
 
-                                    <ActionIcon
-                                        variant="subtle"
-                                        color="red"
-                                        aria-label="Eliminar contacto"
-                                        onClick={() => eliminarContactoNuevo(index)}>
-                                        <BsTrash size={16} />
-                                    </ActionIcon>
-                                </Group>
+                                {(form.errors[
+                                    `contactosCrear.${index}.tipoValor`
+                                ] ||
+                                    form.errors[
+                                    `contactosCrear.${index}.valor`
+                                    ]) && (
+                                        <Text size="xs" c="red" mt={4}>
+                                            {String(
+                                                form.errors[
+                                                `contactosCrear.${index}.tipoValor`
+                                                ] ||
+                                                form.errors[
+                                                `contactosCrear.${index}.valor`
+                                                ]
+                                            )}
+                                        </Text>
+                                    )}
                             </div>
-                        ))}
-                    </Stack>
-                )}
+
+                        )
+                    )}
+                </Stack>
+
             </Paper>
 
             {/* DOCUMENTOS */}
@@ -718,6 +915,6 @@ export function PersonalEditar() {
                 </Button>
             </Group>
 
-        </PersonalForm>
+        </PersonalForm >
     );
 }
