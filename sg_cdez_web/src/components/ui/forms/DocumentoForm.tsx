@@ -29,8 +29,7 @@ export function DocumentoForm({
     },
 
     validate: {
-      archivo: (valor) =>
-        valor ? null : "Debe adjuntar un archivo.",
+      archivo: (valor) => (valor ? null : "Debe adjuntar un archivo."),
     },
   });
 
@@ -71,7 +70,7 @@ export function DocumentoForm({
           {...form.getInputProps("archivo")}
         />
 
-        <Group justify="flex-end" mt="sm">
+        <Group justify="flex-end" gap="sm" mt="md">
           <Button
             type="button"
             variant="default"
@@ -81,11 +80,7 @@ export function DocumentoForm({
             Cancelar
           </Button>
 
-          <Button
-            type="submit"
-            loading={loading}
-            className="primary-button"
-          >
+          <Button type="submit" loading={loading}>
             Adjuntar documento
           </Button>
         </Group>

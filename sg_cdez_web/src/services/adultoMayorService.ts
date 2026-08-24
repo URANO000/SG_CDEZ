@@ -2,6 +2,8 @@ import { apiClient } from "../utils/apiHelper";
 
 import type {
   AdultoMayorCreateRequest,
+  AdultoMayorUpdateRequest,
+  AdultoMayorFallecimientoRequest,
   AdultoMayorDesactivarRequest,
   AdultoMayorFiltro,
   AdultoMayorResponse,
@@ -33,6 +35,18 @@ export async function listarAdultosMayoresFiltrados(
   return response.data;
 }
 
+export async function actualizarAdultoMayor(
+  adultoId: string,
+  request: AdultoMayorUpdateRequest,
+): Promise<AdultoMayorResponse> {
+  const response = await apiClient.put<AdultoMayorResponse>(
+    `/adultos-mayores/${adultoId}`,
+    request,
+  );
+
+  return response.data;
+}
+
 export async function obtenerAdultoMayorPorId(
   adultoId: string,
 ): Promise<AdultoMayorResponse> {
@@ -49,6 +63,28 @@ export async function desactivarAdultoMayor(
 ): Promise<AdultoMayorResponse> {
   const response = await apiClient.patch<AdultoMayorResponse>(
     `/adultos-mayores/${adultoId}/desactivar`,
+    request,
+  );
+
+  return response.data;
+}
+
+export async function activarAdultoMayor(
+  adultoId: string,
+): Promise<AdultoMayorResponse> {
+  const response = await apiClient.patch<AdultoMayorResponse>(
+    `/adultos-mayores/${adultoId}/activar`,
+  );
+
+  return response.data;
+}
+
+export async function registrarFallecimientoAdultoMayor(
+  adultoId: string,
+  request: AdultoMayorFallecimientoRequest,
+): Promise<AdultoMayorResponse> {
+  const response = await apiClient.patch<AdultoMayorResponse>(
+    `/adultos-mayores/${adultoId}/fallecimiento`,
     request,
   );
 

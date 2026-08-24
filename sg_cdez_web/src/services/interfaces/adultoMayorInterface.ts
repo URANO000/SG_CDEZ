@@ -19,6 +19,14 @@ export interface AdultoMayorCreateRequest {
   fechaIngreso: string;
 }
 
+export interface AdultoMayorUpdateRequest {
+  direccion: string;
+  escolaridad: string;
+  grupoFamiliar: string | null;
+  funcionalidadFisica: string | null;
+  ayudaBiomecanica: boolean;
+}
+
 export interface AdultoMayorFiltro {
   searchTerm: string | null;
   estado: EstadoAdultoMayor;
@@ -44,5 +52,10 @@ export interface AdultoMayorResponse {
 
 export interface AdultoMayorDesactivarRequest {
   fechaRetiro: string;
+  motivoRetiro: string;
+}
+
+export interface AdultoMayorFallecimientoRequest {
+  fechaFallecimiento: string;
   motivoRetiro: string;
 }
