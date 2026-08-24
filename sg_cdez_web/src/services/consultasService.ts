@@ -16,3 +16,9 @@ export const obtenerConsultaPorId = async (consultaId: string): Promise<Consulta
     const response = await apiClient.get( `/consulta/obtenerConsulta/${consultaId}`);
     return response.data;
 }
+
+
+export const desactivarConsulta = async (consultaId: string): Promise<ConsultaDetailResponse> => {
+    const response = await apiClient.post(`/consulta/desactivarConsulta/${consultaId}`)
+    return response.data;
+}

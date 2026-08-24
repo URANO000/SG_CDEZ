@@ -79,8 +79,7 @@ function App() {
                   <ProtectedRoute roles={["ROLE_ADMIN"]}>
                     <AdultoMayorRegistrar />
                   </ProtectedRoute>
-                }
-              />
+                }/>
               <Route path="/documentacion" element={<Documentacion />} />
 
               <Route

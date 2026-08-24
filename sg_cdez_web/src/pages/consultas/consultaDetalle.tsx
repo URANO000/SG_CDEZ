@@ -262,7 +262,7 @@ export function ConsultaDetalle() {
                                 </Text>
 
                                 <Text className={classes.value}>
-                                    {consulta.adultoMayor.fechaNacimiento}
+                                    {mostrarFecha(consulta.adultoMayor.fechaNacimiento)}
                                 </Text>
 
                             </div>

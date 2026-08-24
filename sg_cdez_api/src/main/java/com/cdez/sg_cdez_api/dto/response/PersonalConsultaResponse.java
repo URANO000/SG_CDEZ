@@ -8,6 +8,6 @@ public record PersonalConsultaResponse(
         UUID personalId,
         String usuario,
         String nombreCompleto,
-        Especialidad especialidad
+        String especialidad
 ) {
 }

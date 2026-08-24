@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { PersonalTable } from "../../components/ui/tables/personalTable";
+import { PersonalTable } from "../../components/ui/tables/PersonalTable";
 import type { PersonalResponse } from "../../services/interfaces/personalResponse";
 import type { PersonalFiltro } from "../../services/interfaces/personalFiltroInterface";
 import { listarPersonalFiltrado } from "../../services/personalService";
