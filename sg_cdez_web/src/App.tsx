@@ -27,6 +27,7 @@ import { PersonalDetalle } from "./pages/personal/personalDetalle";
 import { PersonalEditar } from "./pages/personal/personalEditar";
 import { PersonalRegistrar } from "./pages/personal/personalRegistrar";
 import { AdultoMayorRegistrar } from "./pages/adultosMayores/adultoMayorRegistrar";
+import { Ajustes } from "./pages/ajustes/ajustes";
 
 function App() {
   return (
@@ -57,6 +58,7 @@ function App() {
             >
               <Route path="/" element={<Home />} />
               <Route path="/consultas" element={<Consultas />} />
+              <Route path="/perfil" element={<Ajustes />} />
               <Route path="/adultosMayores" element={<AdultosMayores />} />
               <Route
                 path="/adultosMayores/:adultoId/expediente"
