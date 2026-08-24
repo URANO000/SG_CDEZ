@@ -1,15 +1,18 @@
 import { useState } from "react";
 import {
+    ActionIcon,
     Button,
     Group,
     Modal,
     Paper,
     SimpleGrid,
     Text,
+    Textarea,
     TextInput,
     Title,
-    ActionIcon
 } from "@mantine/core";
+
+import { useForm } from "@mantine/form";
 import { useNavigate } from "react-router";
 import { BsArrowLeft } from "react-icons/bs";
 import { notifications } from "@mantine/notifications";
@@ -22,6 +25,16 @@ import type { ConsultaCreateRequest } from "../../../services/interfaces/consult
 import type { AdultoMayorResponse } from "../../../services/interfaces/adultoMayorInterface";
 
 import { AdultoSelector } from "../../common/AdultoSelector";
+
+interface ConsultaFormValues {
+    tipoConsulta: string;
+    motivo: string;
+    descripcion: string;
+    diagnostico: string;
+    resultadosEvaluaciones: string;
+    recomendaciones: string;
+    notas: string;
+}
 
 export function ConsultaRegistrarForm() {
 
@@ -74,85 +87,167 @@ export function ConsultaRegistrarForm() {
         setSelectorAbierto(false);
     };
 
+    const form = useForm<ConsultaFormValues>({
+        mode: "controlled",
+
+        initialValues: {
+            tipoConsulta: "",
+            motivo: "",
+            descripcion: "",
+            diagnostico: "",
+            resultadosEvaluaciones: "",
+            recomendaciones: "",
+            notas: "",
+        },
+
+        validate: {
+            tipoConsulta: (value) => {
+                const valor = value.trim();
+
+                if (!valor) {
+                    return "El tipo de consulta es obligatorio.";
+                }
+
+                if (valor.length < 3) {
+                    return "El tipo de consulta debe contener al menos 3 caracteres.";
+                }
+
+                if (valor.length > 100) {
+                    return "El tipo de consulta no puede superar los 100 caracteres.";
+                }
+
+                return null;
+            },
+
+            motivo: (value) => {
+                const valor = value.trim();
+
+                if (!valor) {
+                    return "El motivo de la consulta es obligatorio.";
+                }
+
+                if (valor.length < 5) {
+                    return "El motivo debe contener al menos 5 caracteres.";
+                }
+
+                if (valor.length > 1000) {
+                    return "El motivo no puede superar los 1000 caracteres.";
+                }
+
+                return null;
+            },
+
+            descripcion: (value) => {
+                if (
+                    value.trim() &&
+                    value.trim().length < 5
+                ) {
+                    return "La descripción debe contener al menos 5 caracteres.";
+                }
+
+                return null;
+            },
+
+            diagnostico: (value) => {
+                if (
+                    value.trim() &&
+                    value.trim().length < 3
+                ) {
+                    return "El diagnóstico debe contener al menos 3 caracteres.";
+                }
+
+                return null;
+            },
+
+            resultadosEvaluaciones: (value) => {
+                if (
+                    value.trim() &&
+                    value.trim().length < 3
+                ) {
+                    return "Los resultados deben contener al menos 3 caracteres.";
+                }
+
+                return null;
+            },
+
+            recomendaciones: (value) => {
+                if (
+                    value.trim() &&
+                    value.trim().length < 3
+                ) {
+                    return "Las recomendaciones deben contener al menos 3 caracteres.";
+                }
+
+                return null;
+            },
+
+            notas: (value) => {
+                if (
+                    value.trim() &&
+                    value.trim().length > 1500
+                ) {
+                    return "Las notas no pueden superar los 1500 caracteres.";
+                }
+
+                return null;
+            },
+        },
+    });
+
+    const nullable = (value: string): string | null => {
+        const limpio = value.trim();
+
+        return limpio.length > 0
+            ? limpio
+            : null;
+    };
+
 
     const handleSubmit = async (
-        e: React.FormEvent<HTMLFormElement>
+        values: ConsultaFormValues
     ) => {
 
-        e.preventDefault();
-
         if (!adultoSeleccionado) {
-
             notifications.show({
                 title: "Adulto mayor requerido",
-                message: "Debe seleccionar un adulto mayor para la consulta.",
+                message:
+                    "Debe seleccionar un adulto mayor para registrar la consulta.",
                 color: "orange",
             });
 
             return;
         }
 
-
         setLoading(true);
 
         try {
 
-            const form = e.currentTarget;
-
             const consulta: ConsultaCreateRequest = {
-
                 adultoId:
                     adultoSeleccionado.adultoId,
 
                 tipoConsulta:
-                    (
-                        form.elements.namedItem(
-                            "tipoConsulta"
-                        ) as HTMLInputElement
-                    ).value,
+                    values.tipoConsulta.trim(),
 
                 motivo:
-                    (
-                        form.elements.namedItem(
-                            "motivo"
-                        ) as HTMLTextAreaElement
-                    ).value,
+                    values.motivo.trim(),
 
                 descripcion:
-                    (
-                        form.elements.namedItem(
-                            "descripcion"
-                        ) as HTMLTextAreaElement
-                    ).value || null,
+                    nullable(values.descripcion),
 
                 diagnostico:
-                    (
-                        form.elements.namedItem(
-                            "diagnostico"
-                        ) as HTMLTextAreaElement
-                    ).value || null,
+                    nullable(values.diagnostico),
 
                 resultadosEvaluaciones:
-                    (
-                        form.elements.namedItem(
-                            "resultadosEvaluaciones"
-                        ) as HTMLTextAreaElement
-                    ).value || null,
+                    nullable(values.resultadosEvaluaciones),
 
                 recomendaciones:
-                    (
-                        form.elements.namedItem(
-                            "recomendaciones"
-                        ) as HTMLTextAreaElement
-                    ).value || null,
+                    nullable(values.recomendaciones),
 
                 notas:
-                    (
-                        form.elements.namedItem(
-                            "notas"
-                        ) as HTMLTextAreaElement
-                    ).value || null,
+                    nullable(values.notas),
             };
+
 
             await registrarConsulta(consulta);
 
@@ -188,7 +283,10 @@ export function ConsultaRegistrarForm() {
 
             if (
                 axios.isAxiosError(error) &&
-                error.response?.status === 401
+                (
+                    error.response?.status === 401 ||
+                    error.response?.status === 403
+                )
             ) {
 
                 notifications.show({
@@ -196,6 +294,23 @@ export function ConsultaRegistrarForm() {
                     message:
                         error.response.data?.message ??
                         "No tiene permisos para registrar la consulta.",
+                    color: "orange",
+                });
+
+                return;
+            }
+
+
+            if (
+                axios.isAxiosError(error) &&
+                error.response?.status === 400
+            ) {
+
+                notifications.show({
+                    title: "Datos inválidos",
+                    message:
+                        error.response.data?.message ??
+                        "Revise la información ingresada.",
                     color: "orange",
                 });
 
@@ -213,7 +328,6 @@ export function ConsultaRegistrarForm() {
         } finally {
 
             setLoading(false);
-
         }
     };
 
@@ -238,24 +352,26 @@ export function ConsultaRegistrarForm() {
                             <BsArrowLeft size={18} />
                         </ActionIcon>
                     </Group>
-
                     <Paper className={classes.headerCard}>
+
                         <Title
                             order={2}
                             className={classes.pageTitle}
                         >
-                            Registrar consulta
+                            Registrar consulta general
                         </Title>
 
                         <Text className={classes.subtitle}>
-                            Registrar una nueva consulta clínica.
+                            Registre la información clínica y la valoración
+                            general del adulto mayor.
                         </Text>
+
                     </Paper>
 
                 </div>
 
 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={form.onSubmit(handleSubmit)}>
 
 
                     {/* ADULTO MAYOR */}
@@ -301,8 +417,7 @@ export function ConsultaRegistrarForm() {
 
                                     <Group
                                         justify="space-between"
-                                        align="flex-end"
-                                    >
+                                        align="flex-end">
 
                                         <TextInput
                                             label="Nombre completo"
@@ -310,16 +425,14 @@ export function ConsultaRegistrarForm() {
                                                 adultoSeleccionado.nombreCompleto
                                             }
                                             readOnly
-                                            className={classes.readonlyField}
-                                        />
+                                            className={classes.readonlyField} />
 
                                         <Button
                                             type="button"
                                             variant="light"
                                             onClick={() =>
                                                 setSelectorAbierto(true)
-                                            }
-                                        >
+                                            }>
                                             Cambiar
                                         </Button>
 
@@ -332,8 +445,7 @@ export function ConsultaRegistrarForm() {
                                             sm: 2,
                                             md: 3,
                                         }}
-                                        mt="md"
-                                    >
+                                        mt="md">
 
                                         <TextInput
                                             label="Identificación"
@@ -375,206 +487,185 @@ export function ConsultaRegistrarForm() {
 
 
                     {/* INFORMACIÓN DE LA CONSULTA */}
-
                     <Paper className={classes.card}>
-
-                        <Group className={classes.sectionHeader}>
+                        <div className={classes.sectionHeader}>
 
                             <Title
                                 order={4}
-                                className={classes.sectionTitle}
-                            >
+                                className={classes.sectionTitle}>
                                 Información de la consulta
                             </Title>
 
-                        </Group>
+                            <Text
+                                size="sm"
+                                className={classes.sectionDescription}>
+                                Complete la información clínica correspondiente
+                                a esta consulta.
+                            </Text>
+
+                        </div>
+
 
 
                         <div className={classes.formGrid}>
 
-
-                            <div
-                                className={`${classes.fieldGroup} ${classes.fieldFull}`}
-                            >
-
-                                <label
-                                    className={classes.fieldLabel}
-                                >
-                                    Tipo de consulta
-                                    <span className={classes.required}>
-                                        *
-                                    </span>
-                                </label>
-
-                                <input
-                                    className={classes.input}
-                                    type="text"
-                                    name="tipoConsulta"
-                                    required
-                                />
-
-                            </div>
+                            <TextInput
+                                label="Tipo de consulta"
+                                description="Indique el tipo o categoría de la consulta."
+                                placeholder="Ej. Consulta de seguimiento"
+                                withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
+                                {...form.getInputProps("tipoConsulta")}
+                            />
 
 
-                            <div
-                                className={`${classes.fieldGroup} ${classes.fieldFull}`}
-                            >
-
-                                <label
-                                    className={classes.fieldLabel}
-                                >
-                                    Motivo de consulta
-                                    <span className={classes.required}>
-                                        *
-                                    </span>
-                                </label>
-
-                                <textarea
-                                    className={classes.textarea}
-                                    name="motivo"
-                                    rows={4}
-                                    required
-                                />
-
-                            </div>
+                            <Textarea
+                                label="Motivo de consulta"
+                                description="Describa la razón principal por la que se realiza la consulta."
+                                placeholder="Ingrese el motivo principal de la consulta..."
+                                withAsterisk
+                                minRows={4}
+                                autosize
+                                maxRows={8}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("motivo")}
+                            />
 
 
-                            <div
-                                className={`${classes.fieldGroup} ${classes.fieldFull}`}
-                            >
-
-                                <label
-                                    className={classes.fieldLabel}
-                                >
-                                    Descripción
-                                </label>
-
-                                <textarea
-                                    className={classes.textarea}
-                                    name="descripcion"
-                                    rows={5}
-                                />
-
-                            </div>
+                            <Textarea
+                                label="Descripción"
+                                description="Información adicional relevante sobre la situación actual."
+                                placeholder="Ingrese una descripción general..."
+                                minRows={4}
+                                autosize
+                                maxRows={8}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("descripcion")}
+                            />
 
 
-                            <div
-                                className={`${classes.fieldGroup} ${classes.fieldFull}`}
-                            >
-
-                                <label
-                                    className={classes.fieldLabel}
-                                >
-                                    Diagnóstico
-                                </label>
-
-                                <textarea
-                                    className={classes.textarea}
-                                    name="diagnostico"
-                                    rows={5}
-                                />
-
-                            </div>
+                            <Textarea
+                                label="Diagnóstico"
+                                description="Registre el diagnóstico o valoración obtenida."
+                                placeholder="Ingrese el diagnóstico..."
+                                minRows={4}
+                                autosize
+                                maxRows={8}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("diagnostico")}
+                            />
 
 
-                            <div
-                                className={`${classes.fieldGroup} ${classes.fieldFull}`}
-                            >
-
-                                <label
-                                    className={classes.fieldLabel}
-                                >
-                                    Resultados de evaluaciones
-                                </label>
-
-                                <textarea
-                                    className={classes.textarea}
-                                    name="resultadosEvaluaciones"
-                                    rows={5}
-                                />
-
-                            </div>
+                            <Textarea
+                                label="Resultados de evaluaciones"
+                                description="Documente los principales resultados encontrados durante la evaluación."
+                                placeholder="Ingrese los resultados de las evaluaciones..."
+                                minRows={4}
+                                autosize
+                                maxRows={8}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("resultadosEvaluaciones")}
+                            />
 
 
-                            <div
-                                className={`${classes.fieldGroup} ${classes.fieldFull}`}
-                            >
-
-                                <label
-                                    className={classes.fieldLabel}
-                                >
-                                    Recomendaciones
-                                </label>
-
-                                <textarea
-                                    className={classes.textarea}
-                                    name="recomendaciones"
-                                    rows={5}
-                                />
-
-                            </div>
+                            <Textarea
+                                label="Recomendaciones"
+                                description="Indique las recomendaciones brindadas al adulto mayor."
+                                placeholder="Ingrese las recomendaciones..."
+                                minRows={4}
+                                autosize
+                                maxRows={8}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("recomendaciones")}
+                            />
 
 
-                            <div
-                                className={`${classes.fieldGroup} ${classes.fieldFull}`}
-                            >
-
-                                <label
-                                    className={classes.fieldLabel}
-                                >
-                                    Notas
-                                </label>
-
-                                <textarea
-                                    className={classes.textarea}
-                                    name="notas"
-                                    rows={4}
-                                />
-
-                            </div>
+                            <Textarea
+                                label="Notas adicionales"
+                                description="Agregue cualquier observación que considere importante."
+                                placeholder="Ingrese notas adicionales..."
+                                minRows={3}
+                                autosize
+                                maxRows={7}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("notas")}
+                            />
 
                         </div>
 
                     </Paper>
 
+                    
+                {/* BOTONES */}
 
-                    {/* BOTONES */}
+                <Group
+                    justify="flex-end"
+                    className={classes.submitBar}
+                >
 
-                    <Group
-                        justify="flex-end"
-                        className={classes.submitBar}
+                    <Button
+                        type="button"
+                        variant="default"
+                        onClick={() => navigate(-1)}
+                        disabled={loading}
                     >
-
-                        <Button
-                            type="button"
-                            variant="default"
-                            onClick={() => navigate(-1)}
-                            disabled={loading}
-                        >
-                            Cancelar
-                        </Button>
+                        Cancelar
+                    </Button>
 
 
-                        <Button
-                            type="submit"
-                            loading={loading}
-                            disabled={!adultoSeleccionado}
-                        >
-                            Registrar consulta
-                        </Button>
+                    <Button
+                        type="submit"
+                        loading={loading}
+                        disabled={!adultoSeleccionado}
+                    >
+                        Registrar consulta
+                    </Button>
 
-                    </Group>
+                </Group>
+
 
                 </form>
 
-            </div>
+
+            </div >
 
 
             {/* SELECTOR DE ADULTO */}
 
-            <Modal
+            < Modal
                 opened={selectorAbierto}
-                onClose={() => setSelectorAbierto(false)}
+                onClose={() => setSelectorAbierto(false)
+                }
                 title="Seleccionar adulto mayor"
                 size="lg"
                 centered
@@ -584,7 +675,7 @@ export function ConsultaRegistrarForm() {
                     onSelect={seleccionarAdulto}
                 />
 
-            </Modal>
+            </Modal >
 
         </>
     );

@@ -3,6 +3,7 @@ package com.cdez.sg_cdez_api.service.impl;
 import com.cdez.sg_cdez_api.dto.request.*;
 import com.cdez.sg_cdez_api.dto.response.*;
 import com.cdez.sg_cdez_api.entity.*;
+import com.cdez.sg_cdez_api.entity.enums.Especialidad;
 import com.cdez.sg_cdez_api.repository.ConsultaRepository;
 import com.cdez.sg_cdez_api.repository.specifications.ConsultaSpecs;
 import com.cdez.sg_cdez_api.service.*;
@@ -187,15 +188,20 @@ public class ConsultaServiceImpl implements ConsultaService {
         );
     }
 
-    private ConsultaDetailResponse mapDetailDTO(Consulta consulta){
+    private ConsultaDetailResponse mapDetailDTO(Consulta consulta) {
         AdultoMayor adultoMayor = consulta.getAdultoMayor();
         Personal personal = consulta.getCreatedBy();
 
-            ConsultaNutricionalDetailResponse nutricional = null;
-
-        if(consulta.getConsultaNutricional() != null){
+        ConsultaNutricionalDetailResponse nutricional = null;
+        if (consulta.getConsultaNutricional() != null) {
             nutricional = nutricionalMapDetailDTO(consulta.getConsultaNutricional());
         }
+
+        Personal currentUser = AUTH_HELPER.obtenerUsuarioAutenticado();
+
+        boolean esConsultaPsicologica = personal.getEspecialidad() == Especialidad.PSICOLOGIA;
+        boolean puedeVerCamposClinicos = !esConsultaPsicologica
+                || currentUser.getEspecialidad() == Especialidad.PSICOLOGIA;
 
         return new ConsultaDetailResponse(
                 consulta.getConsultaId(),
@@ -206,13 +212,13 @@ public class ConsultaServiceImpl implements ConsultaService {
                         adultoMayor.getNombreCompleto(),
                         adultoMayor.getFechaNacimiento()
                 ),
-                consulta.getMotivo(),
+                puedeVerCamposClinicos ? consulta.getMotivo() : null,
                 consulta.getTipoConsulta(),
-                consulta.getDescripcion(),
+                puedeVerCamposClinicos ? consulta.getDescripcion() : null,
                 consulta.getDiagnostico(),
-                consulta.getResultadosEvaluaciones(),
+                puedeVerCamposClinicos ? consulta.getResultadosEvaluaciones() : null,
                 consulta.getRecomendaciones(),
-                consulta.getNotas(),
+                puedeVerCamposClinicos ? consulta.getNotas() : null,
                 consulta.isActivo() ? "Activo" : "Inactivo",
                 new PersonalConsultaResponse(
                         personal.getPersonalId(),

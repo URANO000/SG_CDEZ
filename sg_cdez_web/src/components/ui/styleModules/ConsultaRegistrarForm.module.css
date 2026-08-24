@@ -52,34 +52,37 @@
     margin: 0;
 }
 
+.sectionDescription {
+    color: var(--text);
+    opacity: 0.6;
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
 
-.formGrid {
-    display: grid;
-
-    grid-template-columns:
-        repeat(2, minmax(0, 1fr));
-
-    gap: 20px 24px;
+.fieldLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text);
+  opacity: 0.75;
+  margin-bottom: 6px;
 }
 
 
+.formGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
 .fieldGroup {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-
-.fieldFull {
-    grid-column: 1 / -1;
-}
-
-
 .fieldLabel {
+    font-size: 0.9rem;
+    font-weight: 500;
     color: var(--text);
-
-    font-size: 0.85rem;
-    font-weight: 600;
 }
 
 
