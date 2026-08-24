@@ -855,6 +855,10 @@ export function ConsultaNutricionalEditarForm() {
                         </Text>
                     </Paper>
 
+                </div>
+
+                <form onSubmit={form.onSubmit(handleSubmit)}>
+
                     <Paper className={classes.card}>
                         <Group className={classes.sectionHeader}>
                             <Title
@@ -871,7 +875,12 @@ export function ConsultaNutricionalEditarForm() {
                                     label="Nombre completo"
                                     value={adultoMayor.nombreCompleto}
                                     readOnly
-                                    className={classes.readonlyField}
+                                    disabled
+                                    classNames={{
+                                        root: classes.readonlyField,
+                                        label: classes.fieldLabel,
+                                        input: classes.input,
+                                    }}
                                 />
 
                                 <SimpleGrid
@@ -886,6 +895,12 @@ export function ConsultaNutricionalEditarForm() {
                                         label="Identificación"
                                         value={adultoMayor.identificacion}
                                         readOnly
+                                        classNames={{
+                                            root: classes.fieldGroup,
+                                            label: classes.fieldLabel,
+                                            input: classes.input,
+                                        }}
+                                        disabled
                                     />
 
                                     <TextInput
@@ -896,805 +911,797 @@ export function ConsultaNutricionalEditarForm() {
                                                 : "No registrada"
                                         }
                                         readOnly
+                                        classNames={{
+                                            root: classes.fieldGroup,
+                                            label: classes.fieldLabel,
+                                            input: classes.input,
+                                        }}
+                                        disabled
                                     />
 
                                     <TextInput
                                         label="Tipo de identificación"
                                         value={adultoMayor.tipoIdentificacion}
                                         readOnly
+                                        classNames={{
+                                            root: classes.fieldGroup,
+                                            label: classes.fieldLabel,
+                                            input: classes.input,
+                                        }}
+                                        disabled
                                     />
                                 </SimpleGrid>
                             </div>
                         )}
                     </Paper>
+                    {/* INFORMACIÓN GENERAL */}
+                    <Paper className={classes.card}>
 
-                    <form onSubmit={form.onSubmit(handleSubmit)}>
-                        {/* INFORMACIÓN GENERAL */}
-                        <Paper className={classes.card}>
-
-                            <Group className={classes.sectionHeader}>
-                                <Title
-                                    order={4}
-                                    className={classes.sectionTitle}
-                                >
-                                    Información de la consulta
-                                </Title>
-                            </Group>
+                        <Group className={classes.sectionHeader}>
+                            <Title
+                                order={4}
+                                className={classes.sectionTitle}
+                            >
+                                Información de la consulta
+                            </Title>
+                        </Group>
 
 
-                            <div className={classes.formGrid}>
+                        <div className={classes.formGrid}>
 
-                                <TextInput
-                                    label="Tipo de consulta"
-                                    withAsterisk
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        required: classes.required,
-                                        input: classes.input,
-                                    }}
-                                    {...form.getInputProps("consultaGeneral.tipoConsulta")}
-                                />
-
-
-                                <Textarea
-                                    label="Motivo de consulta"
-                                    withAsterisk
-                                    minRows={4}
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        required: classes.required,
-                                        input: classes.textarea,
-                                    }}
-                                    {...form.getInputProps("consultaGeneral.motivo")}
-                                />
-
-
-                                <Textarea
-                                    label="Descripción"
-                                    minRows={4}
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        input: classes.textarea,
-                                    }}
-                                    {...form.getInputProps("consultaGeneral.descripcion")}
-                                />
-
-
-                                <Textarea
-                                    label="Diagnóstico"
-                                    minRows={4}
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        input: classes.textarea,
-                                    }}
-                                    {...form.getInputProps("consultaGeneral.diagnostico")}
-                                />
-
-
-                                <Textarea
-                                    label="Resultados de evaluaciones"
-                                    minRows={4}
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        input: classes.textarea,
-                                    }}
-                                    {...form.getInputProps("consultaGeneral.resultadosEvaluaciones")}
-                                />
-
-
-                                <Textarea
-                                    label="Recomendaciones"
-                                    minRows={4}
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        input: classes.textarea,
-                                    }}
-                                    {...form.getInputProps("consultaGeneral.recomendaciones")}
-                                />
-
-
-                                <Textarea
-                                    label="Notas"
-                                    minRows={4}
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        input: classes.textarea,
-                                    }}
-                                    {...form.getInputProps("consultaGeneral.notas")}
-                                />
-
-                            </div>
-
-                        </Paper>
-
-
-                        {/* HISTORIA ALIMENTARIA */}
-                        <Paper className={classes.card}>
-
-                            <Group className={classes.sectionHeader}>
-                                <Title
-                                    order={4}
-                                    className={classes.sectionTitle}
-                                >
-                                    Historia alimentaria
-                                </Title>
-                            </Group>
-
-
-                            <div className={classes.formGrid}>
-
-                                <Textarea
-                                    label="Historia alimentaria"
-                                    minRows={4}
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        input: classes.textarea,
-                                    }}
-                                    {...form.getInputProps("historiaAlimentaria")}
-                                />
-
-
-                                <Select
-                                    label="Apetito"
-                                    placeholder="Seleccione el apetito"
-                                    data={[
-                                        { value: "BUENO", label: "Bueno" },
-                                        { value: "REGULAR", label: "Regular" },
-                                        { value: "MALO", label: "Malo" },
-                                    ]}
-                                    clearable
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        input: classes.input,
-                                    }}
-                                    {...form.getInputProps("apetito")}
-                                />
-
-
-                                <TextInput
-                                    label="Masticación"
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        input: classes.input,
-                                    }}
-                                    {...form.getInputProps("masticacion")}
-                                />
-
-
-                                <TextInput
-                                    label="Deglución"
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        input: classes.input,
-                                    }}
-                                    {...form.getInputProps("deglucion")}
-                                />
-
-                            </div>
-
-                        </Paper>
-
-
-                        {/* SÍNTOMAS GASTROINTESTINALES */}
-                        <Paper className={classes.card}>
-
-                            <Group className={classes.sectionHeader}>
-                                <Title
-                                    order={4}
-                                    className={classes.sectionTitle}
-                                >
-                                    Síntomas gastrointestinales
-                                </Title>
-                            </Group>
-
-
-                            <SimpleGrid
-                                cols={{
-                                    base: 1,
-                                    sm: 2,
-                                    md: 5,
+                            <TextInput
+                                label="Tipo de consulta"
+                                withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
                                 }}
-                                mb="lg">
-
-                                <Switch
-                                    label="Náuseas"
-                                    {...form.getInputProps(
-                                        "nauseas",
-                                        { type: "checkbox" }
-                                    )}
-                                />
-
-                                <Switch
-                                    label="Vómitos"
-                                    {...form.getInputProps(
-                                        "vomitos",
-                                        { type: "checkbox" }
-                                    )}
-                                />
-
-                                <Switch
-                                    label="Distensión"
-                                    {...form.getInputProps(
-                                        "distension",
-                                        { type: "checkbox" }
-                                    )}
-                                />
-
-                                <Switch
-                                    label="Gases"
-                                    {...form.getInputProps(
-                                        "gases",
-                                        { type: "checkbox" }
-                                    )}
-                                />
-
-                                <Switch
-                                    label="Reflujo"
-                                    {...form.getInputProps(
-                                        "reflujo",
-                                        { type: "checkbox" }
-                                    )}
-                                />
-
-                            </SimpleGrid>
+                                {...form.getInputProps("consultaGeneral.tipoConsulta")}
+                            />
 
 
-                            <div className={classes.formGrid}>
-
-                                <TextInput
-                                    label="Frecuencia de evacuaciones"
-                                    withAsterisk
-                                    placeholder="Ej. 1 vez al día"
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        required: classes.required,
-                                        input: classes.input,
-                                    }}
-                                    {...form.getInputProps("frecuenciaEvacuaciones")}
-                                />
-
-                                <TextInput
-                                    label="Consistencia Bristol"
-                                    withAsterisk
-                                    placeholder="Ej. Tipo 4"
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        required: classes.required,
-                                        input: classes.input,
-                                    }}
-                                    {...form.getInputProps("consistenciaBristol")}
-                                />
+                            <Textarea
+                                label="Motivo de consulta"
+                                withAsterisk
+                                minRows={4}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("consultaGeneral.motivo")}
+                            />
 
 
-                                <Textarea
-                                    label="Estado cognitivo"
-                                    withAsterisk
-                                    minRows={3}
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        required: classes.required,
-                                        input: classes.textarea,
-                                    }}
-                                    {...form.getInputProps("estadoCognitivo")}
-                                />
-                            </div>
-
-                        </Paper>
+                            <Textarea
+                                label="Descripción"
+                                minRows={4}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("consultaGeneral.descripcion")}
+                            />
 
 
-                        {/* ANTROPOMETRÍA */}
-                        <Paper className={classes.card}>
-
-                            <Group className={classes.sectionHeader}>
-                                <Title
-                                    order={4}
-                                    className={classes.sectionTitle}
-                                >
-                                    Antropometría
-                                </Title>
-                            </Group>
-
-
-                            <div className={classes.formGrid}>
-
-                                <TextInput
-                                    label="Peso actual (kg)"
-                                    withAsterisk
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        required: classes.required,
-                                        input: classes.input,
-                                    }}
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    {...form.getInputProps(
-                                        "antropometria.pesoActual"
-                                    )}
-                                />
+                            <Textarea
+                                label="Diagnóstico"
+                                minRows={4}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("consultaGeneral.diagnostico")}
+                            />
 
 
-                                <TextInput
-                                    label="Peso habitual (kg)"
-                                    withAsterisk
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        required: classes.required,
-                                        input: classes.input,
-                                    }}
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    {...form.getInputProps(
-                                        "antropometria.pesoHabitual"
-                                    )}
-                                />
+                            <Textarea
+                                label="Resultados de evaluaciones"
+                                minRows={4}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("consultaGeneral.resultadosEvaluaciones")}
+                            />
 
 
-                                <TextInput
-                                    label="Peso hace 6 meses (kg)"
-                                    withAsterisk
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        required: classes.required,
-                                        input: classes.input,
-                                    }}
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    {...form.getInputProps(
-                                        "antropometria.pesoHace6Meses"
-                                    )}
-                                />
+                            <Textarea
+                                label="Recomendaciones"
+                                minRows={4}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("consultaGeneral.recomendaciones")}
+                            />
 
 
-                                <TextInput
-                                    label="Talla (m)"
-                                    withAsterisk
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        required: classes.required,
-                                        input: classes.input,
-                                    }}
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    {...form.getInputProps(
-                                        "antropometria.talla"
-                                    )}
-                                />
+                            <Textarea
+                                label="Notas"
+                                minRows={4}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("consultaGeneral.notas")}
+                            />
+
+                        </div>
+
+                    </Paper>
 
 
-                                <TextInput
-                                    label="Altura estimada (m)"
-                                    withAsterisk
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        required: classes.required,
-                                        input: classes.input,
-                                    }}
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    {...form.getInputProps(
-                                        "antropometria.alturaEstimada"
-                                    )}
-                                />
+                    {/* HISTORIA ALIMENTARIA */}
+                    <Paper className={classes.card}>
 
-
-                                <TextInput
-                                    label="IMC"
-                                    withAsterisk
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        required: classes.required,
-                                        input: classes.input,
-                                    }}
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    {...form.getInputProps(
-                                        "antropometria.imc"
-                                    )}
-                                />
-
-
-                                <TextInput
-                                    label="Circunferencia de pantorrilla (cm)"
-                                    withAsterisk
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        required: classes.required,
-                                        input: classes.input,
-                                    }}
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    {...form.getInputProps(
-                                        "antropometria.circunferenciaPantorrilla"
-                                    )}
-                                />
-
-
-                                <TextInput
-                                    label="Circunferencia braquial (cm)"
-                                    withAsterisk
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        required: classes.required,
-                                        input: classes.input,
-                                    }}
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    {...form.getInputProps(
-                                        "antropometria.circunferenciaBraquial"
-                                    )}
-                                />
-
-
-                                <TextInput
-                                    label="Circunferencia de cintura (cm)"
-                                    withAsterisk
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        required: classes.required,
-                                        input: classes.input,
-                                    }}
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    {...form.getInputProps(
-                                        "antropometria.circunferenciaCintura"
-                                    )}
-                                />
-
-
-                                <TextInput
-                                    label="Pérdida de peso (%)"
-                                    withAsterisk
-                                    classNames={{
-                                        root: classes.fieldGroup,
-                                        label: classes.fieldLabel,
-                                        required: classes.required,
-                                        input: classes.input,
-                                    }}
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    max="100"
-                                    {...form.getInputProps(
-                                        "antropometria.perdidaPesoPorcentaje"
-                                    )}
-                                />
-
-                            </div>
-
-                        </Paper>
-
-
-                        {/* TAMIZAJES */}
-                        <Paper className={classes.card}>
-
-                            <Group
-                                justify="space-between"
-                                className={classes.sectionHeader}
+                        <Group className={classes.sectionHeader}>
+                            <Title
+                                order={4}
+                                className={classes.sectionTitle}
                             >
-
-                                <Title
-                                    order={4}
-                                    className={classes.sectionTitle}
-                                >
-                                    Tamizajes nutricionales
-                                </Title>
-
-                                <Button
-                                    type="button"
-                                    variant="light"
-                                    leftSection={<BsPlus />}
-                                    onClick={() =>
-                                        form.insertListItem("tamizajes", {
-                                            tamizajeId: "",
-                                            tipo: null,
-                                            puntaje: "",
-                                            resultado: "",
-                                            observaciones: "",
-                                        })
-                                    }
-                                >
-                                    Agregar tamizaje
-                                </Button>
-
-                            </Group>
+                                Historia alimentaria
+                            </Title>
+                        </Group>
 
 
-                            {form.values.tamizajes.length === 0 && (
+                        <div className={classes.formGrid}>
 
-                                <Text className={classes.emptyText}>
-                                    No se han agregado tamizajes nutricionales.
-                                </Text>
-
-                            )}
-
-
-                            {form.values.tamizajes.map(
-                                (_, index) => (
-
-                                    <Paper
-                                        key={index}
-                                        withBorder
-                                        p="md"
-                                        mb="md"
-                                    >
-
-                                        <Group
-                                            justify="space-between"
-                                            mb="md"
-                                        >
-
-                                            <Text fw={600}>
-                                                Tamizaje {index + 1}
-                                            </Text>
-
-                                            <ActionIcon
-                                                type="button"
-                                                color="red"
-                                                variant="subtle"
-                                                onClick={() =>
-                                                    form.removeListItem(
-                                                        "tamizajes",
-                                                        index
-                                                    )
-                                                }
-                                            >
-                                                <BsTrash />
-                                            </ActionIcon>
-
-                                        </Group>
+                            <Textarea
+                                label="Historia alimentaria"
+                                minRows={4}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("historiaAlimentaria")}
+                            />
 
 
-                                        <div className={classes.formGrid}>
-
-                                            <Select
-                                                label="Tipo de tamizaje"
-                                                placeholder="Seleccione el tipo"
-                                                withAsterisk
-                                                data={[
-                                                    { value: "MNA", label: "MNA" },
-                                                    { value: "SARC_F", label: "SARC-F" },
-                                                    { value: "MUST", label: "MUST" },
-                                                    { value: "NRS", label: "NRS" },
-                                                ]}
-                                                {...form.getInputProps(
-                                                    `tamizajes.${index}.tipo`
-                                                )}
-                                            />
-
-
-                                            <TextInput
-                                                label="Puntaje"
-                                                type="number"
-                                                step="0.01"
-                                                {...form.getInputProps(
-                                                    `tamizajes.${index}.puntaje`
-                                                )}
-                                            />
+                            <Select
+                                label="Apetito"
+                                placeholder="Seleccione el apetito"
+                                data={[
+                                    { value: "BUENO", label: "Bueno" },
+                                    { value: "REGULAR", label: "Regular" },
+                                    { value: "MALO", label: "Malo" },
+                                ]}
+                                clearable
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.input,
+                                }}
+                                {...form.getInputProps("apetito")}
+                            />
 
 
-                                            <TextInput
-                                                label="Resultado"
-                                                {...form.getInputProps(
-                                                    `tamizajes.${index}.resultado`
-                                                )}
-                                            />
+                            <TextInput
+                                label="Masticación"
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.input,
+                                }}
+                                {...form.getInputProps("masticacion")}
+                            />
 
 
-                                            <Textarea
-                                                label="Observaciones"
-                                                minRows={3}
-                                                className={classes.fieldFull}
-                                                {...form.getInputProps(
-                                                    `tamizajes.${index}.observaciones`
-                                                )}
-                                            />
+                            <TextInput
+                                label="Deglución"
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.input,
+                                }}
+                                {...form.getInputProps("deglucion")}
+                            />
 
-                                        </div>
+                        </div>
 
-                                    </Paper>
-
-                                )
-                            )}
-
-                        </Paper>
+                    </Paper>
 
 
-                        {/* EXÁMENES DE LABORATORIO */}
-                        <Paper className={classes.card}>
+                    {/* SÍNTOMAS GASTROINTESTINALES */}
+                    <Paper className={classes.card}>
 
-                            <Group
-                                justify="space-between"
-                                className={classes.sectionHeader}
+                        <Group className={classes.sectionHeader}>
+                            <Title
+                                order={4}
+                                className={classes.sectionTitle}
                             >
-
-                                <Title
-                                    order={4}
-                                    className={classes.sectionTitle}
-                                >
-                                    Exámenes de laboratorio
-                                </Title>
-
-                                <Button
-                                    type="button"
-                                    variant="light"
-                                    leftSection={<BsPlus />}
-                                    onClick={() =>
-                                        form.insertListItem("examenesLaboratorio", {
-                                            examenId: "",
-                                            nombre: "",
-                                            valor: "",
-                                            unidad: "",
-                                            fecha: "",
-                                            observaciones: "",
-                                        })
-                                    }
-                                >
-                                    Agregar examen
-                                </Button>
-
-                            </Group>
+                                Síntomas gastrointestinales
+                            </Title>
+                        </Group>
 
 
-                            {form.values.examenesLaboratorio.length === 0 && (
+                        <SimpleGrid
+                            cols={{
+                                base: 1,
+                                sm: 2,
+                                md: 5,
+                            }}
+                            mb="lg">
 
-                                <Text className={classes.emptyText}>
-                                    No se han agregado exámenes de laboratorio.
-                                </Text>
+                            <Switch
+                                label="Náuseas"
+                                {...form.getInputProps(
+                                    "nauseas",
+                                    { type: "checkbox" }
+                                )}
+                            />
 
-                            )}
+                            <Switch
+                                label="Vómitos"
+                                {...form.getInputProps(
+                                    "vomitos",
+                                    { type: "checkbox" }
+                                )}
+                            />
 
+                            <Switch
+                                label="Distensión"
+                                {...form.getInputProps(
+                                    "distension",
+                                    { type: "checkbox" }
+                                )}
+                            />
 
-                            {form.values.examenesLaboratorio.map(
-                                (_, index) => (
+                            <Switch
+                                label="Gases"
+                                {...form.getInputProps(
+                                    "gases",
+                                    { type: "checkbox" }
+                                )}
+                            />
 
-                                    <Paper
-                                        key={index}
-                                        withBorder
-                                        p="md"
-                                        mb="md"
-                                    >
+                            <Switch
+                                label="Reflujo"
+                                {...form.getInputProps(
+                                    "reflujo",
+                                    { type: "checkbox" }
+                                )}
+                            />
 
-                                        <Group
-                                            justify="space-between"
-                                            mb="md"
-                                        >
-
-                                            <Text fw={600}>
-                                                Examen {index + 1}
-                                            </Text>
-
-                                            <ActionIcon
-                                                type="button"
-                                                color="red"
-                                                variant="subtle"
-                                                onClick={() =>
-                                                    form.removeListItem(
-                                                        "examenesLaboratorio",
-                                                        index
-                                                    )
-                                                }
-                                            >
-                                                <BsTrash />
-                                            </ActionIcon>
-
-                                        </Group>
-
-
-                                        <div className={classes.formGrid}>
-
-                                            <TextInput
-                                                label="Nombre"
-                                                withAsterisk
-                                                {...form.getInputProps(
-                                                    `examenesLaboratorio.${index}.nombre`
-                                                )}
-                                            />
+                        </SimpleGrid>
 
 
-                                            <TextInput
-                                                label="Valor"
-                                                {...form.getInputProps(
-                                                    `examenesLaboratorio.${index}.valor`
-                                                )}
-                                            />
+                        <div className={classes.formGrid}>
+
+                            <TextInput
+                                label="Frecuencia de evacuaciones"
+                                withAsterisk
+                                placeholder="Ej. 1 vez al día"
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
+                                {...form.getInputProps("frecuenciaEvacuaciones")}
+                            />
+
+                            <TextInput
+                                label="Consistencia Bristol"
+                                withAsterisk
+                                placeholder="Ej. Tipo 4"
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
+                                {...form.getInputProps("consistenciaBristol")}
+                            />
 
 
-                                            <TextInput
-                                                label="Unidad"
-                                                placeholder="Ej. mg/dL"
-                                                {...form.getInputProps(
-                                                    `examenesLaboratorio.${index}.unidad`
-                                                )}
-                                            />
+                            <Textarea
+                                label="Estado cognitivo"
+                                withAsterisk
+                                minRows={3}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps("estadoCognitivo")}
+                            />
+                        </div>
+
+                    </Paper>
 
 
-                                            <TextInput
-                                                label="Fecha"
-                                                type="date"
-                                                {...form.getInputProps(
-                                                    `examenesLaboratorio.${index}.fecha`
-                                                )}
-                                            />
+                    {/* ANTROPOMETRÍA */}
+                    <Paper className={classes.card}>
+
+                        <Group className={classes.sectionHeader}>
+                            <Title
+                                order={4}
+                                className={classes.sectionTitle}
+                            >
+                                Antropometría
+                            </Title>
+                        </Group>
 
 
-                                            <Textarea
-                                                label="Observaciones"
-                                                minRows={3}
-                                                className={classes.fieldFull}
-                                                {...form.getInputProps(
-                                                    `examenesLaboratorio.${index}.observaciones`
-                                                )}
-                                            />
+                        <div className={classes.formGrid}>
 
-                                        </div>
+                            <TextInput
+                                label="Peso actual (kg)"
+                                withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                {...form.getInputProps(
+                                    "antropometria.pesoActual"
+                                )}
+                            />
 
-                                    </Paper>
 
-                                )
-                            )}
+                            <TextInput
+                                label="Peso habitual (kg)"
+                                withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                {...form.getInputProps(
+                                    "antropometria.pesoHabitual"
+                                )}
+                            />
 
-                        </Paper>
+
+                            <TextInput
+                                label="Peso hace 6 meses (kg)"
+                                withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                {...form.getInputProps(
+                                    "antropometria.pesoHace6Meses"
+                                )}
+                            />
 
 
-                        {/* BOTONES */}
+                            <TextInput
+                                label="Talla (m)"
+                                withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                {...form.getInputProps(
+                                    "antropometria.talla"
+                                )}
+                            />
+
+
+                            <TextInput
+                                label="Altura estimada (m)"
+                                withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                {...form.getInputProps(
+                                    "antropometria.alturaEstimada"
+                                )}
+                            />
+
+
+                            <TextInput
+                                label="IMC"
+                                withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                {...form.getInputProps(
+                                    "antropometria.imc"
+                                )}
+                            />
+
+
+                            <TextInput
+                                label="Circunferencia de pantorrilla (cm)"
+                                withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                {...form.getInputProps(
+                                    "antropometria.circunferenciaPantorrilla"
+                                )}
+                            />
+
+
+                            <TextInput
+                                label="Circunferencia braquial (cm)"
+                                withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                {...form.getInputProps(
+                                    "antropometria.circunferenciaBraquial"
+                                )}
+                            />
+
+
+                            <TextInput
+                                label="Circunferencia de cintura (cm)"
+                                withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                {...form.getInputProps(
+                                    "antropometria.circunferenciaCintura"
+                                )}
+                            />
+
+
+                            <TextInput
+                                label="Pérdida de peso (%)"
+                                withAsterisk
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    required: classes.required,
+                                    input: classes.input,
+                                }}
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100"
+                                {...form.getInputProps(
+                                    "antropometria.perdidaPesoPorcentaje"
+                                )}
+                            />
+
+                        </div>
+
+                    </Paper>
+
+
+                    {/* TAMIZAJES */}
+                    <Paper className={classes.card}>
+
                         <Group
-                            justify="flex-end"
-                            className={classes.submitBar}
+                            justify="space-between"
+                            className={classes.sectionHeader}
                         >
 
-                            <Button
-                                type="button"
-                                variant="default"
-                                onClick={() => navigate(-1)}
-                                disabled={loading}
+                            <Title
+                                order={4}
+                                className={classes.sectionTitle}
                             >
-                                Cancelar
-                            </Button>
+                                Tamizajes nutricionales
+                            </Title>
 
-
-                            <Button
-                                type="submit"
-                                loading={loading}
-                            >
-                                Actualizar consulta nutricional
-                            </Button>
 
                         </Group>
 
-                    </form>
-                </div>
+
+                        {form.values.tamizajes.length === 0 && (
+
+                            <Text className={classes.emptyText}>
+                                No se han agregado tamizajes nutricionales.
+                            </Text>
+
+                        )}
+
+
+                        {form.values.tamizajes.map(
+                            (_, index) => (
+
+                                <Paper
+                                    key={index}
+                                    withBorder
+                                    p="md"
+                                    mb="md"
+                                >
+
+                                    <Group
+                                        justify="space-between"
+                                        mb="md"
+                                    >
+
+                                        <Text fw={600}>
+                                            Tamizaje {index + 1}
+                                        </Text>
+
+
+                                    </Group>
+
+
+                                    <div className={classes.formGrid}>
+
+                                        <Select
+                                            label="Tipo de tamizaje"
+                                            placeholder="Seleccione el tipo"
+                                            withAsterisk
+                                            classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.textinput,
+                                            }}
+                                            data={[
+                                                { value: "MNA", label: "MNA" },
+                                                { value: "SARC_F", label: "SARC-F" },
+                                                { value: "MUST", label: "MUST" },
+                                                { value: "NRS", label: "NRS" },
+                                            ]}
+                                            {...form.getInputProps(
+                                                `tamizajes.${index}.tipo`
+                                            )}
+                                        />
+
+
+                                        <TextInput
+                                            label="Puntaje"
+                                            type="number"
+                                            step="0.01"
+                                            {...form.getInputProps(
+                                                `tamizajes.${index}.puntaje`
+                                            )}
+                                            classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.textinput,
+                                            }}
+                                        />
+
+
+                                        <TextInput
+                                            label="Resultado"
+                                            {...form.getInputProps(
+                                                `tamizajes.${index}.resultado`
+                                            )}
+                                            classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.textinput,
+                                            }}
+                                        />
+
+
+                                        <Textarea
+                                            label="Observaciones"
+                                            minRows={3}
+                                            classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.textarea,
+                                            }}
+                                            {...form.getInputProps(
+                                                `tamizajes.${index}.observaciones`
+                                            )}
+                                        />
+
+                                    </div>
+
+                                </Paper>
+
+                            )
+                        )}
+
+                    </Paper>
+
+
+                    {/* EXÁMENES DE LABORATORIO */}
+                    <Paper className={classes.card}>
+
+                        <Group
+                            justify="space-between"
+                            className={classes.sectionHeader}
+                        >
+
+                            <Title
+                                order={4}
+                                className={classes.sectionTitle}
+                            >
+                                Exámenes de laboratorio
+                            </Title>
+
+                        </Group>
+
+
+                        {form.values.examenesLaboratorio.length === 0 && (
+
+                            <Text className={classes.emptyText}>
+                                No se han agregado exámenes de laboratorio.
+                            </Text>
+
+                        )}
+
+
+                        {form.values.examenesLaboratorio.map(
+                            (_, index) => (
+
+                                <Paper
+                                    key={index}
+                                    withBorder
+                                    p="md"
+                                    mb="md"
+                                >
+
+                                    <Group
+                                        justify="space-between"
+                                        mb="md"
+                                    >
+
+                                        <Text fw={600}>
+                                            Examen {index + 1}
+                                        </Text>
+
+                                    </Group>
+
+
+                                    <div className={classes.formGrid}>
+
+                                        <TextInput
+                                            label="Nombre"
+                                            withAsterisk
+                                            classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.textinput,
+                                            }}
+                                            {...form.getInputProps(
+                                                `examenesLaboratorio.${index}.nombre`
+                                            )}
+                                        />
+
+
+                                        <TextInput
+                                            label="Valor"
+                                             classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.textinput,
+                                            }}
+                                            {...form.getInputProps(
+                                                `examenesLaboratorio.${index}.valor`
+                                            )}
+                                        />
+
+
+                                        <TextInput
+                                            label="Unidad"
+                                             classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.textinput,
+                                            }}
+                                            placeholder="Ej. mg/dL"
+                                            {...form.getInputProps(
+                                                `examenesLaboratorio.${index}.unidad`
+                                            )}
+                                        />
+
+
+                                        <TextInput
+                                            label="Fecha"
+                                            type="date"
+                                             classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.textinput,
+                                            }}
+                                            {...form.getInputProps(
+                                                `examenesLaboratorio.${index}.fecha`
+                                            )}
+                                        />
+
+
+                                        <Textarea
+                                            label="Observaciones"
+                                            minRows={3}
+                                            className={classes.fieldFull}
+                                             classNames={{
+                                                root: classes.fieldGroup,
+                                                label: classes.fieldLabel,
+                                                input: classes.textarea,
+                                            }}
+                                            {...form.getInputProps(
+                                                `examenesLaboratorio.${index}.observaciones`
+                                            )}
+                                        />
+
+                                    </div>
+
+                                </Paper>
+
+                            )
+                        )}
+
+                    </Paper>
+
+
+                    {/* BOTONES */}
+                    <Group
+                        justify="flex-end"
+                        className={classes.submitBar}
+                    >
+
+                        <Button
+                            type="button"
+                            variant="default"
+                            onClick={() => navigate(-1)}
+                            disabled={loading}
+                        >
+                            Cancelar
+                        </Button>
+
+
+                        <Button
+                            type="submit"
+                            loading={loading}
+                        >
+                            Actualizar consulta nutricional
+                        </Button>
+
+                    </Group>
+
+                </form>
             </div>
         </>
     )
