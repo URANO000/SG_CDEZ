@@ -2,8 +2,9 @@ package com.cdez.sg_cdez_api.config;
 
 import com.cdez.sg_cdez_api.filter.JwtAuthFilter;
 import jakarta.servlet.DispatcherType;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -21,9 +22,10 @@ import org.springframework.http.HttpMethod;
 import java.util.List;
 
 @Configuration
-@Data
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SecurityConfig {
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
     private final JwtAuthFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
     /**
@@ -109,7 +111,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of(frontendUrl));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
