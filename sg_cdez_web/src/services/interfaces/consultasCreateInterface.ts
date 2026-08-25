@@ -1,5 +1,10 @@
 import type { Apetito, TipoTamizaje } from "./consultasDetailsResponse";
 
+export interface ReferenciaCreateRequest {
+    receptorId: string;
+    mensaje: string;
+}
+
 export interface TamizajeNutricionalCreateRequest{
     tipo: TipoTamizaje | null;
     puntaje: number | null;
@@ -37,6 +42,7 @@ export interface ConsultaCreateRequest{
     resultadosEvaluaciones: string | null;
     recomendaciones: string | null;
     notas: string | null;
+    referencia?: ReferenciaCreateRequest;
 }
 
 export interface ConsultaNutricionalCreateRequest{

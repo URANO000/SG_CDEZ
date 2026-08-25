@@ -24,10 +24,6 @@ import classes from "../styleModules/ConsultaRegistrarForm.module.css";
 import { registrarConsultaNutricional } from "../../../services/consultasService";
 
 import type {
-    ConsultaNutricionalCreateRequest,
-} from "../../../services/interfaces/consultasCreateInterface";
-
-import type {
     Apetito,
     TipoTamizaje,
 } from "../../../services/interfaces/consultasDetailsResponse";
@@ -35,8 +31,10 @@ import type {
 import type {
     AdultoMayorResponse,
 } from "../../../services/interfaces/adultoMayorInterface";
+import type { PersonalResponse } from "../../../services/interfaces/personalResponse";
 
 import { AdultoSelector } from "../../common/AdultoSelector";
+import { PersonalSelector } from "../../common/PersonalSelector";
 
 
 interface AntropometriaFormValues {
@@ -66,6 +64,11 @@ interface ExamenLaboratorioFormValues {
     fecha: string;
     observaciones: string;
 }
+interface ReferenciaFormValues {
+    receptorId: string;
+    mensaje: string;
+}
+
 
 interface ConsultaNutricionalFormValues {
     consultaGeneral: {
@@ -76,6 +79,7 @@ interface ConsultaNutricionalFormValues {
         resultadosEvaluaciones: string;
         recomendaciones: string;
         notas: string;
+        referencia: ReferenciaFormValues;
     };
 
     historiaAlimentaria: string;
@@ -109,6 +113,8 @@ export function ConsultaNutricionalRegistrarForm() {
     const [adultoSeleccionado, setAdultoSeleccionado] =
         useState<AdultoMayorResponse | null>(null);
 
+    const [personalSeleccionado, setPersonalSeleccionado] =
+        useState<PersonalResponse | null>(null);
     const [selectorAbierto, setSelectorAbierto] =
         useState(false);
 
@@ -125,6 +131,10 @@ export function ConsultaNutricionalRegistrarForm() {
                 resultadosEvaluaciones: "",
                 recomendaciones: "",
                 notas: "",
+                referencia: {
+                    receptorId: "",
+                    mensaje: ""
+                }
             },
 
             historiaAlimentaria: "",
@@ -435,6 +445,13 @@ export function ConsultaNutricionalRegistrarForm() {
                         nullable(
                             values.consultaGeneral.notas
                         ),
+                    referencia:
+                    {
+                        receptorId:
+                            values.consultaGeneral.referencia.receptorId,
+                        mensaje:
+                            values.consultaGeneral.referencia.mensaje
+                    }
                 },
 
                 historiaAlimentaria:
@@ -1581,9 +1598,85 @@ export function ConsultaNutricionalRegistrarForm() {
 
                                 </Paper>
 
+
                             )
                         )}
 
+                    </Paper>
+
+                    <Paper className={classes.card}>
+                        <div>
+                            <div className={classes.sectionHeader}>
+
+                                <Title
+                                    order={4}
+                                    className={classes.sectionTitle}>
+                                    Referencia de consulta
+                                </Title>
+
+                                <Text
+                                    size="sm"
+                                    className={classes.sectionDescription}>
+                                    Es completamente opcional.
+                                </Text>
+
+                            </div>
+                            {/* PERSONAL SELECTION OUGHH */}
+                            <PersonalSelector
+                                selectedId={form.values.consultaGeneral.referencia.receptorId}
+                                onSelect={(personal) => {
+                                    setPersonalSeleccionado(personal);
+
+                                    form.setFieldValue(
+                                        "consultaGeneral.referencia.receptorId",
+                                        personal.personalId
+                                    );
+                                }}
+
+                            />
+
+                            {personalSeleccionado && (
+                                <div>
+                                    <Text size="sm" fw={600}>
+                                        Profesional seleccionado
+                                    </Text>
+
+                                    <Text size="sm">
+                                        {[
+                                            personalSeleccionado.primerNombre,
+                                            personalSeleccionado.segundoNombre,
+                                            personalSeleccionado.primerApellido,
+                                            personalSeleccionado.segundoApellido,
+                                        ]
+                                            .filter(Boolean)
+                                            .join(" ")}
+                                    </Text>
+
+                                    <Text size="xs" c="dimmed">
+                                        {personalSeleccionado.especialidad}
+                                        {" · "}
+                                        {personalSeleccionado.usuario}
+                                    </Text>
+                                </div>
+                            )}
+
+                            <Textarea
+                                label="Referencia a otro profesional"
+                                description="Envíe un correo con algún mensaje que considere importante."
+                                placeholder="Ingrese su mensaje..."
+                                minRows={3}
+                                autosize
+                                maxRows={7}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps(
+                                    "consultaGeneral.referencia.mensaje"
+                                )}
+                            />
+                        </div>
                     </Paper>
 
 

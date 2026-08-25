@@ -46,9 +46,9 @@ public class PersonalServiceImpl implements PersonalService {
     @Override
     public PageResponse<PersonalResponse> listarPersonalFiltrado(PersonalFiltro filtros,@PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
         // Validaciones
-        if(!AUTH_HELPER.isUsuarioAdmin()){
-            throw new RuntimeException("Sólo un usuario administrador puede ver el personal.");
-        }
+//        if(!AUTH_HELPER.isUsuarioAdmin()){
+//            throw new RuntimeException("Sólo un usuario administrador puede ver el personal.");
+//        }
 
         AUTH_HELPER.validarUsuarioActivo();
 

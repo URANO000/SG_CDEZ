@@ -29,6 +29,7 @@ public class ConsultaServiceImpl implements ConsultaService {
     private final TamizajeService TAMIZAJE_SERVICE;
     private final AntropometriaService ANTROPOMETRIA_SERVICE;
     private final ExamenLaboratorioService EXAMENLAB_SERVICE;
+    private final ReferenciaService REFERENCIA_SERVICE;
 
     @Override
     public PageResponse<ConsultaPageResponse> listarConsultasFiltradas(ConsultaFiltro filtros, Pageable pageable) {
@@ -110,6 +111,12 @@ public class ConsultaServiceImpl implements ConsultaService {
     @Override
     public ConsultaDetailResponse crearConsulta(ConsultaCreateRequest request) {
         Consulta consulta = crearConsultaEntity(request);
+        if(request.referencia() != null){
+            REFERENCIA_SERVICE.crearReferencia(
+                    consulta,
+                    request.referencia()
+            );
+        }
 
         return mapDetailDTO(consulta);
     }
