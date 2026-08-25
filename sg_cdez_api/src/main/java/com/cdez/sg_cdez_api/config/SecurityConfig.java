@@ -71,6 +71,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/personal/desactivarPersonal/**").hasRole("ADMIN")
                         .requestMatchers("/api/personal/reportePDF").hasRole("ADMIN")
                         .requestMatchers("/api/personal/reporteExcel").hasRole("ADMIN")
+                        .requestMatchers("/api/dashboard/admin").hasRole("ADMIN")
+                        .requestMatchers("/api/dashboard/personal").hasRole("PERSONAL")
+                        .requestMatchers("/api/dashboard/ayudante").hasRole("AYUDANTE")
 
 
                         .requestMatchers("/api/consulta/**").hasAnyRole("PERSONAL", "AYUDANTE")
