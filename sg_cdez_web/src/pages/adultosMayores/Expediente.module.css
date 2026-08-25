@@ -1,0 +1,238 @@
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 30px 40px;
+}
+
+.topBar {
+  margin-bottom: 18px;
+}
+
+.pageTitle {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.breadcrumb {
+  color: var(--text);
+  opacity: 0.65;
+}
+
+.headerCard {
+  padding: 22px 26px;
+  margin-bottom: 18px;
+
+  background-color: var(--card-bg);
+
+  border: 1px solid rgba(107, 99, 117, 0.13);
+  border-radius: 8px;
+
+  box-shadow: var(--shadow);
+}
+
+.personName {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.secondaryText {
+  color: var(--text);
+  opacity: 0.65;
+}
+
+.tabs {
+  width: 100%;
+}
+
+.panel {
+  min-height: 360px;
+  padding: 28px;
+
+  background-color: var(--card-bg);
+
+  border-radius: 0 8px 8px 8px;
+}
+
+.panelPlaceholder {
+  min-height: 360px;
+  padding: 32px;
+
+  color: var(--text);
+  opacity: 0.65;
+
+  background-color: var(--card-bg);
+
+  border-radius: 0 8px 8px 8px;
+}
+
+.label {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: var(--text);
+  opacity: 0.55;
+
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.value {
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.badgeActive {
+  background-color: var(--color-primary) !important;
+  color: var(--color-sidebar) !important;
+}
+
+.badgeInactive {
+  background-color: var(--color-secondary) !important;
+  color: var(--color-sidebar) !important;
+}
+
+.loadingState {
+  display: flex;
+
+  min-height: 70vh;
+
+  align-items: center;
+  justify-content: center;
+}
+
+.encargadosList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.encargadoCard {
+  padding: 22px;
+
+  background-color: var(--card-bg);
+
+  border: 1px solid rgba(107, 99, 117, 0.13);
+  border-radius: 8px;
+}
+
+.encargadoName {
+  margin-bottom: 18px;
+
+  color: var(--text);
+  font-weight: 600;
+}
+
+.contactosSection {
+  margin-top: 22px;
+  padding-top: 18px;
+
+  border-top: 1px solid rgba(107, 99, 117, 0.15);
+}
+
+.contactosList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contactoRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 10px 12px;
+
+  background-color: rgba(107, 99, 117, 0.05);
+
+  border-radius: 6px;
+}
+
+.contactoType {
+  min-width: 100px;
+
+  color: var(--text);
+  font-weight: 600;
+}
+
+.emptyState {
+  padding: 40px 20px;
+
+  color: var(--text);
+  opacity: 0.6;
+
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .container {
+    padding: 20px 12px 32px;
+  }
+
+  .headerCard {
+    padding: 18px;
+  }
+
+  .panel {
+    padding: 18px;
+  }
+
+  .panelPlaceholder {
+    padding: 18px;
+  }
+}
+
+.epicrisisCard {
+  padding: 24px;
+  background: var(--card-bg);
+  border: 1px solid rgba(107, 99, 117, 0.16);
+  border-radius: 8px;
+}
+
+.loadingSection {
+  display: flex;
+  min-height: 220px;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyState {
+  display: flex;
+  min-height: 220px;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  opacity: 0.55;
+  text-align: center;
+}
+.historySection {
+  margin-top: 32px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(107, 99, 117, 0.16);
+}
+
+.historyHeader {
+  margin-bottom: 20px;
+}
+
+.filterButton {
+  background-color: var(--color-navbar);
+}
+
+.filterButton:hover {
+  background-color: var(--color-secondary);
+}
+
+.paginationBar {
+  margin-top: 20px;
+}
+.registerButton {
+  background-color: var(--color-navbar);
+}
+
+.registerButton:hover {
+  background-color: var(--color-secondary);
+}

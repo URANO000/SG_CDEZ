@@ -1,0 +1,106 @@
+.wrapper {
+  background: var(--table-color-light);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.table thead tr {
+  background-color: var(--color-navbar);
+}
+
+.table thead th {
+  color: #ffffff;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  padding: 14px 16px;
+  border: none;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid rgba(107, 99, 117, 0.12);
+  transition: background-color 0.15s ease;
+}
+
+.table tbody tr:hover {
+  background-color: var(--color-sidebar-hv);
+}
+
+.table tbody td {
+  padding: 12px 16px;
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.badgeActive,
+.badgeInactive {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.badgeActive {
+    background-color: rgba(34, 197, 94, 0.10);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    color: #16a34a;
+}
+
+.badgeInactive {
+    background-color: rgba(107, 114, 128, 0.10);
+    border: 1px solid rgba(107, 114, 128, 0.35);
+    color: #6b7280;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 32px 16px !important;
+  color: var(--text);
+  opacity: 0.6;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .table {
+    font-size: 0.8rem;
+  }
+
+  .table thead th,
+  .table tbody td {
+    padding: 10px 8px;
+  }
+}
+
+.actionView {
+  color: var(--color-secondary);
+}
+
+.actionView:hover {
+  background-color: var(--color-sidebar-hv);
+}
+
+.actionEdit {
+  color: var(--color-navbar);
+}
+
+.actionEditDisabled{
+  color: rgb(192, 188, 188);
+  cursor: not-allowed;
+}
+
+.actionEdit:hover {
+  background-color: var(--color-sidebar-hv);
+}

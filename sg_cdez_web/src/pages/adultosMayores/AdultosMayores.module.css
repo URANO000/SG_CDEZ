@@ -1,0 +1,85 @@
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 30px;
+}
+
+.heading {
+  gap: 16px;
+}
+
+.pageTitle {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.btnBar{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: end;
+    margin-bottom: 20px;
+    gap: 12px;
+}
+
+.reportBtn{
+    background-color: var(--color-secondary);
+}
+
+.reportBtn:hover{
+    background-color: #688399;
+}
+
+.titleRule {
+  height: 1px;
+  margin: 8px 0 20px;
+  background-color: rgba(107, 99, 117, 0.45);
+}
+
+.filterBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.searchField {
+  flex: 1;
+  max-width: 420px;
+}
+
+.statusField {
+  width: 180px;
+}
+
+.loadingState {
+  display: flex;
+  min-height: 280px;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 700px) {
+  .container {
+    padding: 20px 12px;
+  }
+
+  .heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .filterBar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .searchField {
+    width: 100%;
+    max-width: none;
+  }
+
+  .statusField {
+    width: 100%;
+  }
+}

@@ -11,6 +11,9 @@ export default defineConfig([
     files: ['**/*.{ts,tsx}'],
     extends: [
       js.configs.recommended,
+      {
+        ignores: ["**/*.css", "**/*.scss", "**/*.sass"],
+      },
       tseslint.configs.recommended,
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,

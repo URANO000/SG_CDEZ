@@ -1,0 +1,130 @@
+.pageTitle {
+    color: var(--text);
+    padding: 20px 30px 20px 30px;
+    font-weight: 600;
+    border: 1px solid rgba(107, 99, 117, 0.25);
+    box-shadow: rgba(113, 111, 116, 0.075);
+    background-color: var(--table-color-light);
+}
+
+.filterBar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.btnBar{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: end;
+    margin-bottom: 20px;
+    gap: 12px;
+}
+
+
+.createBtn {
+    text-decoration: none;
+}
+
+.createBtn a {
+    color: #ffffff;
+}
+
+.reportBtn{
+    background-color: var(--color-secondary);
+}
+
+.reportBtn:hover{
+    background-color: #688399;
+}
+
+.field {
+    flex: 1;
+    min-width: 180px;
+}
+
+.input {
+    border: 1px solid rgba(107, 99, 117, 0.25);
+    background-color: #ffffff;
+    color: var(--text);
+    border-radius: 6px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input:focus {
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 2px rgba(144, 182, 191, 0.3);
+}
+
+.searchButton {
+    background-color: var(--color-navbar) !important;
+    color: #ffffff !important;
+    border-radius: 6px;
+    font-weight: 500;
+    height: 36px;
+}
+
+.searchButton:hover {
+    background-color: var(--color-sidebar-clc) !important;
+}
+
+.paginationBar {
+    margin-top: 20px;
+}
+
+.paginationRoot {
+    gap: 4px;
+}
+
+.pageControl {
+    border: 1px solid rgba(107, 99, 117, 0.2);
+    color: var(--text);
+    background-color: var(--table-color-light);
+    border-radius: 6px;
+}
+
+.pageControl:hover {
+    background-color: var(--color-sidebar-hv);
+}
+
+.pageControl[data-active] {
+    background-color: var(--color-primary) !important;
+    color: var(--color-sidebar) !important;
+    border-color: var(--color-primary);
+}
+
+.mainpg {
+    padding-bottom: 30px;
+}
+
+.subpg {
+    padding: 20px 30px;
+}
+
+@media (max-width: 768px) {
+    .filterBar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .field {
+        min-width: 100%;
+    }
+
+    .searchButton {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .pageTitle {
+        font-size: 1.25rem;
+    }
+
+    .paginationRoot {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}

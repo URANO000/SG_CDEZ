@@ -1,122 +1,228 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
+
+import { useEffect } from "react";
+import { MantineProvider, localStorageColorSchemeManager } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
+import { BrowserRouter as Router, Routes, Route } from "react-router";
+
+import { zurquiTheme } from "./theme";
+import "./App.css";
+
+import { Layout } from "./components/layout/Layout";
+
+import { Home } from "./pages/home/home";
+import { Login } from "./pages/auth/login";
+import { Activar } from "./pages/auth/activarCuenta";
+import { ForgotPassword } from "./pages/auth/forgotPassword";
+import { ResendVerification } from "./pages/auth/resendVerification";
+import { RestablecerContrasena } from "./pages/auth/restablecerContrasena";
+
+import { Consultas } from "./pages/consultas/consultas";
+import { ConsultaDetalle } from "./pages/consultas/consultaDetalle";
+
+import { AdultosMayores } from "./pages/adultosMayores/adultosMayores";
+import { AdultoMayorExpediente } from "./pages/adultosMayores/adultoMayorExpediente";
+import { AdultoMayorEditar } from "./pages/adultosMayores/adultoMayorEditar";
+import { AdultoMayorRegistrar } from "./pages/adultosMayores/adultoMayorRegistrar";
+
+import { Personal } from "./pages/personal/personal";
+import { PersonalDetalle } from "./pages/personal/personalDetalle";
+import { PersonalEditar } from "./pages/personal/personalEditar";
+import { PersonalRegistrar } from "./pages/personal/personalRegistrar";
+
+import { Auditoria } from "./pages/auditoria/auditoria";
+import { Documentacion } from "./pages/documentacion/documentacion";
+
+import { Ajustes } from "./pages/ajustes/ajustes";
+import { Apariencia } from "./pages/ajustes/apariencia";
+import { Accesibilidad } from "./pages/ajustes/accesibilidad";
+
+import { NotFound } from "./pages/error/404";
+import { ServerError } from "./pages/error/500";
+
+import { AuthProvider } from "./services/authContext";
+import { ProtectedRoute } from "./Routes";
+
+import {
+  applyAccessibilitySettings,
+  loadAccessibilitySettings,
+} from "./utils/accessibility";
+import { ConsultaRegistrar } from "./pages/consultas/consultaRegistrar";
+import { ConsultaEditar } from "./pages/consultas/consultaEditar";
+
+const colorSchemeManager = localStorageColorSchemeManager({
+  key: "sg-cdez-color-scheme",
+});
 
 function App() {
-  const [count, setCount] = useState(0)
+  useEffect(() => {
+    applyAccessibilitySettings(loadAccessibilitySettings());
+  }, []);
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <MantineProvider
+      theme={zurquiTheme}
+      colorSchemeManager={colorSchemeManager}
+      defaultColorScheme="light"
+    >
+      <Notifications position="top-right" />
 
-      <div className="ticks"></div>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            {/* RUTAS PÚBLICAS */}
+            <Route path="/activar" element={<Activar />} />
+            <Route path="/login" element={<Login />} />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+            <Route path="/forgot-password" element={<ForgotPassword />} />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+            <Route
+              path="/restablecer-contrasena"
+              element={<RestablecerContrasena />}
+            />
+
+            <Route
+              path="/reenviar-verificacion"
+              element={<ResendVerification />}
+            />
+
+            <Route path="/500" element={<ServerError />} />
+
+            {/* RUTAS AUTENTICADAS */}
+            <Route
+              element={
+                <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_ADMIN", "ROLE_AYUDANTE"]}>
+                  <Layout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/" element={<Home />} />
+
+              {/* CONSULTAS */}
+              <Route
+                path="/consultas"
+                element={
+                  <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_AYUDANTE"]}>
+                    <Consultas />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/consulta/:consultaId/detalle"
+                element={
+                  <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_AYUDANTE"]}>
+                    <ConsultaDetalle />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/consulta/:consultaId/editar"
+                element={
+                  <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_AYUDANTE"]}>
+                    <ConsultaEditar />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="consulta/registrar"
+                element={
+                  <ProtectedRoute roles={["ROLE_PERSONAL", "ROLE_AYUDANTE"]}>
+                    <ConsultaRegistrar />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* AJUSTES */}
+              <Route path="/perfil" element={<Ajustes />} />
+
+              <Route path="/apariencia" element={<Apariencia />} />
+
+              <Route path="/accesibilidad" element={<Accesibilidad />} />
+
+              {/* ADULTOS MAYORES */}
+              <Route path="/adultosMayores" element={<AdultosMayores />} />
+
+              <Route
+                path="/adultosMayores/:adultoId/expediente"
+                element={<AdultoMayorExpediente />}
+              />
+
+              <Route
+                path="/adultosMayores/registrar"
+                element={
+                  <ProtectedRoute roles={["ROLE_ADMIN", "ROLE_AYUDANTE"]}>
+                    <AdultoMayorRegistrar />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/adultosMayores/:adultoId/editar"
+                element={<AdultoMayorEditar />}
+              />
+
+              {/* DOCUMENTACIÓN */}
+              <Route path="/documentacion" element={<Documentacion />} />
+
+              {/* PERSONAL */}
+              <Route
+                path="/personal"
+                element={
+                  <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                    <Personal />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/personal/:personalId/detalle"
+                element={
+                  <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                    <PersonalDetalle />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/personal/:personalId/editar"
+                element={
+                  <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                    <PersonalEditar />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/personal/registrar"
+                element={
+                  <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                    <PersonalRegistrar />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* AUDITORÍA */}
+              <Route
+                path="/auditoria"
+                element={
+                  <ProtectedRoute roles={["ROLE_ADMIN", "ROLE_AYUDANTE"]}>
+                    <Auditoria />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
+
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Router>
+      </AuthProvider>
+    </MantineProvider>
+  );
 }
 
-export default App
+export default App;

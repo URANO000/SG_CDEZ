@@ -1,111 +1,136 @@
 :root {
+  /* =========================
+     COLORES GENERALES
+     ========================= */
+
   --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
+
+  --color-navbar: #547e72;
+
+  --color-sidebar: #0a1811;
+  --color-sidebar-clc: #0f2214;
+  --color-sidebar-hv: rgba(10, 121, 47, 0.103);
+  --color-sidebar-border: rgba(113, 184, 137, 0.281);
+
+  --color-primary: #c1c98e;
+  --color-secondary: #90b6bf;
+
+  --card-bg: #f5f5f5;
+  --table-color-light: #ffffff;
+
+  --bg: #ffffff;
+
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* =========================
+     TIPOGRAFÍA
+     ========================= */
+
+  --sans:
+    "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+
+  --heading:
+    "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
-  color-scheme: light dark;
+
   color: var(--text);
   background: var(--bg);
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+/* =========================================================
+   APARIENCIA - MODO OSCURO
+   ========================================================= */
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
+[data-mantine-color-scheme="dark"] {
+  --text: #e7e4ea;
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+  --bg: #101210;
+  --card-bg: #181b1a;
+  --table-color-light: #222624;
+
+  --color-navbar: #496d64;
+
+  --color-sidebar: #08120d;
+  --color-sidebar-clc: #0d1c12;
+  --color-sidebar-hv: rgba(193, 201, 142, 0.1);
+  --color-sidebar-border: rgba(193, 201, 142, 0.18);
+
+  --shadow:
+    rgba(0, 0, 0, 0.3) 0 10px 15px -3px, rgba(0, 0, 0, 0.18) 0 4px 6px -2px;
 }
 
-body {
-  margin: 0;
+/* =========================================================
+   ACCESIBILIDAD - TAMAÑO DEL TEXTO
+   ========================================================= */
+
+/* Normal = 18px, definido en :root */
+
+[data-accessibility-font="large"] {
+  font-size: 20px;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+[data-accessibility-font="extra-large"] {
+  font-size: 22px;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+/* =========================================================
+   ACCESIBILIDAD - CONTRASTE ALTO EN MODO CLARO
+   ========================================================= */
+
+[data-accessibility-contrast="high"][data-mantine-color-scheme="light"] {
+  --text: #111111;
+
+  --bg: #ffffff;
+  --card-bg: #ffffff;
+  --table-color-light: #ffffff;
+
+  --color-sidebar: #001008;
+  --color-sidebar-clc: #00170c;
+  --color-sidebar-border: rgba(0, 0, 0, 0.45);
+
+  --shadow: rgba(0, 0, 0, 0.28) 0 8px 15px -3px;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+/* =========================================================
+   ACCESIBILIDAD - CONTRASTE ALTO EN MODO OSCURO
+   ========================================================= */
+
+[data-accessibility-contrast="high"][data-mantine-color-scheme="dark"] {
+  --text: #ffffff;
+
+  --bg: #000000;
+  --card-bg: #101210;
+  --table-color-light: #151815;
+
+  --color-sidebar: #000000;
+  --color-sidebar-clc: #050805;
+  --color-sidebar-border: rgba(255, 255, 255, 0.45);
+
+  --shadow: rgba(0, 0, 0, 0.55) 0 8px 15px -3px;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+/* =========================================================
+   ACCESIBILIDAD - REDUCIR MOVIMIENTO
+   ========================================================= */
+
+[data-accessibility-motion="reduced"] *,
+[data-accessibility-motion="reduced"] *::before,
+[data-accessibility-motion="reduced"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
 }
