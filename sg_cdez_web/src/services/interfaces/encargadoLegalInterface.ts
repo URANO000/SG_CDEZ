@@ -24,3 +24,7 @@ export interface EncargadoLegalCreateRequest {
   direccion: string;
   contactos: ContactoCreateRequest[];
 }
+
+export interface EncargadoLegalUpdateRequest {
+  direccion: string;
+}

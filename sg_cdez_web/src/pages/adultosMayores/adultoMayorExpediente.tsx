@@ -16,13 +16,21 @@ import {
   Pagination,
   Select,
   Modal,
+  TextInput,
+  Tooltip,
 } from "@mantine/core";
 
 import axios from "axios";
 
 import type { EpicrisisResponse } from "../../services/interfaces/epicrisisInterface";
 
-import { BsArrowLeft, BsDownload, BsEye } from "react-icons/bs";
+import {
+  BsArrowLeft,
+  BsDownload,
+  BsEye,
+  BsPencilSquare,
+  BsPersonDash,
+} from "react-icons/bs";
 
 import { useNavigate, useParams } from "react-router";
 
@@ -30,7 +38,11 @@ import { obtenerAdultoMayorPorId } from "../../services/adultoMayorService";
 
 import type { AdultoMayorResponse } from "../../services/interfaces/adultoMayorInterface";
 
-import { listarEncargadosPorAdulto } from "../../services/encargadoLegalService";
+import {
+  actualizarEncargadoLegal,
+  desactivarEncargadoLegal,
+  listarEncargadosPorAdulto,
+} from "../../services/encargadoLegalService";
 
 import type { EncargadoLegalResponse } from "../../services/interfaces/encargadoLegalInterface";
 
@@ -118,6 +130,18 @@ export function AdultoMayorExpediente() {
   const [encargadosError, setEncargadosError] = useState(false);
 
   const [modalEncargadoAbierto, setModalEncargadoAbierto] = useState(false);
+
+  const [encargadoAEditar, setEncargadoAEditar] =
+    useState<EncargadoLegalResponse | null>(null);
+
+  const [direccionEncargado, setDireccionEncargado] = useState("");
+
+  const [actualizandoEncargado, setActualizandoEncargado] = useState(false);
+
+  const [encargadoADesactivar, setEncargadoADesactivar] =
+    useState<EncargadoLegalResponse | null>(null);
+
+  const [desactivandoEncargado, setDesactivandoEncargado] = useState(false);
 
   const [epicrisisVigente, setEpicrisisVigente] =
     useState<EpicrisisResponse | null>(null);
@@ -545,6 +569,81 @@ export function AdultoMayorExpediente() {
     });
   }
 
+  function abrirEdicionEncargado(encargado: EncargadoLegalResponse) {
+    setEncargadoAEditar(encargado);
+    setDireccionEncargado(encargado.direccion);
+  }
+
+  async function guardarEdicionEncargado() {
+    if (!encargadoAEditar) {
+      return;
+    }
+
+    const direccion = direccionEncargado.trim();
+
+    if (!direccion) {
+      return;
+    }
+
+    try {
+      setActualizandoEncargado(true);
+
+      await actualizarEncargadoLegal(encargadoAEditar.encargadoId, {
+        direccion,
+      });
+
+      setEncargadoAEditar(null);
+      setDireccionEncargado("");
+
+      await cargarEncargados();
+
+      notifications.show({
+        title: "Encargado actualizado",
+        message:
+          "La información del encargado legal se actualizó correctamente.",
+        color: "green",
+      });
+    } catch {
+      notifications.show({
+        title: "Error al actualizar",
+        message: "No se pudo actualizar el encargado legal.",
+        color: "red",
+      });
+    } finally {
+      setActualizandoEncargado(false);
+    }
+  }
+
+  async function confirmarDesactivacionEncargado() {
+    if (!encargadoADesactivar) {
+      return;
+    }
+
+    try {
+      setDesactivandoEncargado(true);
+
+      await desactivarEncargadoLegal(encargadoADesactivar.encargadoId);
+
+      setEncargadoADesactivar(null);
+
+      await cargarEncargados();
+
+      notifications.show({
+        title: "Encargado desactivado",
+        message: "El encargado legal dejó de mostrarse en el expediente.",
+        color: "green",
+      });
+    } catch {
+      notifications.show({
+        title: "Error al desactivar",
+        message: "No se pudo desactivar el encargado legal.",
+        color: "red",
+      });
+    } finally {
+      setDesactivandoEncargado(false);
+    }
+  }
+
   function solicitarDesactivacionDocumento(documento: DocumentoResponse) {
     setDocumentoADesactivar(documento);
   }
@@ -731,9 +830,34 @@ export function AdultoMayorExpediente() {
                     key={encargado.encargadoId}
                     className={classes.encargadoCard}
                   >
-                    <Title order={4} className={classes.encargadoName}>
-                      {nombreCompleto}
-                    </Title>
+                    <Group justify="space-between" align="flex-start" mb="md">
+                      <Title order={4} className={classes.encargadoName}>
+                        {nombreCompleto}
+                      </Title>
+
+                      <Group gap={4}>
+                        <Tooltip label="Editar">
+                          <ActionIcon
+                            variant="subtle"
+                            aria-label="Editar encargado legal"
+                            onClick={() => abrirEdicionEncargado(encargado)}
+                          >
+                            <BsPencilSquare size={17} />
+                          </ActionIcon>
+                        </Tooltip>
+
+                        <Tooltip label="Desactivar">
+                          <ActionIcon
+                            variant="subtle"
+                            color="red"
+                            aria-label="Desactivar encargado legal"
+                            onClick={() => setEncargadoADesactivar(encargado)}
+                          >
+                            <BsPersonDash size={18} />
+                          </ActionIcon>
+                        </Tooltip>
+                      </Group>
+                    </Group>
 
                     <SimpleGrid
                       cols={{
@@ -811,6 +935,87 @@ export function AdultoMayorExpediente() {
               onRegistrado={manejarEncargadoRegistrado}
               onCancelar={() => setModalEncargadoAbierto(false)}
             />
+          </Modal>
+          <Modal
+            opened={encargadoAEditar !== null}
+            onClose={() => {
+              setEncargadoAEditar(null);
+              setDireccionEncargado("");
+            }}
+            title={
+              <Stack gap={2}>
+                <Title order={3}>Editar encargado legal</Title>
+
+                <Text size="sm" c="dimmed" fw={400}>
+                  Actualice la información disponible del encargado legal.
+                </Text>
+              </Stack>
+            }
+            centered
+            size="md"
+          >
+            <Stack gap="lg">
+              <TextInput
+                label="Dirección"
+                value={direccionEncargado}
+                onChange={(event) =>
+                  setDireccionEncargado(event.currentTarget.value)
+                }
+                maxLength={200}
+                required
+              />
+
+              <Group justify="flex-end">
+                <Button
+                  variant="default"
+                  onClick={() => {
+                    setEncargadoAEditar(null);
+                    setDireccionEncargado("");
+                  }}
+                >
+                  Cancelar
+                </Button>
+
+                <Button
+                  loading={actualizandoEncargado}
+                  disabled={!direccionEncargado.trim()}
+                  onClick={() => void guardarEdicionEncargado()}
+                >
+                  Guardar cambios
+                </Button>
+              </Group>
+            </Stack>
+          </Modal>
+          <Modal
+            opened={encargadoADesactivar !== null}
+            onClose={() => setEncargadoADesactivar(null)}
+            title="Desactivar encargado legal"
+            centered
+            size="md"
+          >
+            <Stack gap="lg">
+              <Text>
+                ¿Desea desactivar este encargado legal? Dejará de mostrarse
+                entre los encargados activos asociados al adulto mayor.
+              </Text>
+
+              <Group justify="flex-end">
+                <Button
+                  variant="default"
+                  onClick={() => setEncargadoADesactivar(null)}
+                >
+                  Cancelar
+                </Button>
+
+                <Button
+                  color="red"
+                  loading={desactivandoEncargado}
+                  onClick={() => void confirmarDesactivacionEncargado()}
+                >
+                  Desactivar
+                </Button>
+              </Group>
+            </Stack>
           </Modal>
         </Tabs.Panel>
 

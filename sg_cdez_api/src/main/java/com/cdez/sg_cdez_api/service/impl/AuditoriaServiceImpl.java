@@ -9,16 +9,16 @@ import com.cdez.sg_cdez_api.repository.PersonalRepository;
 import com.cdez.sg_cdez_api.repository.specifications.AuditoriaSpecs;
 import com.cdez.sg_cdez_api.service.AuditoriaService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -74,19 +74,27 @@ public class AuditoriaServiceImpl implements AuditoriaService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<AuditoriaResponse> consultarAuditorias(AuditoriaFiltroRequest filtro) {
+    public Page<AuditoriaResponse> consultarAuditorias(
+            AuditoriaFiltroRequest filtro,
+            Pageable pageable
+    ) {
         AuditoriaFiltroRequest filtroSeguro = filtro != null
                 ? filtro
-                : new AuditoriaFiltroRequest(null, null, null, null, null, null);
+                : new AuditoriaFiltroRequest(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
 
         return auditoriaRepository
                 .findAll(
                         AuditoriaSpecs.conFiltros(filtroSeguro),
-                        Sort.by(Sort.Direction.DESC, "createdAt")
+                        pageable
                 )
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
+                .map(this::mapToResponse);
     }
 
     private Personal obtenerUsuarioAutenticado() {

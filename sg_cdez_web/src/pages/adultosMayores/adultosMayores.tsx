@@ -13,7 +13,7 @@ import {
   Textarea,
   TextInput,
   Title,
-  Menu
+  Menu,
 } from "@mantine/core";
 
 import { AiOutlineSearch } from "react-icons/ai";
@@ -66,6 +66,11 @@ export function AdultosMayores() {
     estado: "ACTIVO",
   });
 
+  const [filtrosAplicados, setFiltrosAplicados] = useState<AdultoMayorFiltro>({
+    searchTerm: null,
+    estado: "ACTIVO",
+  });
+
   const { user } = useAuth();
 
   const navigate = useNavigate();
@@ -109,7 +114,7 @@ export function AdultosMayores() {
 
   function downloadBlob(blob: Blob, filename: string) {
     const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = filename;
     document.body.appendChild(link);
@@ -118,20 +123,19 @@ export function AdultosMayores() {
     window.URL.revokeObjectURL(url);
   }
 
-
-  const handleGenerateReport = async (type: 'pdf' | 'excel') => {
-    if (type === 'pdf') {
+  const handleGenerateReport = async (type: "pdf" | "excel") => {
+    if (type === "pdf") {
       const blob = await generarReportePDF();
-      downloadBlob(blob, 'reporte_de_adulto.pdf');
+      downloadBlob(blob, "reporte_de_adulto.pdf");
     } else {
       const blob = await generarReporteExcel();
-      downloadBlob(blob, 'reporte_de_adulto.xlsx');
+      downloadBlob(blob, "reporte_de_adulto.xlsx");
     }
   };
 
   async function cargarAdultos(
     page: number,
-    filtrosConsulta: AdultoMayorFiltro = filtros,
+    filtrosConsulta: AdultoMayorFiltro,
   ) {
     setLoading(true);
     setError(null);
@@ -340,31 +344,32 @@ export function AdultosMayores() {
             </Button>
           )}
 
-          {
-            (user?.rol === "ROLE_ADMIN" || user?.rol === "ROLE_AYUDANTE") && (
-              <Menu position="top-end" withinPortal radius="md">
-                <Menu.Target>
-                  <Button rightSection={<TbChevronDown size={18} />} className={classes.reportBtn}>
-                    Generar Reporte
-                  </Button>
-                </Menu.Target>
-                <Menu.Dropdown>
-                  <Menu.Item
-                    leftSection={<TbFileTypePdf size={16} />}
-                    onClick={() => handleGenerateReport('pdf')}
-                  >
-                    PDF
-                  </Menu.Item>
-                  <Menu.Item
-                    leftSection={<TbFileTypeXls size={16} />}
-                    onClick={() => handleGenerateReport('excel')}
-                  >
-                    Excel
-                  </Menu.Item>
-                </Menu.Dropdown>
-              </Menu>
-            )
-          }
+          {(user?.rol === "ROLE_ADMIN" || user?.rol === "ROLE_AYUDANTE") && (
+            <Menu position="top-end" withinPortal radius="md">
+              <Menu.Target>
+                <Button
+                  rightSection={<TbChevronDown size={18} />}
+                  className={classes.reportBtn}
+                >
+                  Generar Reporte
+                </Button>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item
+                  leftSection={<TbFileTypePdf size={16} />}
+                  onClick={() => handleGenerateReport("pdf")}
+                >
+                  PDF
+                </Menu.Item>
+                <Menu.Item
+                  leftSection={<TbFileTypeXls size={16} />}
+                  onClick={() => handleGenerateReport("excel")}
+                >
+                  Excel
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          )}
         </div>
       </Group>
 
@@ -415,6 +420,7 @@ export function AdultosMayores() {
         <Button
           className={filterClasses.searchButton}
           onClick={() => {
+            setFiltrosAplicados(filtros);
             void cargarAdultos(0, filtros);
           }}
         >
@@ -436,11 +442,10 @@ export function AdultosMayores() {
         <>
           <AdultosMayoresTable
             adultosMayores={pageData?.content ?? []}
-            estadoListado={filtros.estado}
+            estadoListado={filtrosAplicados.estado}
             onDesactivar={setAdultoAProcesarBaja}
             onActivar={setAdultoAActivar}
           />
-
           <Group justify="center" className={filterClasses.paginationBar}>
             <Pagination
               value={(pageData?.currentPage ?? 0) + 1}
