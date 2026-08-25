@@ -59,6 +59,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/encargados/**").hasAnyRole("PERSONAL", "ADMIN",  "AYUDANTE")
                         .requestMatchers("/api/documentos/**").hasAnyRole("PERSONAL", "ADMIN",  "AYUDANTE")
                         .requestMatchers("/api/auditorias/**").hasAnyRole("ADMIN",  "AYUDANTE")
+                        .requestMatchers("/api/medicamentos/**").hasAnyRole("ADMIN",  "AYUDANTE", "PERSONAL")
+
                         .requestMatchers("/api/personal/listarPersonalFiltrado").hasAnyRole("ADMIN", "PERSONAL", "AYUDANTE")
                         .requestMatchers("/api/personal/obtenerPersonalPorId/**").hasRole("ADMIN")
                         .requestMatchers("/api/personal/crearPersonal").hasRole("ADMIN")
