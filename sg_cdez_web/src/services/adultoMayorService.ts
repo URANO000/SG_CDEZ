@@ -90,3 +90,18 @@ export async function registrarFallecimientoAdultoMayor(
 
   return response.data;
 }
+
+
+export const generarReportePDF = async () => {
+  const response = await apiClient.get(`/adultos-mayores/reporte`, {
+    responseType: 'blob', 
+  });
+  return response.data; 
+};
+
+export const generarReporteExcel = async () => {
+  const response = await apiClient.get(`/adultos-mayores/reporteExcel`, {
+    responseType: 'blob', 
+  });
+  return response.data; 
+};

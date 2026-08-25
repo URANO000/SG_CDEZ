@@ -13,11 +13,13 @@ import {
   Textarea,
   TextInput,
   Title,
+  Menu
 } from "@mantine/core";
 
 import { AiOutlineSearch } from "react-icons/ai";
 
 import { useNavigate } from "react-router";
+import { TbFileTypePdf, TbFileTypeXls, TbChevronDown } from "react-icons/tb";
 
 import { BsPlusLg } from "react-icons/bs";
 
@@ -26,6 +28,8 @@ import { AdultosMayoresTable } from "../../components/ui/tables/AdultosMayoresTa
 import { useAuth } from "../../services/authContext";
 
 import { notifications } from "@mantine/notifications";
+import { generarReporteExcel } from "../../services/adultoMayorService";
+import { generarReportePDF } from "../../services/adultoMayorService";
 
 import {
   activarAdultoMayor,
@@ -102,6 +106,28 @@ export function AdultosMayores() {
     useState<AdultoMayorResponse | null>(null);
 
   const pageSize = 10;
+
+  function downloadBlob(blob: Blob, filename: string) {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  }
+
+
+  const handleGenerateReport = async (type: 'pdf' | 'excel') => {
+    if (type === 'pdf') {
+      const blob = await generarReportePDF();
+      downloadBlob(blob, 'reporte_de_adulto.pdf');
+    } else {
+      const blob = await generarReporteExcel();
+      downloadBlob(blob, 'reporte_de_adulto.xlsx');
+    }
+  };
 
   async function cargarAdultos(
     page: number,
@@ -304,14 +330,42 @@ export function AdultosMayores() {
           Adultos Mayores
         </Title>
 
-        {user?.rol === "ROLE_ADMIN" && (
-          <Button
-            leftSection={<BsPlusLg size={15} />}
-            onClick={() => navigate("/adultosMayores/registrar")}
-          >
-            Registrar Adulto Mayor
-          </Button>
-        )}
+        <div className={classes.btnBar}>
+          {(user?.rol === "ROLE_ADMIN" || user?.rol === "ROLE_AYUDANTE") && (
+            <Button
+              leftSection={<BsPlusLg size={15} />}
+              onClick={() => navigate("/adultosMayores/registrar")}
+            >
+              Registrar Adulto Mayor
+            </Button>
+          )}
+
+          {
+            (user?.rol === "ROLE_ADMIN" || user?.rol === "ROLE_AYUDANTE") && (
+              <Menu position="top-end" withinPortal radius="md">
+                <Menu.Target>
+                  <Button rightSection={<TbChevronDown size={18} />} className={classes.reportBtn}>
+                    Generar Reporte
+                  </Button>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Item
+                    leftSection={<TbFileTypePdf size={16} />}
+                    onClick={() => handleGenerateReport('pdf')}
+                  >
+                    PDF
+                  </Menu.Item>
+                  <Menu.Item
+                    leftSection={<TbFileTypeXls size={16} />}
+                    onClick={() => handleGenerateReport('excel')}
+                  >
+                    Excel
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
+            )
+          }
+        </div>
       </Group>
 
       <div className={classes.titleRule} />
