@@ -1,5 +1,6 @@
 package com.cdez.sg_cdez_api.dto.response;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public record UserSessionResponse(
@@ -7,6 +8,8 @@ public record UserSessionResponse(
         String nombreCompleto,
         String usuario,
         String rol,
-        String especialidad
+        String especialidad,
+
+        Instant expiresAt
 ) {
 }
