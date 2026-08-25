@@ -36,7 +36,10 @@ const modulosAuditoria = [
   { value: "EPICRISIS", label: "Epicrisis" },
   { value: "CONSULTA", label: "Consulta" },
   { value: "PERSONAL", label: "Personal" },
-  { value: "ENCARGADO_LEGAL", label: "Encargado legal" },
+  {
+    value: "ENCARGADO_LEGAL",
+    label: "Encargado legal",
+  },
 ];
 
 export function Auditoria() {

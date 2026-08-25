@@ -18,5 +18,7 @@ public interface EncargadoLegalService {
 
     EncargadoLegalResponse actualizarEncargado(UUID encargadoId, EncargadoLegalUpdateRequest request);
 
+    EncargadoLegalResponse desactivarEncargado(UUID encargadoId);
+
     EncargadoLegal obtenerEncargadoCheck(UUID encargadoId);
 }

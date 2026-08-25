@@ -13,6 +13,10 @@ import com.cdez.sg_cdez_api.service.EncargadoLegalService;
 import com.cdez.sg_cdez_api.util.AuthHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.cdez.sg_cdez_api.service.AuditoriaService;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +30,7 @@ public class EncargadoLegalServiceImpl implements EncargadoLegalService {
     private final AdultoMayorRepository adultoMayorRepository;
     private final ContactoService CONTACTO_SERVICE;
     private final AuthHelper AUTH_HELPER;
+    private final AuditoriaService auditoriaService;
 
     /**
      * Registra un nuevo encargado legal y establece
@@ -79,16 +84,91 @@ public class EncargadoLegalServiceImpl implements EncargadoLegalService {
     }
 
     @Override
-    public EncargadoLegalResponse actualizarEncargado(UUID encargadoId, EncargadoLegalUpdateRequest request) {
+    public EncargadoLegalResponse actualizarEncargado(
+            UUID encargadoId,
+            EncargadoLegalUpdateRequest request
+    ) {
         EncargadoLegal encargado = obtenerEncargadoCheck(encargadoId);
 
-        Personal personalActual = AUTH_HELPER.obtenerUsuarioAutenticado();
+        Personal personalActual =
+                AUTH_HELPER.obtenerUsuarioAutenticado();
 
-        encargado.setDireccion(request.direccion());
+        String direccionAnterior = encargado.getDireccion();
+        String nuevaDireccion = request.direccion();
+
+        encargado.setDireccion(nuevaDireccion);
         encargado.setUpdatedAt(LocalDateTime.now());
         encargado.setUpdatedBy(personalActual);
 
-        EncargadoLegal actualizado = encargadoLegalRepository.save(encargado);
+        EncargadoLegal actualizado =
+                encargadoLegalRepository.save(encargado);
+
+        if (!java.util.Objects.equals(
+                direccionAnterior,
+                nuevaDireccion
+        )) {
+            Map<String, Object> detalleDireccion =
+                    new LinkedHashMap<>();
+
+            detalleDireccion.put(
+                    "anterior",
+                    direccionAnterior
+            );
+
+            detalleDireccion.put(
+                    "nuevo",
+                    nuevaDireccion
+            );
+
+            Map<String, Object> cambios =
+                    new LinkedHashMap<>();
+
+            cambios.put(
+                    "direccion",
+                    detalleDireccion
+            );
+
+            auditoriaService.registrarAccion(
+                    "ACTUALIZAR_ENCARGADO_LEGAL",
+                    "ENCARGADO_LEGAL",
+                    "EncargadoLegal",
+                    actualizado.getEncargadoId().toString(),
+                    "Se actualizó la información de un encargado legal.",
+                    cambios
+            );
+        }
+
+        return mapToResponse(actualizado);
+    }
+
+    @Override
+    public EncargadoLegalResponse desactivarEncargado(
+            UUID encargadoId
+    ) {
+        EncargadoLegal encargado =
+                obtenerEncargadoCheck(encargadoId);
+
+        if (!encargado.isActivo()) {
+            return mapToResponse(encargado);
+        }
+
+        Personal personalActual =
+                AUTH_HELPER.obtenerUsuarioAutenticado();
+
+        encargado.setActivo(false);
+        encargado.setUpdatedAt(LocalDateTime.now());
+        encargado.setUpdatedBy(personalActual);
+
+        EncargadoLegal actualizado =
+                encargadoLegalRepository.save(encargado);
+
+        auditoriaService.registrarAccion(
+                "DESACTIVAR_ENCARGADO_LEGAL",
+                "ENCARGADO_LEGAL",
+                "EncargadoLegal",
+                actualizado.getEncargadoId().toString(),
+                "Se desactivó un encargado legal."
+        );
 
         return mapToResponse(actualizado);
     }
