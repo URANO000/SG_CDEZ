@@ -2,6 +2,11 @@
 DROP DATABASE IF EXISTS Anaconda;
 CREATE DATABASE Anaconda; 
 
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE datname = 'anaconda'
+AND pid <> pg_backend_pid();
+
 --Tablas iniciales (08/05/2026)
 CREATE TABLE Rol(
 	rol_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -143,7 +148,7 @@ VALUES ('ADMIN'), ('PERSONAL'), ('AYUDANTE');
 
 INSERT INTO Personal (primer_nombre, primer_apellido, rol_id, especialidad, tipo_identificacion, identificacion,
 direccion, carnet, usuario, contrasena, activo, created_at, credenciales_expiradas, cuenta_bloqueada, email_verificado)
-VALUES ('Default','User',1, 'Programador', 'cédula', '402250833', 'Avenida 123', '123456789', 'hello@gmail.com', '$2a$12$xiiXfivq.xywYjmXbFxg6.BbptpYUiUcZO6zACscQA79OqXGXGjT2',
+VALUES ('Default','User',1, 'NUTRICION', 'CIC', '402250833', 'Avenida 123', '123456789', 'hello@gmail.com', '$2a$12$xiiXfivq.xywYjmXbFxg6.BbptpYUiUcZO6zACscQA79OqXGXGjT2',
 true, NOW(), false, false, true);
 
 /* Tabla e índices relacionados al modelo de epicrisis documental (17/07/2026)*/
@@ -315,3 +320,82 @@ CREATE TABLE Referencia (
 	created_at TIMESTAMP NOT NUll
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS ux_rol_nombre
+    ON rol (LOWER(nombre));
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_personal_usuario
+    ON personal (LOWER(usuario));
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_personal_tipo_identificacion_identificacion
+    ON personal (tipo_identificacion, identificacion);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_personal_carnet
+    ON personal (carnet)
+    WHERE carnet IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS ix_personal_rol_id
+    ON personal (rol_id);
+
+CREATE INDEX IF NOT EXISTS ix_personal_created_by
+    ON personal (created_by);
+
+CREATE INDEX IF NOT EXISTS ix_personal_updated_by
+    ON personal (updated_by)
+    WHERE updated_by IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS ix_personal_activo_rol
+    ON personal (rol_id, personal_id)
+    WHERE activo = TRUE;
+
+CREATE INDEX IF NOT EXISTS ix_contacto_personal_activo
+    ON contacto (personal_id)
+    WHERE personal_id IS NOT NULL AND activo = TRUE;
+
+CREATE INDEX IF NOT EXISTS ix_contacto_encargado_activo
+    ON contacto (encargado_id)
+    WHERE encargado_id IS NOT NULL AND activo = TRUE;
+
+CREATE INDEX IF NOT EXISTS ix_contacto_created_by
+    ON contacto (created_by);
+
+CREATE INDEX IF NOT EXISTS ix_contacto_updated_by
+    ON contacto (updated_by)
+    WHERE updated_by IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_email_verification_token_token
+    ON emailverificationtoken (token);
+
+CREATE INDEX IF NOT EXISTS ix_email_verification_personal_unused
+    ON emailverificationtoken (personal_id, expires_at DESC)
+    WHERE usado = FALSE;
+
+CREATE INDEX IF NOT EXISTS ix_email_verification_expires_at
+    ON emailverificationtoken (expires_at);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_password_reset_token_token
+    ON passwordresettoken (token);
+
+CREATE INDEX IF NOT EXISTS ix_password_reset_personal_unused
+    ON passwordresettoken (personal_id, expires_at DESC)
+    WHERE usado = FALSE;
+
+CREATE INDEX IF NOT EXISTS ix_password_reset_expires_at
+    ON passwordresettoken (expires_at);
+
+CREATE INDEX IF NOT EXISTS ix_consulta_adulto_activa_fecha
+    ON consulta (adulto_id, created_at DESC)
+    WHERE activo = TRUE;
+
+CREATE INDEX IF NOT EXISTS ix_consulta_adulto_tipo_fecha
+    ON consulta (adulto_id, tipo_consulta, created_at DESC)
+    WHERE activo = TRUE;
+
+CREATE INDEX IF NOT EXISTS ix_consulta_created_by
+    ON consulta (created_by);
+
+CREATE INDEX IF NOT EXISTS ix_consulta_updated_by
+    ON consulta (updated_by)
+    WHERE updated_by IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS ix_tamizaje_consulta_tipo
+    ON tamizajenutricional (consulta_nutricional_id, tipo);
