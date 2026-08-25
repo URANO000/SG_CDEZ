@@ -38,7 +38,7 @@ public class MedicamentoController {
         SERVICE.desactivarMedicamentos(medicamentoId);
     }
 
-    @PostMapping("/desactivarMedicamentos/{medicamentoId}")
+    @PostMapping("/activarMedicamentos/{medicamentoId}")
     public void activarMedicamento(@PathVariable(name = "medicamentoId") UUID medicamentoId){
         SERVICE.activarMedicamentos(medicamentoId);
     }

@@ -2,6 +2,8 @@ package com.cdez.sg_cdez_api.service.impl;
 
 import com.cdez.sg_cdez_api.entity.Personal;
 import com.cdez.sg_cdez_api.entity.reports.Column;
+import com.cdez.sg_cdez_api.entity.reports.ExcelColumn;
+import com.cdez.sg_cdez_api.entity.reports.ExcelTableReport;
 import com.cdez.sg_cdez_api.entity.reports.PdfTableReport;
 import com.cdez.sg_cdez_api.dto.request.AdultoMayorRequest;
 import com.cdez.sg_cdez_api.dto.response.AdultoMayorResponse;
@@ -24,13 +26,10 @@ import com.cdez.sg_cdez_api.service.AuditoriaService;
 import com.cdez.sg_cdez_api.repository.specifications.AdultoMayorSpecs;
 
 import java.io.IOException;
-import java.util.UUID;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import com.cdez.sg_cdez_api.dto.request.AdultoMayorFiltro;
 import com.cdez.sg_cdez_api.dto.response.PageResponse;
@@ -39,8 +38,6 @@ import com.cdez.sg_cdez_api.util.ValidationHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -498,6 +495,124 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
 
         }catch (IOException ex){
             throw new RuntimeException("Error de fuente.");
+        }
+    }
+
+    public byte[] generarReporteAdultoExcel() {
+        try {
+            if (!AUTH_HELPER.isUsuarioAdmin()) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "Sólo un usuario administrador puede generar reportes del personal."
+                );
+            }
+
+            AUTH_HELPER.validarUsuarioActivo();
+            List<AdultoMayorResponse> adultos = listarAdultosMayores();
+
+            ExcelTableReport<AdultoMayorResponse> reporte =
+                    ExcelTableReport.<AdultoMayorResponse>builder()
+                            .titulo("Reporte de Adultos Mayores")
+                            .datos(adultos)
+                            .columnas(List.of(
+                                    new ExcelColumn<>(
+                                            "Tipo Identificación",
+                                            AdultoMayorResponse::tipoIdentificacion,
+                                            25,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Identificación",
+                                            AdultoMayorResponse::identificacion,
+                                            20,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Nombre Completo",
+                                            AdultoMayorResponse::nombreCompleto,
+                                            35,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Nacionalidad",
+                                            AdultoMayorResponse::nacionalidad,
+                                            20,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Fecha Nacimiento",
+                                            r -> r.fechaNacimiento()
+                                                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+                                            30,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Sexo",
+                                            AdultoMayorResponse::sexo,
+                                            6,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Dirección",
+                                            AdultoMayorResponse::direccion,
+                                            35,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Escolaridad",
+                                            AdultoMayorResponse::escolaridad,
+                                            35,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Grupo Familiar",
+                                            AdultoMayorResponse::grupoFamiliar,
+                                            35,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Pensión",
+                                            a -> a.pension() ? "Sí" : "No",
+                                            15,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.CENTER
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Funcionalidad Física",
+                                            AdultoMayorResponse::funcionalidadFisica,
+                                            20,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Ayuda Biomecánica",
+                                            b -> b.ayudaBiomecanica() ? "Sí" : "No",
+                                            10,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Fecha de Ingreso",
+                                            r -> r.fechaIngreso()
+                                                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+                                            30,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Motivo Retiro",
+                                            AdultoMayorResponse::activo,
+                                            15,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.CENTER
+                                    )
+
+                    )).showTimestamp(true)
+                        .zebraRows(true)
+                        .autoFilter(true)
+                        .freezeHeader(true)
+                        .build();
+            return REPORT_SERVICE.generarTablaExcel(reporte);
+        } catch (IOException ex) {
+            throw new RuntimeException(
+                    "Error al generar el reporte de personal en Excel.",
+                    ex
+            );
         }
     }
 

@@ -25,6 +25,7 @@ public interface AdultoMayorService {
     AdultoMayorResponse activarAdultoMayor(UUID id);
     AdultoMayorResponse registrarFallecimiento(UUID id, AdultoMayorFallecimientoRequest request);
     byte[] generarReporteAdultoPDF();
+    byte[] generarReporteAdultoExcel();
     PageResponse<AdultoMayorResponse> listarAdultosMayoresFiltrados(AdultoMayorFiltro filtros, Pageable pageable);
     AdultoMayor obtenerAdultoCheck(UUID id);
 
