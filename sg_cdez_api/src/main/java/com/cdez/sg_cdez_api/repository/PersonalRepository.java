@@ -16,4 +16,5 @@ public interface PersonalRepository extends JpaRepository<Personal, UUID>, JpaSp
     Optional<Personal> findByUsuario(String usuario);
     Page<Personal> findByEspecialidad(String especialidad, Pageable pageable);
     Page<Personal> findByActivo(boolean activo, Pageable pageable);
+    long countByActivoTrue();
 }

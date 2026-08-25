@@ -3,7 +3,6 @@ package com.cdez.sg_cdez_api.controller;
 import com.cdez.sg_cdez_api.dto.request.*;
 import com.cdez.sg_cdez_api.dto.response.*;
 import com.cdez.sg_cdez_api.entity.CustomUserDetails;
-import com.cdez.sg_cdez_api.entity.Personal;
 import com.cdez.sg_cdez_api.service.*;
 import com.cdez.sg_cdez_api.util.Exceptions.TokenExpiradoException;
 import jakarta.servlet.http.Cookie;
@@ -15,7 +14,6 @@ import org.springframework.security.core.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
-import java.util.Date;
 
 @RestController
 @RequestMapping("/api/auth")
