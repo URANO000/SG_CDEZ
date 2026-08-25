@@ -23,8 +23,15 @@ import classes from '../styleModules/ConsultaRegistrarForm.module.css';
 import { registrarConsulta } from "../../../services/consultasService";
 import type { ConsultaCreateRequest } from "../../../services/interfaces/consultasCreateInterface";
 import type { AdultoMayorResponse } from "../../../services/interfaces/adultoMayorInterface";
+import type { PersonalResponse } from "../../../services/interfaces/personalResponse";
 
 import { AdultoSelector } from "../../common/AdultoSelector";
+import { PersonalSelector } from "../../common/PersonalSelector";
+
+interface ReferenciaFormValues {
+    receptorId: string;
+    mensaje: string;
+}
 
 interface ConsultaFormValues {
     tipoConsulta: string;
@@ -34,6 +41,7 @@ interface ConsultaFormValues {
     resultadosEvaluaciones: string;
     recomendaciones: string;
     notas: string;
+    referencia: ReferenciaFormValues;
 }
 
 export function ConsultaRegistrarForm() {
@@ -47,6 +55,9 @@ export function ConsultaRegistrarForm() {
 
     const [selectorAbierto, setSelectorAbierto] =
         useState(false);
+
+    const [personalSeleccionado, setPersonalSeleccionado] =
+        useState<PersonalResponse | null>(null);
 
 
     const calcularEdad = (
@@ -98,6 +109,10 @@ export function ConsultaRegistrarForm() {
             resultadosEvaluaciones: "",
             recomendaciones: "",
             notas: "",
+            referencia: {
+                receptorId: "",
+                mensaje: ""
+            }
         },
 
         validate: {
@@ -246,6 +261,13 @@ export function ConsultaRegistrarForm() {
 
                 notas:
                     nullable(values.notas),
+                referencia:
+                {
+                    receptorId:
+                        values.referencia.receptorId,
+                    mensaje:
+                        values.referencia.mensaje
+                }
             };
 
 
@@ -644,8 +666,84 @@ export function ConsultaRegistrarForm() {
                                 {...form.getInputProps("notas")}
                             />
 
+
                         </div>
 
+                    </Paper>
+
+                    <Paper className={classes.card}>
+                        <div>
+                            <div className={classes.sectionHeader}>
+
+                                <Title
+                                    order={4}
+                                    className={classes.sectionTitle}>
+                                    Referencia de consulta
+                                </Title>
+
+                                <Text
+                                    size="sm"
+                                    className={classes.sectionDescription}>
+                                    Es completamente opcional.
+                                </Text>
+
+                            </div>
+                            {/* PERSONAL SELECTION OUGHH */}
+                            <PersonalSelector
+                                selectedId={form.values.referencia.receptorId}
+                                onSelect={(personal) => {
+                                    setPersonalSeleccionado(personal);
+
+                                    form.setFieldValue(
+                                        "referencia.receptorId",
+                                        personal.personalId
+                                    );
+                                }}
+
+                            />
+
+                            {personalSeleccionado && (
+                                <div>
+                                    <Text size="sm" fw={600}>
+                                        Profesional seleccionado
+                                    </Text>
+
+                                    <Text size="sm">
+                                        {[
+                                            personalSeleccionado.primerNombre,
+                                            personalSeleccionado.segundoNombre,
+                                            personalSeleccionado.primerApellido,
+                                            personalSeleccionado.segundoApellido,
+                                        ]
+                                            .filter(Boolean)
+                                            .join(" ")}
+                                    </Text>
+
+                                    <Text size="xs" c="dimmed">
+                                        {personalSeleccionado.especialidad}
+                                        {" · "}
+                                        {personalSeleccionado.usuario}
+                                    </Text>
+                                </div>
+                            )}
+
+                            <Textarea
+                                label="Referencia a otro profesional"
+                                description="Envíe un correo con algún mensaje que considere importante."
+                                placeholder="Ingrese su mensaje..."
+                                minRows={3}
+                                autosize
+                                maxRows={7}
+                                classNames={{
+                                    root: classes.fieldGroup,
+                                    label: classes.fieldLabel,
+                                    input: classes.textarea,
+                                }}
+                                {...form.getInputProps(
+                                    "referencia.mensaje"
+                                )}
+                            />
+                        </div>
                     </Paper>
 
 

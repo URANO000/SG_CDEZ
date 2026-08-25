@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es-CR"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <style>
+        @media only screen and (max-width: 480px) {
+            .container {
+                width: 100% !important;
+            }
+
+            .padded {
+                padding: 24px !important;
+            }
+        }
+    </style>
+</head>
+
+<body style="
+    margin:0;
+    padding:0;
+    background-color:#f4f4f7;
+    font-family:Arial, Helvetica, sans-serif;
+">
+
+<div style="
+    display:none;
+    max-height:0;
+    overflow:hidden;
+    mso-hide:all;
+">
+    Ha recibido una nueva referencia.
+</div>
+
+<table style="
+    background-color:#f4f4f7;
+    padding:40px 0;
+    width:100%;
+">
+    <tr>
+        <td align="center">
+
+            <table class="container"
+                   style="
+                    width:480px;
+                    background-color:#ffffff;
+                    border-radius:8px;
+                    overflow:hidden;
+                    box-shadow:0 1px 3px rgba(0,0,0,0.08);
+                   ">
+
+                <tr>
+                    <td style="
+                        padding:28px 24px;
+                        text-align:center;
+                    ">
+
+                        <img src="../static/zurqui-logo.png"
+                             th:src="|cid:${imageResourceName}|"
+                             alt="Zurquí"
+                             style="
+                                width:56px;
+                                margin-bottom:12px;
+                                display:block;
+                                margin-left:auto;
+                                margin-right:auto;
+                             " />
+
+                        <span style="
+                            color:#000000;
+                            font-size:20px;
+                            font-weight:bold;
+                        ">
+                            Nueva referencia
+                        </span>
+
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="padded"
+                        style="
+                            padding:32px;
+                            color:#333333;
+                            font-size:15px;
+                            line-height:1.6;
+                        ">
+
+                        <p>
+                            Hola
+                            <b th:text="${nombreReceptor}">
+                                Usuario
+                            </b>,
+                        </p>
+
+                        <p>
+                            Ha recibido una referencia por parte de
+                            <strong th:text="${nombreEmisor}">
+                                Profesional
+                            </strong>.
+                        </p>
+
+                        <table style="
+                            width:100%;
+                            margin:24px 0;
+                            border-collapse:collapse;
+                            background-color:#f8f8f8;
+                            border-radius:6px;
+                        ">
+
+                            <tr>
+                                <td style="
+                                    padding:12px;
+                                    font-weight:bold;
+                                ">
+                                    Profesional:
+                                </td>
+
+                                <td style="padding:12px;"
+                                    th:text="${nombreEmisor}">
+                                    Nombre
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="
+                                    padding:12px;
+                                    font-weight:bold;
+                                ">
+                                    Especialidad:
+                                </td>
+
+                                <td style="padding:12px;"
+                                    th:text="${especialidadEmisor}">
+                                    Especialidad
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="
+                                    padding:12px;
+                                    font-weight:bold;
+                                ">
+                                    Persona adulta mayor:
+                                </td>
+
+                                <td style="padding:12px;"
+                                    th:text="${nombreAdultoMayor}">
+                                    Adulto Mayor
+                                </td>
+                            </tr>
+
+                        </table>
+
+                        <p style="font-weight:bold;">
+                            Mensaje:
+                        </p>
+
+                        <div style="
+                            background-color:#f4f4f7;
+                            border-left:4px solid #8F9A48;
+                            padding:16px;
+                            margin-top:8px;
+                            white-space:pre-line;
+                        "
+                             th:text="${mensajeReferencia}">
+                            Mensaje de referencia
+                        </div>
+
+                        <table style="margin:24px auto;">
+                            <tr>
+                                <td style="border-radius:6px; background-color=#8F9A48;">
+                                    <!--[if mso]>
+                                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml"
+                                                 xmlns:w="urn:schemas-microsoft-com:office:word" th:href="${enlace}"
+                                                 style="height:48px;v-text-anchor:middle;width:220px;" arcsize="12%"
+                                                 strokecolor="#8F9A48" fillcolor="#8F9A48">
+                                        <w:anchorlock/>
+                                        <div style="color:#ffffff;text-align: center;">
+                                            Ver consulta
+                                        </div>
+                                    </v:roundrect>
+                                    <![endif]-->
+                                    <!--[if !mso]><!-->
+                                    <a href="#" th:href="${enlace}" class="btn-activate" style="display:inline-block; padding:14px 28px; color:#ffffff; text-decoration:none; font-weight:bold; font-size:15px; border-radius:6px; background-color:#8F9A48;">
+                                        Ver consulta
+                                    </a>
+                                    <!--<![endif]-->
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="
+                        padding:16px 24px;
+                        text-align:center;
+                        border-top:1px solid #eeeeee;
+                    ">
+
+                        <span style="
+                            color:#aaaaaa;
+                            font-size:11px;
+                        ">
+                            Este correo es informativo y no requiere ninguna acción.
+                        </span>
+
+                    </td>
+                </tr>
+
+            </table>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

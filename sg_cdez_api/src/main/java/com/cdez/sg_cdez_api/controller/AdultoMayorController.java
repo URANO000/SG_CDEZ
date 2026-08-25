@@ -117,4 +117,22 @@ public class AdultoMayorController {
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
     }
+
+    @GetMapping("/reporteExcel")
+    public ResponseEntity<byte[]> generarReporteAdultoExcel() throws IOException{
+
+        byte[] reporte = adultoMayorService.generarReporteAdultoExcel();
+
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=reporte-adulto.xlsx"
+                )
+                .contentType(
+                        MediaType.parseMediaType(
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        )
+                )
+                .body(reporte);
+    }
 }

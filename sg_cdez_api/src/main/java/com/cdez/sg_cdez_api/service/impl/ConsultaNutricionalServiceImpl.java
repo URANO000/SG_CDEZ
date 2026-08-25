@@ -21,6 +21,7 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
     private final AntropometriaService ANTROPOMETRIA_SERVICE;
     private final ExamenLaboratorioService EXAMENLAB_SERVICE;
     private final AuthHelper AUTH_HELPER;
+    private final ReferenciaService REFERENCIA_SERVICE;
 
 
     @Override
@@ -65,6 +66,13 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
         EXAMENLAB_SERVICE.crearExamenesLab(request.examenesLaboratorio(), consultaNutricionalGuardada);
 
         ANTROPOMETRIA_SERVICE.crearAntropometria(request.antropometria(), consultaNutricionalGuardada);
+
+        if(request.consultaGeneral().referencia() != null){
+            REFERENCIA_SERVICE.crearReferencia(
+                    consulta,
+                    request.consultaGeneral().referencia()
+            );
+        }
 
     }
 

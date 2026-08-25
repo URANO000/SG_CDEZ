@@ -59,7 +59,17 @@ public class SecurityConfig {
                         .requestMatchers("/api/encargados/**").hasAnyRole("PERSONAL", "ADMIN",  "AYUDANTE")
                         .requestMatchers("/api/documentos/**").hasAnyRole("PERSONAL", "ADMIN",  "AYUDANTE")
                         .requestMatchers("/api/auditorias/**").hasAnyRole("ADMIN",  "AYUDANTE")
-                        .requestMatchers("/api/personal/**").hasRole("ADMIN")
+                        .requestMatchers("/api/medicamentos/**").hasAnyRole("ADMIN",  "AYUDANTE", "PERSONAL")
+
+                        .requestMatchers("/api/personal/listarPersonalFiltrado").hasAnyRole("ADMIN", "PERSONAL", "AYUDANTE")
+                        .requestMatchers("/api/personal/obtenerPersonalPorId/**").hasRole("ADMIN")
+                        .requestMatchers("/api/personal/crearPersonal").hasRole("ADMIN")
+                        .requestMatchers("/api/personal/actualizarPersonal/**").hasRole("ADMIN")
+                        .requestMatchers("/api/personal/activarPersonal/**").hasRole("ADMIN")
+                        .requestMatchers("/api/personal/desactivarPersonal/**").hasRole("ADMIN")
+                        .requestMatchers("/api/personal/reportePDF").hasRole("ADMIN")
+                        .requestMatchers("/api/personal/reporteExcel").hasRole("ADMIN")
+
 
                         .requestMatchers("/api/consulta/**").hasAnyRole("PERSONAL", "AYUDANTE")
                         .requestMatchers("/api/consulta-nutricional/**").hasAnyRole("PERSONAL",  "AYUDANTE")
