@@ -32,6 +32,11 @@ public interface ConsultaRepository extends JpaRepository<Consulta, UUID>, JpaSp
             LocalDateTime fechaInicio
     );
 
+    long countByActivoTrueAndCreatedAtBetween(
+            LocalDateTime fechaInicio,
+            LocalDateTime fechaFin
+    );
+
     @Query("""
         SELECT
             p.especialidad AS especialidad,
@@ -75,6 +80,18 @@ public interface ConsultaRepository extends JpaRepository<Consulta, UUID>, JpaSp
             COUNT(c) AS cantidad
         FROM Consulta c
         WHERE c.activo = true
+        GROUP BY c.tipoConsulta
+        ORDER BY COUNT(c) DESC
+    """)
+    List<ConsultasPorTipoProjection>
+    contarConsultasActivasPorTipo();
+
+    @Query("""
+        SELECT
+            COALESCE(c.tipoConsulta, 'Sin clasificar') AS tipoConsulta,
+            COUNT(c) AS cantidad
+        FROM Consulta c
+        WHERE c.activo = true
           AND c.createdBy.personalId = :personalId
         GROUP BY c.tipoConsulta
         ORDER BY COUNT(c) DESC
@@ -82,6 +99,26 @@ public interface ConsultaRepository extends JpaRepository<Consulta, UUID>, JpaSp
     List<ConsultasPorTipoProjection> contarPorTipoConsulta(
             @Param("personalId") UUID personalId
     );
+
+    @Query("""
+        SELECT
+            c.consultaId AS consultaId,
+            a.adultoId AS adultoId,
+            a.primerNombre AS primerNombre,
+            a.segundoNombre AS segundoNombre,
+            a.primerApellido AS primerApellido,
+            a.segundoApellido AS segundoApellido,
+            c.tipoConsulta AS tipoConsulta,
+            c.motivo AS motivo,
+            c.createdAt AS fecha
+        FROM Consulta c
+        JOIN c.adultoMayor a
+        WHERE c.activo = true
+        ORDER BY c.createdAt DESC
+    """)
+    List<ConsultaRecienteProjection>
+    buscarConsultasRecientes(Pageable pageable);
+
 
     @Query("""
         SELECT

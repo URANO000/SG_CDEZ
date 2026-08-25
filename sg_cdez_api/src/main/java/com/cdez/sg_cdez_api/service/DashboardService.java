@@ -1,5 +1,6 @@
 package com.cdez.sg_cdez_api.service;
 
+import com.cdez.sg_cdez_api.dto.response.AyudanteDashboardResponse;
 import com.cdez.sg_cdez_api.dto.response.DashboardResponse;
 import com.cdez.sg_cdez_api.dto.response.PersonalDashboardResponse;
 
@@ -10,4 +11,6 @@ public interface DashboardService {
 
     PersonalDashboardResponse obtenerDashboardPersonal(
     );
+
+    AyudanteDashboardResponse obtenerDashboardAyudante();
 }

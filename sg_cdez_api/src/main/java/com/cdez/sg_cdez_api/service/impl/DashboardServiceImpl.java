@@ -157,6 +157,66 @@ public class DashboardServiceImpl implements DashboardService {
         );
     }
 
+    @Override
+    public AyudanteDashboardResponse obtenerDashboardAyudante() {
+        LocalDate hoy = LocalDate.now();
+
+        LocalDateTime inicioHoy = hoy.atStartOfDay();
+        LocalDateTime inicioManana = hoy.plusDays(1).atStartOfDay();
+
+        LocalDateTime inicioMes = hoy
+                .withDayOfMonth(1)
+                .atStartOfDay();
+
+        List<ConsultasPorTipoResponse> consultasPorTipo =
+                consultaRepository
+                        .contarConsultasActivasPorTipo()
+                        .stream()
+                        .map(resultado ->
+                                new ConsultasPorTipoResponse(
+                                        resultado.getTipoConsulta(),
+                                        resultado.getCantidad()
+                                )
+                        )
+                        .toList();
+
+        List<ConsultaRecienteResponse> consultasRecientes =
+                consultaRepository
+                        .buscarConsultasRecientes(
+                                PageRequest.of(0, 5)
+                        )
+                        .stream()
+                        .map(this::mapearConsultaReciente)
+                        .toList();
+
+        return new AyudanteDashboardResponse(
+                adultoRepository.countByActivoTrue(),
+
+                adultoRepository.countByActivoFalse(),
+
+                adultoRepository.countByActivoTrueAndCreatedAtGreaterThanEqual(
+                        inicioMes
+                ),
+
+                consultaRepository.countByActivoTrue(),
+
+                consultaRepository
+                        .countByActivoTrueAndCreatedAtGreaterThanEqual(
+                                inicioMes
+                        ),
+
+                consultaRepository
+                        .countByActivoTrueAndCreatedAtBetween(
+                                inicioHoy,
+                                inicioManana
+                        ),
+
+                consultasPorTipo,
+
+                consultasRecientes
+        );
+    }
+
 
 
 }

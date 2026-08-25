@@ -34,3 +34,14 @@ export interface PersonalDashboardResponse {
   consultasPorTipo: ConsultasPorTipo[];
   consultasRecientes: ConsultaReciente[];
 }
+
+export interface AyudanteDashboardResponse {
+  adultosActivos: number;
+  adultosInactivos: number;
+  adultosNuevosEsteMes: number;
+  consultasTotales: number;
+  consultasEsteMes: number;
+  consultasHoy: number;
+  consultasPorTipo: ConsultasPorTipo[];
+  consultasRecientes: ConsultaReciente[];
+}
