@@ -4,11 +4,14 @@ import com.cdez.sg_cdez_api.service.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -19,28 +22,6 @@ public class EmailServiceImpl implements EmailService {
     private final JavaMailSender MAIL_SENDER;
     private final TemplateEngine TEMPLATE_ENGINE;
 
-    @Override
-    public void enviarCredenciales(String correo, String passwordTemp) {
-        SimpleMailMessage mensaje = new SimpleMailMessage();
-
-        mensaje.setTo(correo);
-        mensaje.setSubject("Credenciales de acceso");
-
-
-        mensaje.setText(
-                """
-                Su cuenta ha sido creada.
-
-                Usuario: %s
-                Contraseña temporal: %s
-
-                Debe cambiar esta contraseña en su primer inicio de sesión.
-                """
-                        .formatted(correo, passwordTemp)
-        );
-
-        MAIL_SENDER.send(mensaje);
-    }
 
     @Override
     public void enviarCorreoVerificacion(String usuario, String token, String nombre) {
@@ -85,6 +66,58 @@ public class EmailServiceImpl implements EmailService {
         }catch (MessagingException e) {
             throw new RuntimeException("Error enviando correo de restablecimiento de contraseña", e);
         }
+
+    }
+
+    @Override
+    public void enviarCorreoReferencia(String correoReceptor, String nombreReceptor, String nombreEmisor, String especialidadEmisor, String nombreAdultoMayor, String mensaje, String consultaId) {
+        String enlace = "http://localhost:5173/consulta/" + consultaId + "/detalle";
+        Context context = new Context();
+
+        String imageResourceName = "zurquiLogo";
+
+        context.setVariable("enlace", enlace);
+
+        context.setVariable("nombreReceptor", nombreReceptor);
+        context.setVariable("nombreEmisor", nombreEmisor);
+        context.setVariable("especialidadEmisor", especialidadEmisor);
+        context.setVariable("nombreAdultoMayor", nombreAdultoMayor);
+        context.setVariable("mensajeReferencia", mensaje);
+        context.setVariable(
+                "imageResourceName",
+                imageResourceName
+        );
+
+        String html = TEMPLATE_ENGINE.process("referencia", context);
+
+        try{
+            MimeMessage message = MAIL_SENDER.createMimeMessage();
+
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setTo(correoReceptor);
+            helper.setSubject("Nueva referencia - " + nombreAdultoMayor);
+            helper.setText(html, true);
+            ClassPathResource logo =
+                    new ClassPathResource(
+                            "static/zurqui-logo.png"
+                    );
+
+            helper.addInline(
+                    imageResourceName,
+                    logo,
+                    "image/png"
+            );
+
+            MAIL_SENDER.send(message);
+
+        } catch (MessagingException e){
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error enviando correo de referencia",
+                    e
+            );
+        }
+
 
     }
 }

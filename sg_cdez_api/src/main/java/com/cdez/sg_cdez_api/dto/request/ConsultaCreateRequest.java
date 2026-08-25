@@ -15,6 +15,7 @@ public record ConsultaCreateRequest(
         String diagnostico,
         String resultadosEvaluaciones,
         String recomendaciones,
-        String notas
+        String notas,
+        ReferenciaCreateRequest referencia
 ) {
 }

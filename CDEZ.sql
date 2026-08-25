@@ -306,4 +306,12 @@ CREATE TABLE Medicamento(
 	activo BOOl NOT NULL
 );
 
+CREATE TABLE Referencia (
+	referencia_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	emisor_id UUID NOT NULL REFERENCES Personal(personal_id),
+	receptor_id UUID NOT NULL REFERENCES Personal(personal_id),
+	consulta_id UUID NOT NULL REFERENCES Consulta(consulta_id),
+	mensaje TEXT NOT NULL,
+	created_at TIMESTAMP NOT NUll
+);
 
