@@ -6,6 +6,7 @@ import com.cdez.sg_cdez_api.entity.CustomUserDetails;
 import com.cdez.sg_cdez_api.entity.Personal;
 import com.cdez.sg_cdez_api.service.*;
 import com.cdez.sg_cdez_api.util.Exceptions.TokenExpiradoException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,12 +14,16 @@ import org.springframework.http.*;
 import org.springframework.security.core.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.util.Date;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService SERVICE;
     private final PersonalService PERSONAL_SERVICE;
+    private final JwtService JWT_SERVICE;
 
     //Login Api
     @PostMapping("/iniciarSesion")
@@ -74,9 +79,34 @@ public class AuthController {
     }
 
     @GetMapping("/session")
-    public ResponseEntity<UserSessionResponse> session(Authentication authentication){
+    public ResponseEntity<UserSessionResponse> session(Authentication authentication, HttpServletRequest request){
 
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+
+        PersonalResponse personal = PERSONAL_SERVICE.obtenerPersonalPorId(user.getUsuarioId());
+        if (personal.activo().equals("Inactivo")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String token = null;
+
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("access_token".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (token == null) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .build();
+        }
+
+        Instant expiration =
+                JWT_SERVICE.extractExpiration(token).toInstant();
 
         String rol = user.getAuthorities()
                 .stream()
@@ -84,15 +114,14 @@ public class AuthController {
                 .map(GrantedAuthority::getAuthority)
                 .orElse(null);
 
-        PersonalResponse personal = PERSONAL_SERVICE.obtenerPersonalPorId(user.getUsuarioId());
-
         return ResponseEntity.ok(
                 new UserSessionResponse(
                         user.getUsuarioId(),
                         personal.primerNombre() + " " + personal.primerApellido(),
                         user.getUsuario(),
                         rol,
-                        personal.especialidad().getLabel()
+                        personal.especialidad().getLabel(),
+                        expiration
 
                 )
         );
