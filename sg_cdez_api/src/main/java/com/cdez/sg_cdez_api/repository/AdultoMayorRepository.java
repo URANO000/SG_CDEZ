@@ -14,4 +14,6 @@ public interface AdultoMayorRepository
     boolean existsByIdentificacion(
             String identificacion
     );
+
+    long countByActivoTrue();
 }
