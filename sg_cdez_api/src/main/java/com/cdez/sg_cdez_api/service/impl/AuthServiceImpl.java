@@ -34,6 +34,8 @@ public class AuthServiceImpl implements AuthService {
     private final TokenService TOKEN_SERVICE;
     private final AuthHelper AUTH_HELPER;
     private final RateLimiterService RATE_LIMITER_SERVICE;
+    private final RefreshTokenService REFRESH_TOKEN_SERVICE;
+    private final CustomUserDetailsService USER_DETAILS_SERVICE;
 
 
     @Override
@@ -69,11 +71,27 @@ public class AuthServiceImpl implements AuthService {
 
         //Si pasa los filtros, entonces las credenciales son válidas
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
         //Generar y retornar JWT
         String jwt = jwtService.generateToken(userDetails);
         JwtAuthResponse response = new JwtAuthResponse();
         response.setAccessToken(jwt);
-
+        response.setRecordarme(loginRequest.isRecordarme());
+        if (loginRequest.isRecordarme()) {
+            Personal personal = PERSONAL_REPOSITORY
+                    .findById(userDetails.getUsuarioId())
+                    .orElseThrow(() ->
+                            new ResponseStatusException(
+                                    HttpStatus.UNAUTHORIZED,
+                                    "Usuario no encontrado."
+                            )
+                    );
+            String refreshToken =
+                    REFRESH_TOKEN_SERVICE.crearRefreshToken(
+                            personal
+                    );
+            response.setRefreshToken(refreshToken);
+        }
         return response;
     }
 
@@ -173,4 +191,22 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
+    @Override
+    @Transactional
+    public JwtAuthResponse renovarSesion(String refreshToken) {
+        RefreshToken tokenActual = REFRESH_TOKEN_SERVICE.validarRefreshToken(refreshToken);
+        Personal personal =
+                tokenActual.getPersonal();
+        if (!personal.isActivo()) {REFRESH_TOKEN_SERVICE.revocarTodosPorPersonal(personal.getPersonalId());
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "La cuenta no se encuentra activa.");
+        }
+        CustomUserDetails userDetails = (CustomUserDetails) USER_DETAILS_SERVICE.loadUserById(personal.getPersonalId());
+        String nuevoRefreshToken = REFRESH_TOKEN_SERVICE.rotarRefreshToken(refreshToken);
+        String nuevoAccessToken = jwtService.generateToken(userDetails);
+        JwtAuthResponse response = new JwtAuthResponse();
+        response.setAccessToken(nuevoAccessToken);
+        response.setRefreshToken(nuevoRefreshToken);
+        response.setRecordarme(true);
+        return response;
+    }
 }
