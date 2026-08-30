@@ -46,6 +46,8 @@ public class ConsultaNutricional {
     private Boolean distension;
     private Boolean gases;
     private Boolean reflujo;
+    private Boolean diarrea;
+    private Boolean estrenimiento;
 
     @Column(name = "frecuencia_evacuaciones", length = 100)
     private String frecuenciaEvacuaciones;

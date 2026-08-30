@@ -7,7 +7,8 @@ export const ESPECIALIDADES = [
     { value: "TERAPIA_FISICA", label: "Terapia Física" },
     { value: "TERAPIA_RESPIRATORIA", label: "Terapia Respiratoria" },
     { value: "TERAPIA_LENGUAJE", label: "Terapia de Lenguaje" },
-    {value: "COORDINACION", label: "Coordinación"}
+    {value: "COORDINACION", label: "Coordinación"},
+    {value: "TERAPIA_OCUPACIONAL", label: "Terapia Ocupacional"}
 ] as const;
 
 export type Especialidad = typeof ESPECIALIDADES[number]["value"];

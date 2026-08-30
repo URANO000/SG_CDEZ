@@ -9,7 +9,8 @@ public enum Especialidad {
     TERAPIA_FISICA("Terapia Física"),
     TERAPIA_RESPIRATORIA("Terapia Respiratoria"),
     TERAPIA_LENGUAJE("Terapia de Lenguaje"),
-    COORDINACION("Coordinación");
+    COORDINACION("Coordinación"),
+    TERAPIA_OCUPACIONAL("Terapia Ocupacional");
 
     private final String label;
     Especialidad(String label) { this.label = label; }

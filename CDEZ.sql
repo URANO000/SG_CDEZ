@@ -252,10 +252,13 @@ CREATE TABLE ConsultaNutricional(
 	distension BOOLEAN,
 	gases BOOLEAN,
 	reflujo BOOLEAN,
+	diarrea BOOLEAN,
+	estrenimiento BOOLEAN,
 	frecuencia_evacuaciones TEXT,
 	consistencia_bristol TEXT,
 	estado_cognitivo TEXT
 );
+
 
 CREATE TABLE Antropometria (
 	antropometria_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

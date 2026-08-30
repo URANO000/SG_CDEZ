@@ -1,6 +1,6 @@
 package com.cdez.sg_cdez_api.entity;
 
-import com.cdez.sg_cdez_api.entity.enums.TipoTamizaje;
+import com.cdez.sg_cdez_api.entity.enums.TipoTamizajeNutricion;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,7 +29,7 @@ public class TamizajeNutricional {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo", nullable = false, length = 30)
-    private TipoTamizaje tipo;
+    private TipoTamizajeNutricion tipo;
 
     @Column(name = "puntaje", precision = 6, scale = 2)
     private BigDecimal puntaje;

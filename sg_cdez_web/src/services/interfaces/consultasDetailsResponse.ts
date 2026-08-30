@@ -1,9 +1,9 @@
 export type Apetito = "BUENO" | "REGULAR" | "MALO";
-export type TipoTamizaje = "MNA" | "SARC_F" | "MUST" | "NRS";
+export type TipoTamizajeNutricional = "MNA" | "SARC_F" | "MUST" | "NRS";
 
-export interface TamizajeResponse {
+export interface TamizajeNutricionalResponse {
     tamizajeId: string;
-    tipo: TipoTamizaje;
+    tipo: TipoTamizajeNutricional;
     puntaje: number;
     resultado: string;
     observaciones: string;
@@ -43,10 +43,12 @@ export interface ConsultaNutricionalDetailResponse {
     distension: boolean;
     gases: boolean;
     reflujo: boolean;
+    diarrea: boolean;
+    estrenimiento: boolean;
     frecuenciaEvacuaciones: string;
     consistenciaBristol: string;
     estadoCognitivo: string;
-    tamizajes: TamizajeResponse[];
+    tamizajes: TamizajeNutricionalResponse[];
     examenesLaboratorio: ExamenLaboratorioResponse[];
     antropometria: AntropometriaResponse
 }
