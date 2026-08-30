@@ -262,7 +262,7 @@ public class ConsultaServiceImpl implements ConsultaService {
                 consultaNutricional.getFrecuenciaEvacuaciones(),
                 consultaNutricional.getConsistenciaBristol(),
                 consultaNutricional.getEstadoCognitivo(),
-                TAMIZAJE_SERVICE.listarTamizajesPorConsulta(consultaNutricional),
+                TAMIZAJE_SERVICE.listarTamizajesPorConsultaNutricional(consultaNutricional),
                 EXAMENLAB_SERVICE.listarExamenesPorConsulta(consultaNutricional),
                 ANTROPOMETRIA_SERVICE.obtenerAntropometriaPorConsulta(consultaNutricional)
         );

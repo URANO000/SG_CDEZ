@@ -12,8 +12,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tamizajenutricional")
-public class TamizajeNutricional {
+@Table(name = "tamizaje")
+public class Tamizaje {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -23,9 +23,16 @@ public class TamizajeNutricional {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "consulta_nutricional_id",
-            nullable = false
+            nullable = true
     )
     private ConsultaNutricional consultaNutricional;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "consulta_psych_id",
+            nullable = true
+    )
+    private ConsultaPsych consultaPsych;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo", nullable = false, length = 30)

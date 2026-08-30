@@ -59,7 +59,7 @@ public class ConsultaNutricional {
     private String estadoCognitivo;
 
     @OneToMany(mappedBy = "consultaNutricional")
-    private List<TamizajeNutricional> tamizajes;
+    private List<Tamizaje> tamizajes;
 
     @OneToMany(mappedBy = "consultaNutricional")
     private List<ExamenLaboratorio> examenesLaboratorio;

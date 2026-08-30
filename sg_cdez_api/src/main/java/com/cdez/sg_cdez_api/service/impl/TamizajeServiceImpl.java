@@ -4,7 +4,7 @@ import com.cdez.sg_cdez_api.dto.request.TamizajeNutricionalCreateRequest;
 import com.cdez.sg_cdez_api.dto.request.TamizajeNutricionalUpdateRequest;
 import com.cdez.sg_cdez_api.dto.response.TamizajeResponse;
 import com.cdez.sg_cdez_api.entity.ConsultaNutricional;
-import com.cdez.sg_cdez_api.entity.TamizajeNutricional;
+import com.cdez.sg_cdez_api.entity.Tamizaje;
 import com.cdez.sg_cdez_api.repository.TamizajeRepository;
 import com.cdez.sg_cdez_api.service.TamizajeService;
 import lombok.AllArgsConstructor;
@@ -20,15 +20,15 @@ public class TamizajeServiceImpl implements TamizajeService {
     private final TamizajeRepository REPOSITORY;
 
     @Override
-    public List<TamizajeResponse> listarTamizajesPorConsulta(ConsultaNutricional consultaNutricional) {
+    public List<TamizajeResponse> listarTamizajesPorConsultaNutricional(ConsultaNutricional consultaNutricional) {
         return REPOSITORY.findByConsultaNutricional(consultaNutricional).stream().map(this::mapDTO).toList();
     }
 
     @Override
-    public List<TamizajeResponse> crearTamizajes(List<TamizajeNutricionalCreateRequest> requests, ConsultaNutricional consultaNutricional) {
+    public List<TamizajeResponse> crearTamizajesNutricional(List<TamizajeNutricionalCreateRequest> requests, ConsultaNutricional consultaNutricional) {
         List<TamizajeResponse> tamizajesNuevos = new ArrayList<>();
         for(var tamizaje : requests){
-            TamizajeNutricional tamizajeNutricional = new TamizajeNutricional();
+            Tamizaje tamizajeNutricional = new Tamizaje();
 
             tamizajeNutricional.setConsultaNutricional(consultaNutricional);
             tamizajeNutricional.setTipo(tamizaje.tipo());
@@ -43,10 +43,10 @@ public class TamizajeServiceImpl implements TamizajeService {
     }
 
     @Override
-    public List<TamizajeResponse> actualizarTamizajes(List<TamizajeNutricionalUpdateRequest> requests, ConsultaNutricional consultaNutricional) {
+    public List<TamizajeResponse> actualizarTamizajesNutricional(List<TamizajeNutricionalUpdateRequest> requests, ConsultaNutricional consultaNutricional) {
         List<TamizajeResponse> tamizajesActualizados = new ArrayList<>();
         for(var tamizaje : requests){
-            TamizajeNutricional tamizajeNutricional = REPOSITORY.findByTamizajeIdAndConsultaNutricionalConsultaNutricionalId(tamizaje.tamizajeId(), consultaNutricional.getConsultaNutricionalId())
+            Tamizaje tamizajeNutricional = REPOSITORY.findByTamizajeIdAndConsultaNutricionalConsultaNutricionalId(tamizaje.tamizajeId(), consultaNutricional.getConsultaNutricionalId())
                     .orElseThrow(() -> new ResponseStatusException(
                             HttpStatus.NOT_FOUND,
                             "Tamizaje indicado no fue encontrado."
@@ -56,13 +56,13 @@ public class TamizajeServiceImpl implements TamizajeService {
             tamizajeNutricional.setResultado(tamizaje.resultado());
             tamizajeNutricional.setObservaciones(tamizaje.observaiones());
 
-            TamizajeNutricional tamizajeNutricionalNuevo =  REPOSITORY.save(tamizajeNutricional);
+            Tamizaje tamizajeNutricionalNuevo =  REPOSITORY.save(tamizajeNutricional);
             tamizajesActualizados.add(mapDTO(tamizajeNutricionalNuevo));
         }
         return tamizajesActualizados;
     }
 
-    private TamizajeResponse mapDTO(TamizajeNutricional tamizajeNutricional){
+    private TamizajeResponse mapDTO(Tamizaje tamizajeNutricional){
         return new TamizajeResponse(
                 tamizajeNutricional.getTamizajeId(),
                 tamizajeNutricional.getTipo(),

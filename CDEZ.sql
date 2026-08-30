@@ -259,7 +259,6 @@ CREATE TABLE ConsultaNutricional(
 	estado_cognitivo TEXT
 );
 
-
 CREATE TABLE Antropometria (
 	antropometria_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	consulta_nutricional_id UUID NOT NULL UNIQUE REFERENCES ConsultaNutricional(consulta_nutricional_id),
@@ -274,16 +273,6 @@ CREATE TABLE Antropometria (
 	circunferencia_braquial DECIMAL(6,2),
     circunferencia_cintura DECIMAL(6,2),
     perdida_peso_porcentaje DECIMAL(5,2)
-);
-
-CREATE TABLE TamizajeNutricional(
-	tamizaje_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	consulta_nutricional_id UUID NOT NULL REFERENCES ConsultaNutricional(consulta_nutricional_id),
-
-	tipo VARCHAR(30) NOT NULL,
-	puntaje DECIMAL(6,2),
-	resultado VARCHAR(100),
-	observaciones TEXT
 );
 
 CREATE TABLE ExamenLaboratorio (
@@ -321,6 +310,24 @@ CREATE TABLE Referencia (
 	consulta_id UUID NOT NULL REFERENCES Consulta(consulta_id),
 	mensaje TEXT NOT NULL,
 	created_at TIMESTAMP NOT NUll
+);
+
+-- 29/08/2026
+
+CREATE TABLE ConsultaPsych(
+	consulta_psych_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	consulta_id UUID NOT NULL UNIQUE REFERENCES Consulta(consulta_id)
+);
+
+CREATE TABLE Tamizaje(
+	tamizaje_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	consulta_nutricional_id UUID NULL REFERENCES ConsultaNutricional(consulta_nutricional_id),
+	consulta_psych_id UUID NULL REFERENCES ConsultaPsych(consulta_psych_id),
+
+	tipo VARCHAR(30) NOT NULL,
+	puntaje DECIMAL(6,2),
+	resultado VARCHAR(100),
+	observaciones TEXT
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS ux_rol_nombre
