@@ -34,7 +34,7 @@ import type {
 import type {
     Apetito,
     ConsultaDetailResponse,
-    TipoTamizaje,
+    TipoTamizajeNutricional,
 } from "../../../services/interfaces/consultasDetailsResponse";
 
 interface AntropometriaFormValues {
@@ -53,7 +53,7 @@ interface AntropometriaFormValues {
 
 interface TamizajeFormValues {
     tamizajeId: string;
-    tipo: TipoTamizaje | null;
+    tipo: TipoTamizajeNutricional | null;
     puntaje: string;
     resultado: string;
     observaciones: string;
@@ -89,6 +89,8 @@ interface ConsultaNutricionalFormValues {
     distension: boolean;
     gases: boolean;
     reflujo: boolean;
+    diarrea: boolean;
+    estrenimiento: boolean;
 
     frecuenciaEvacuaciones: string;
     consistenciaBristol: string;
@@ -135,6 +137,8 @@ export function ConsultaNutricionalEditarForm() {
             distension: false,
             gases: false,
             reflujo: false,
+            diarrea: false,
+            estrenimiento: false,
 
             frecuenciaEvacuaciones: "",
             consistenciaBristol: "",
@@ -430,6 +434,10 @@ export function ConsultaNutricionalEditarForm() {
 
                     reflujo:
                         nutricional.reflujo ?? false,
+                    diarrea:
+                        nutricional.diarrea ?? false,
+                    estrenimiento:
+                        nutricional.estrenimiento ?? false,
 
                     frecuenciaEvacuaciones:
                         nutricional.frecuenciaEvacuaciones ?? "",
@@ -625,6 +633,10 @@ export function ConsultaNutricionalEditarForm() {
 
                 reflujo:
                     values.reflujo,
+                diarrea:
+                    values.diarrea,
+                estrenimiento:
+                    values.estrenimiento,
 
                 frecuenciaEvacuaciones:
                     values.frecuenciaEvacuaciones.trim(),
@@ -1171,6 +1183,20 @@ export function ConsultaNutricionalEditarForm() {
                                     { type: "checkbox" }
                                 )}
                             />
+                            <Switch
+                                label="Diarrea"
+                                {...form.getInputProps(
+                                    "diarrea",
+                                    { type: "checkbox" }
+                                )}
+                            />
+                            <Switch
+                                label="Estreñimiento"
+                                {...form.getInputProps(
+                                    "estrenimiento",
+                                    { type: "checkbox" }
+                                )}
+                            />
 
                         </SimpleGrid>
 
@@ -1309,7 +1335,7 @@ export function ConsultaNutricionalEditarForm() {
 
 
                             <TextInput
-                                label="Altura estimada (m)"
+                                label="Altura de rodilla (m)"
                                 withAsterisk
                                 classNames={{
                                     root: classes.fieldGroup,
@@ -1613,7 +1639,7 @@ export function ConsultaNutricionalEditarForm() {
 
                                         <TextInput
                                             label="Valor"
-                                             classNames={{
+                                            classNames={{
                                                 root: classes.fieldGroup,
                                                 label: classes.fieldLabel,
                                                 input: classes.textinput,
@@ -1626,7 +1652,7 @@ export function ConsultaNutricionalEditarForm() {
 
                                         <TextInput
                                             label="Unidad"
-                                             classNames={{
+                                            classNames={{
                                                 root: classes.fieldGroup,
                                                 label: classes.fieldLabel,
                                                 input: classes.textinput,
@@ -1641,7 +1667,7 @@ export function ConsultaNutricionalEditarForm() {
                                         <TextInput
                                             label="Fecha"
                                             type="date"
-                                             classNames={{
+                                            classNames={{
                                                 root: classes.fieldGroup,
                                                 label: classes.fieldLabel,
                                                 input: classes.textinput,
@@ -1656,7 +1682,7 @@ export function ConsultaNutricionalEditarForm() {
                                             label="Observaciones"
                                             minRows={3}
                                             className={classes.fieldFull}
-                                             classNames={{
+                                            classNames={{
                                                 root: classes.fieldGroup,
                                                 label: classes.fieldLabel,
                                                 input: classes.textarea,

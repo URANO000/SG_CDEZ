@@ -257,6 +257,8 @@ public class ConsultaServiceImpl implements ConsultaService {
                 consultaNutricional.getDistension(),
                 consultaNutricional.getGases(),
                 consultaNutricional.getReflujo(),
+                consultaNutricional.getDiarrea(),
+                consultaNutricional.getEstrenimiento(),
                 consultaNutricional.getFrecuenciaEvacuaciones(),
                 consultaNutricional.getConsistenciaBristol(),
                 consultaNutricional.getEstadoCognitivo(),

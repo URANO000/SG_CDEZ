@@ -44,7 +44,7 @@ export function LoginForm() {
       } else {
         notifications.show({
           title: "Error de inicio de sesión",
-          message: "Usuario o contraseña incorrectos.",
+          message: "Error al inciiar sesión.",
           color: "red",
         });
       }

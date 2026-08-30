@@ -186,7 +186,7 @@ export function PersonalDashboard() {
                       {item.valor.toLocaleString()}
                     </Text>
 
-                    <Text size="xs" c="dimmed">
+                    <Text size="xs" c="dimmed" mt={2}>
                       {item.descripcion}
                     </Text>
                   </div>

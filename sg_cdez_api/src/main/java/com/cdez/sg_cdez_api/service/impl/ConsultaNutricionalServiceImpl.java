@@ -49,6 +49,8 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
         consultaNutricional.setDistension(request.distension());
         consultaNutricional.setGases(request.gases());
         consultaNutricional.setReflujo(request.reflujo());
+        consultaNutricional.setDiarrea(request.diarrea());
+        consultaNutricional.setEstrenimiento(request.estrenimiento());
         consultaNutricional.setFrecuenciaEvacuaciones(request.frecuenciaEvacuaciones() == null
                 ? null
                 : request.frecuenciaEvacuaciones().trim());
@@ -111,6 +113,8 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
         consultaNutricionalVieja.setDistension(request.distension());
         consultaNutricionalVieja.setGases(request.gases());
         consultaNutricionalVieja.setReflujo(request.reflujo());
+        consultaNutricionalVieja.setDiarrea(request.diarrea());
+        consultaNutricionalVieja.setEstrenimiento(request.estrenimiento());
 
         consultaNutricionalVieja.setFrecuenciaEvacuaciones(
                 request.frecuenciaEvacuaciones() == null

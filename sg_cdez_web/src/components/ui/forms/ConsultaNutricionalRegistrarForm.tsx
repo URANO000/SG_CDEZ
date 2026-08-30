@@ -25,7 +25,7 @@ import { registrarConsultaNutricional } from "../../../services/consultasService
 
 import type {
     Apetito,
-    TipoTamizaje,
+    TipoTamizajeNutricional,
 } from "../../../services/interfaces/consultasDetailsResponse";
 
 import type {
@@ -51,7 +51,7 @@ interface AntropometriaFormValues {
 }
 
 interface TamizajeFormValues {
-    tipo: TipoTamizaje | null;
+    tipo: TipoTamizajeNutricional | null;
     puntaje: string;
     resultado: string;
     observaciones: string;
@@ -92,6 +92,8 @@ interface ConsultaNutricionalFormValues {
     distension: boolean;
     gases: boolean;
     reflujo: boolean;
+    diarrea: boolean;
+    estrenimiento: boolean;
 
     frecuenciaEvacuaciones: string;
     consistenciaBristol: string;
@@ -147,6 +149,8 @@ export function ConsultaNutricionalRegistrarForm() {
             distension: false,
             gases: false,
             reflujo: false,
+            diarrea: false,
+            estrenimiento: false,
 
             frecuenciaEvacuaciones: "",
             consistenciaBristol: "",
@@ -480,6 +484,12 @@ export function ConsultaNutricionalRegistrarForm() {
 
                 reflujo:
                     values.reflujo,
+
+                diarrea:
+                    values.diarrea,
+
+                estrenimiento:
+                    values.estrenimiento,
 
                 frecuenciaEvacuaciones:
                     values.frecuenciaEvacuaciones.trim(),
@@ -1079,6 +1089,26 @@ export function ConsultaNutricionalRegistrarForm() {
                                 )}
                             />
 
+                            <Switch
+                                label="Diarrea"
+                                {
+                                ...form.getInputProps(
+                                    "diarrea",
+                                    { type: "checkbox" }
+                                )
+                                }
+                            />
+
+                            <Switch
+                                label="Estreñimiento"
+                                {
+                                ...form.getInputProps(
+                                    "estrenimiento",
+                                    { type: "checkbox" }
+                                )
+                                }
+                            />
+
                         </SimpleGrid>
 
 
@@ -1216,7 +1246,7 @@ export function ConsultaNutricionalRegistrarForm() {
 
 
                             <TextInput
-                                label="Altura estimada (m)"
+                                label="Altura de rodilla (m)"
                                 withAsterisk
                                 classNames={{
                                     root: classes.fieldGroup,

@@ -15,6 +15,8 @@ public record ConsultaNutricionalDetailResponse(
         boolean distension,
         boolean gases,
         boolean reflujo,
+        boolean diarrea,
+        boolean estrenimiento,
         String frecuenciaEvacuaciones,
         String consistenciaBristol,
         String estadoCognitivo,
