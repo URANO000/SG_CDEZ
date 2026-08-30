@@ -1,6 +1,6 @@
 package com.cdez.sg_cdez_api.entity.enums;
 
-public enum TipoTamizaje {
+public enum TipoTamizajeNutricion {
     MNA,
     SARC_F,
     MUST,

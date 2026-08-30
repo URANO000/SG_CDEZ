@@ -1,4 +1,4 @@
-import type { Apetito, TipoTamizaje } from "./consultasDetailsResponse";
+import type { Apetito, TipoTamizajeNutricional } from "./consultasDetailsResponse";
 
 export interface ConsultaUpdateRequest {
     tipoConsulta: string;
@@ -12,7 +12,7 @@ export interface ConsultaUpdateRequest {
 
 export interface TamizajeNutricionalUpdateRequest {
     tamizajeId: string;
-    tipo: TipoTamizaje | null;
+    tipo: TipoTamizajeNutricional | null;
     puntaje: number | null;
     resultado: string | null;
     observaciones: string | null;
@@ -51,7 +51,9 @@ export interface ConsultaNutricionalUpdateRequest {
     vomitos: boolean;
     distension: boolean;
     gases: boolean;
-    reflujo: boolean | null;
+    reflujo: boolean;
+    diarrea: boolean;
+    estrenimiento: boolean;
     frecuenciaEvacuaciones: string;
     consistenciaBristol: string;
     estadoCognitivo: string;
