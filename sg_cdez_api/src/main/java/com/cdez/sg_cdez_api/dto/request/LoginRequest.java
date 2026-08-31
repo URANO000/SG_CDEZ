@@ -12,4 +12,5 @@ import lombok.Setter;
 public class LoginRequest {
     private String usuario;
     private String contrasena;
+    private boolean recordarme;
 }

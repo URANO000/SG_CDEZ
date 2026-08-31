@@ -1,37 +1,71 @@
-import {apiClient} from "../utils/apiHelper";
+import { apiClient } from "../utils/apiHelper";
 import type { Session } from "./interfaces/sessionInterface";
 
-export const iniciarSesion = async (usuario: string, contrasena: string) => {
-    await apiClient.post("/auth/iniciarSesion", {usuario, contrasena});
-}
+export const iniciarSesion = async (
+  usuario: string,
+  contrasena: string,
+  recordarme: boolean,
+) => {
+  await apiClient.post("/auth/iniciarSesion", {
+    usuario,
+    contrasena,
+    recordarme,
+  });
+};
 
 // Para la sesión
 
 export async function obtenerSesion() {
-    const response = await apiClient.get<Session>("/auth/session");
-    return response.data;
+  const response = await apiClient.get<Session>("/auth/session");
+  return response.data;
 }
 
-export async function cerrarSesion(){
-    await apiClient.post("/auth/cerrarSesion")
+export async function cerrarSesion() {
+  await apiClient.post("/auth/cerrarSesion");
 }
 
-export const activarCuenta = async (token:string, contrasena:string, confirmarContrasena:string) => {
-    await apiClient.post("/auth/activar", {token, contrasena, confirmarContrasena});
+export async function continuarSesion() {
+  await apiClient.post("/auth/continuarSesion");
 }
 
-export const cambiarContrasena = async (nuevaContrasena: string, confirmarContrasena:string) => {
-    await apiClient.post("/auth/cambiarContrasena", {nuevaContrasena, confirmarContrasena});
-}
+export const activarCuenta = async (
+  token: string,
+  contrasena: string,
+  confirmarContrasena: string,
+) => {
+  await apiClient.post("/auth/activar", {
+    token,
+    contrasena,
+    confirmarContrasena,
+  });
+};
+
+export const cambiarContrasena = async (
+  nuevaContrasena: string,
+  confirmarContrasena: string,
+) => {
+  await apiClient.post("/auth/cambiarContrasena", {
+    nuevaContrasena,
+    confirmarContrasena,
+  });
+};
 
 export const forgotPassword = async (correo: string) => {
-    await apiClient.post("/auth/forgot-password", {correo})
-}
+  await apiClient.post("/auth/forgot-password", { correo });
+};
 
 export const reenviarVerificacion = async (token: string) => {
-    await apiClient.post("/auth/reenviar-verificacion", {token})
-}
+  await apiClient.post("/auth/reenviar-verificacion", { token });
+};
 
-export const restablecerContrasena = async (token: string, contrasena:string, confirmarContrasena:string) => {
-    await apiClient.post("auth/restablecer-contrasena", {token, contrasena, confirmarContrasena})
-}
+export const restablecerContrasena = async (
+  token: string,
+  contrasena: string,
+  confirmarContrasena: string,
+) => {
+  await apiClient.post("auth/restablecer-contrasena", {
+    token,
+    contrasena,
+    confirmarContrasena,
+  });
+};

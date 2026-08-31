@@ -34,6 +34,8 @@ public class AuthServiceImpl implements AuthService {
     private final TokenService TOKEN_SERVICE;
     private final AuthHelper AUTH_HELPER;
     private final RateLimiterService RATE_LIMITER_SERVICE;
+    private final RefreshTokenService REFRESH_TOKEN_SERVICE;
+    private final CustomUserDetailsService USER_DETAILS_SERVICE;
 
 
     @Override
@@ -69,19 +71,52 @@ public class AuthServiceImpl implements AuthService {
 
         //Si pasa los filtros, entonces las credenciales son válidas
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
         //Generar y retornar JWT
         String jwt = jwtService.generateToken(userDetails);
         JwtAuthResponse response = new JwtAuthResponse();
         response.setAccessToken(jwt);
+        response.setRecordarme(loginRequest.isRecordarme());
+        if (loginRequest.isRecordarme()) {
+            Personal personal = PERSONAL_REPOSITORY
+                    .findById(userDetails.getUsuarioId())
+                    .orElseThrow(() ->
+                            new ResponseStatusException(
+                                    HttpStatus.UNAUTHORIZED,
+                                    "Usuario no encontrado."
+                            )
+                    );
 
+            // Solo se permite una sesión persistente activa por usuario
+            REFRESH_TOKEN_SERVICE.revocarTodosPorPersonal(
+                    personal.getPersonalId()
+            );
+            String refreshToken =
+                    REFRESH_TOKEN_SERVICE.crearRefreshToken(
+                            personal
+                    );
+            response.setRefreshToken(refreshToken);
+        }
         return response;
     }
 
+    @Transactional
     @Override
-    public String cambiarContrasena(CambiaContrasenaRequest request){
+    public String cambiarContrasena(
+            CambiaContrasenaRequest request
+    ) {
         Personal usuario = AUTH_HELPER.obtenerUsuarioAutenticado();
-        AUTH_HELPER.actualizarContrasena(usuario, request.getNuevaContransena(), request.getConfirmarContrasena());
+        AUTH_HELPER.actualizarContrasena(
+                usuario,
+                request.getNuevaContransena(),
+                request.getConfirmarContrasena()
+        );
         REPOSITORY.save(usuario);
+
+        // Invalidar todas las sesiones persistentes después de cambiar la contraseña
+        REFRESH_TOKEN_SERVICE.revocarTodosPorPersonal(
+                usuario.getPersonalId()
+        );
         return "La contraseña ha sido actualizada";
     }
 
@@ -145,6 +180,7 @@ public class AuthServiceImpl implements AuthService {
         TOKEN_SERVICE.generarYEnviarResetToken(personal.get());
     }
 
+    @Transactional
     @Override
     public void resetContrasena(ResetPasswordRequest request) {
         PasswordResetToken resetToken = RESET_REPOSITORY.findByToken(request.token())
@@ -170,7 +206,28 @@ public class AuthServiceImpl implements AuthService {
 
         PERSONAL_REPOSITORY.save(personal);
         RESET_REPOSITORY.save(resetToken);
+        REFRESH_TOKEN_SERVICE.revocarTodosPorPersonal(
+                personal.getPersonalId()
+        );
 
     }
 
+    @Override
+    @Transactional
+    public JwtAuthResponse renovarSesion(String refreshToken) {
+        RefreshToken tokenActual = REFRESH_TOKEN_SERVICE.validarRefreshToken(refreshToken);
+        Personal personal =
+                tokenActual.getPersonal();
+        if (!personal.isActivo()) {REFRESH_TOKEN_SERVICE.revocarTodosPorPersonal(personal.getPersonalId());
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "La cuenta no se encuentra activa.");
+        }
+        CustomUserDetails userDetails = (CustomUserDetails) USER_DETAILS_SERVICE.loadUserById(personal.getPersonalId());
+        String nuevoRefreshToken = REFRESH_TOKEN_SERVICE.rotarRefreshToken(refreshToken);
+        String nuevoAccessToken = jwtService.generateToken(userDetails);
+        JwtAuthResponse response = new JwtAuthResponse();
+        response.setAccessToken(nuevoAccessToken);
+        response.setRefreshToken(nuevoRefreshToken);
+        response.setRecordarme(true);
+        return response;
+    }
 }

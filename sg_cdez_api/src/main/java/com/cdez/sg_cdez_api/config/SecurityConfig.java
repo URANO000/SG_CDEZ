@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/forgot-password").permitAll()
                         .requestMatchers("/api/auth/restablecer-contrasena").permitAll()
                         .requestMatchers("/api/auth/cambiarContrasena/**").permitAll()
+                        .requestMatchers("/api/auth/refresh").permitAll()
                         .requestMatchers("/api/auth/session").hasAnyRole("PERSONAL", "ADMIN",  "AYUDANTE")
                         .requestMatchers("/api/auth/activar").permitAll()
                         .requestMatchers("/api/auth/reenviar-verificacion").permitAll()
