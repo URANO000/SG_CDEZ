@@ -1,10 +1,8 @@
 package com.cdez.sg_cdez_api.service.impl;
 
-import com.cdez.sg_cdez_api.dto.request.TamizajeNutricionalCreateRequest;
-import com.cdez.sg_cdez_api.dto.request.TamizajeNutricionalUpdateRequest;
+import com.cdez.sg_cdez_api.dto.request.*;
 import com.cdez.sg_cdez_api.dto.response.TamizajeResponse;
-import com.cdez.sg_cdez_api.entity.ConsultaNutricional;
-import com.cdez.sg_cdez_api.entity.Tamizaje;
+import com.cdez.sg_cdez_api.entity.*;
 import com.cdez.sg_cdez_api.repository.TamizajeRepository;
 import com.cdez.sg_cdez_api.service.TamizajeService;
 import lombok.AllArgsConstructor;
@@ -24,13 +22,17 @@ public class TamizajeServiceImpl implements TamizajeService {
         return REPOSITORY.findByConsultaNutricional(consultaNutricional).stream().map(this::mapDTO).toList();
     }
 
+    public List<TamizajeResponse> listarTamizajesPorConsultaPsycg(ConsultaPsych consultaPsych){
+        return REPOSITORY.findByConsultaPsych(consultaPsych).stream().map(this::mapDTO).toList();
+    }
+
     @Override
-    public List<TamizajeResponse> crearTamizajesNutricional(List<TamizajeNutricionalCreateRequest> requests, ConsultaNutricional consultaNutricional) {
+    public List<TamizajeResponse> crearTamizajesNutricional(List<TamizajeCreateRequest> requests, ConsultaNutricional consultaNutricional) {
         List<TamizajeResponse> tamizajesNuevos = new ArrayList<>();
         for(var tamizaje : requests){
             Tamizaje tamizajeNutricional = new Tamizaje();
 
-            tamizajeNutricional.setConsultaNutricional(consultaNutricional);
+            tamizajeNutricional.setConsulta(consultaNutricional.getConsulta());
             tamizajeNutricional.setTipo(tamizaje.tipo());
             tamizajeNutricional.setPuntaje(tamizaje.puntaje());
             tamizajeNutricional.setResultado(tamizaje.resultado());
@@ -42,8 +44,27 @@ public class TamizajeServiceImpl implements TamizajeService {
         return tamizajesNuevos;
     }
 
+    public List<TamizajeResponse> crearTamizajesPsych(List<TamizajeCreateRequest> requests, ConsultaPsych consultaPsych){
+        List<TamizajeResponse> tamizajesNuevos = new ArrayList<>();
+        for(var tamizaje: requests){
+            Tamizaje tamizajePsyh = new Tamizaje();
+
+            tamizajePsyh.setConsulta(consultaPsych.getConsulta());
+            tamizajePsyh.setTipo(tamizaje.tipo());
+            tamizajePsyh.setResultado(tamizaje.resultado());
+            tamizajePsyh.setObservaciones(tamizaje.observaciones());
+
+            // No aplica
+            tamizajePsyh.setPuntaje(null);
+            REPOSITORY.save(tamizajePsyh);
+            tamizajesNuevos.add(mapDTO(tamizajePsyh));
+        }
+
+        return tamizajesNuevos;
+    }
+
     @Override
-    public List<TamizajeResponse> actualizarTamizajesNutricional(List<TamizajeNutricionalUpdateRequest> requests, ConsultaNutricional consultaNutricional) {
+    public List<TamizajeResponse> actualizarTamizajesNutricional(List<TamizajeUpdateRequest> requests, ConsultaNutricional consultaNutricional) {
         List<TamizajeResponse> tamizajesActualizados = new ArrayList<>();
         for(var tamizaje : requests){
             Tamizaje tamizajeNutricional = REPOSITORY.findByTamizajeIdAndConsultaNutricionalConsultaNutricionalId(tamizaje.tamizajeId(), consultaNutricional.getConsultaNutricionalId())

@@ -321,8 +321,7 @@ CREATE TABLE ConsultaPsych(
 
 CREATE TABLE Tamizaje(
 	tamizaje_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	consulta_nutricional_id UUID NULL REFERENCES ConsultaNutricional(consulta_nutricional_id),
-	consulta_psych_id UUID NULL REFERENCES ConsultaPsych(consulta_psych_id),
+	consulta_id UUID NOT NULL REFERENCES Consulta(consulta_id),
 
 	tipo VARCHAR(30) NOT NULL,
 	puntaje DECIMAL(6,2),

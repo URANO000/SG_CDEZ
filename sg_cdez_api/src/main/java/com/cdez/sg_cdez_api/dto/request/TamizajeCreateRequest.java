@@ -1,11 +1,11 @@
 package com.cdez.sg_cdez_api.dto.request;
 
-import com.cdez.sg_cdez_api.entity.enums.TipoTamizajeNutricion;
+import com.cdez.sg_cdez_api.entity.enums.TipoTamizaje;
 
 import java.math.BigDecimal;
 
-public record TamizajeNutricionalCreateRequest(
-        TipoTamizajeNutricion tipo,
+public record TamizajeCreateRequest(
+        TipoTamizaje tipo,
         BigDecimal puntaje,
         String resultado,
         String observaciones

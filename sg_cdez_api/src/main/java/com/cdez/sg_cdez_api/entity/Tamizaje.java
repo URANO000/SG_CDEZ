@@ -1,6 +1,6 @@
 package com.cdez.sg_cdez_api.entity;
 
-import com.cdez.sg_cdez_api.entity.enums.TipoTamizajeNutricion;
+import com.cdez.sg_cdez_api.entity.enums.TipoTamizaje;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,23 +20,16 @@ public class Tamizaje {
     @Column(name = "tamizaje_id")
     private UUID tamizajeId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(
-            name = "consulta_nutricional_id",
+            name = "consulta_id",
             nullable = true
     )
-    private ConsultaNutricional consultaNutricional;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(
-            name = "consulta_psych_id",
-            nullable = true
-    )
-    private ConsultaPsych consultaPsych;
+    private Consulta consulta;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo", nullable = false, length = 30)
-    private TipoTamizajeNutricion tipo;
+    private TipoTamizaje tipo;
 
     @Column(name = "puntaje", precision = 6, scale = 2)
     private BigDecimal puntaje;
