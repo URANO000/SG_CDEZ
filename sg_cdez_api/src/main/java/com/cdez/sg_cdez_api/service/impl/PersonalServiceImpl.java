@@ -37,6 +37,7 @@ public class PersonalServiceImpl implements PersonalService {
     private final ContactoService CONTACTO_SERVICE;
     private final ReportService REPORT_SERVICE;
     private final DocumentoService DOCUMENTO_SERVICE;
+    private final RefreshTokenService REFRESH_TOKEN_SERVICE;
 
     @Override
     public List<PersonalResponse> listarPersonal() {
@@ -212,18 +213,19 @@ public class PersonalServiceImpl implements PersonalService {
         return mapDTO(personal);
     }
 
+    @Transactional
     @Override
-    public PersonalResponse desactivarPersonal(UUID id){
-        if(!AUTH_HELPER.isUsuarioAdmin()){
+    public PersonalResponse desactivarPersonal(UUID id) {
+        if (!AUTH_HELPER.isUsuarioAdmin()) {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,
                     "Sólo un usuario administrador puede desactivar el personal."
             );
         }
         AUTH_HELPER.validarUsuarioActivo();
-
-        Personal personal = obtenerPersonalCheck(id);
-        if(!personal.isActivo()){
+        Personal personal =
+                obtenerPersonalCheck(id);
+        if (!personal.isActivo()) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Personal ya es inactivo."
@@ -231,9 +233,13 @@ public class PersonalServiceImpl implements PersonalService {
         }
         personal.setActivo(false);
         REPOSITORY.save(personal);
+        // Al desactivar la cuenta se invalidan todas sus sesiones persistentes
+        REFRESH_TOKEN_SERVICE.revocarTodosPorPersonal(
+                personal.getPersonalId()
+        );
         return mapDTO(personal);
     }
-
+    
     @Override
     public byte[] generarReportePersonalPDF() {
         try{

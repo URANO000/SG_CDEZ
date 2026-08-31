@@ -86,6 +86,11 @@ public class AuthServiceImpl implements AuthService {
                                     "Usuario no encontrado."
                             )
                     );
+
+            // Solo se permite una sesión persistente activa por usuario
+            REFRESH_TOKEN_SERVICE.revocarTodosPorPersonal(
+                    personal.getPersonalId()
+            );
             String refreshToken =
                     REFRESH_TOKEN_SERVICE.crearRefreshToken(
                             personal
@@ -95,11 +100,23 @@ public class AuthServiceImpl implements AuthService {
         return response;
     }
 
+    @Transactional
     @Override
-    public String cambiarContrasena(CambiaContrasenaRequest request){
+    public String cambiarContrasena(
+            CambiaContrasenaRequest request
+    ) {
         Personal usuario = AUTH_HELPER.obtenerUsuarioAutenticado();
-        AUTH_HELPER.actualizarContrasena(usuario, request.getNuevaContransena(), request.getConfirmarContrasena());
+        AUTH_HELPER.actualizarContrasena(
+                usuario,
+                request.getNuevaContransena(),
+                request.getConfirmarContrasena()
+        );
         REPOSITORY.save(usuario);
+
+        // Invalidar todas las sesiones persistentes después de cambiar la contraseña
+        REFRESH_TOKEN_SERVICE.revocarTodosPorPersonal(
+                usuario.getPersonalId()
+        );
         return "La contraseña ha sido actualizada";
     }
 
@@ -163,6 +180,7 @@ public class AuthServiceImpl implements AuthService {
         TOKEN_SERVICE.generarYEnviarResetToken(personal.get());
     }
 
+    @Transactional
     @Override
     public void resetContrasena(ResetPasswordRequest request) {
         PasswordResetToken resetToken = RESET_REPOSITORY.findByToken(request.token())
@@ -188,6 +206,9 @@ public class AuthServiceImpl implements AuthService {
 
         PERSONAL_REPOSITORY.save(personal);
         RESET_REPOSITORY.save(resetToken);
+        REFRESH_TOKEN_SERVICE.revocarTodosPorPersonal(
+                personal.getPersonalId()
+        );
 
     }
 
