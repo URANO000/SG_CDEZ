@@ -39,8 +39,19 @@ export interface MedicamentoResponse {
   horario: string | null;
   tipo: TipoMedicamento;
   observaciones: string | null;
+  createdById: string;
   createdBy: string;
   createdAt: string;
   updatedBy: string | null;
   updatedAt: string | null;
+}
+
+export interface MedicamentoUpdateRequest {
+  medicamentoId: string;
+  adultoMayorNombre: string;
+  nombre: string;
+  dosis: string | null;
+  horario: string | null;
+  tipo: TipoMedicamento;
+  observaciones: string | null;
 }

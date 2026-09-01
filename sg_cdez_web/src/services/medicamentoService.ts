@@ -3,6 +3,7 @@ import { apiClient } from "../utils/apiHelper";
 import type {
   MedicamentoCreateRequest,
   MedicamentoResponse,
+  MedicamentoUpdateRequest,
 } from "./interfaces/medicamentoInterface";
 
 export async function listarMedicamentosPorAdulto(
@@ -25,4 +26,22 @@ export async function registrarMedicamento(
   );
 
   return response.data;
+}
+
+export async function actualizarMedicamento(
+  adultoId: string,
+  request: MedicamentoUpdateRequest,
+): Promise<MedicamentoResponse> {
+  const response = await apiClient.put<MedicamentoResponse>(
+    `/medicamentos/actualizarMedicamentos/${adultoId}`,
+    request,
+  );
+
+  return response.data;
+}
+
+export async function desactivarMedicamento(
+  medicamentoId: string,
+): Promise<void> {
+  await apiClient.post(`/medicamentos/desactivarMedicamentos/${medicamentoId}`);
 }

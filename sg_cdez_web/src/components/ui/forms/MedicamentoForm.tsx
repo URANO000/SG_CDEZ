@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import {
   Button,
   Group,
@@ -10,16 +12,21 @@ import {
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 
-import { registrarMedicamento } from "../../../services/medicamentoService";
+import {
+  actualizarMedicamento,
+  registrarMedicamento,
+} from "../../../services/medicamentoService";
 
 import {
   TIPOS_MEDICAMENTO,
+  type MedicamentoResponse,
   type TipoMedicamento,
 } from "../../../services/interfaces/medicamentoInterface";
 
 interface MedicamentoFormProps {
   adultoId: string;
-  onRegistrado: () => void;
+  medicamento?: MedicamentoResponse | null;
+  onGuardado: () => void;
   onCancelar: () => void;
 }
 
@@ -33,16 +40,21 @@ interface MedicamentoFormValues {
 
 export function MedicamentoForm({
   adultoId,
-  onRegistrado,
+  medicamento,
+  onGuardado,
   onCancelar,
 }: MedicamentoFormProps) {
+  const [guardando, setGuardando] = useState(false);
+
+  const editando = medicamento != null;
+
   const form = useForm<MedicamentoFormValues>({
     initialValues: {
-      nombre: "",
-      dosis: "",
-      horario: "",
-      tipo: "",
-      observaciones: "",
+      nombre: medicamento?.nombre ?? "",
+      dosis: medicamento?.dosis ?? "",
+      horario: medicamento?.horario ?? "",
+      tipo: medicamento?.tipo ?? "",
+      observaciones: medicamento?.observaciones ?? "",
     },
 
     validate: {
@@ -53,41 +65,61 @@ export function MedicamentoForm({
     },
   });
 
-  async function manejarRegistro(values: MedicamentoFormValues) {
+  async function manejarGuardado(values: MedicamentoFormValues) {
     if (!values.tipo) {
       return;
     }
 
     try {
-      await registrarMedicamento(adultoId, {
-        nombre: values.nombre.trim(),
-        dosis: values.dosis.trim() || null,
-        horario: values.horario.trim() || null,
-        tipo: values.tipo,
-        observaciones: values.observaciones.trim() || null,
-      });
+      setGuardando(true);
+
+      if (medicamento) {
+        await actualizarMedicamento(adultoId, {
+          medicamentoId: medicamento.medicamentoId,
+          adultoMayorNombre: medicamento.adultoMayorNombre,
+          nombre: values.nombre.trim(),
+          dosis: values.dosis.trim() || null,
+          horario: values.horario.trim() || null,
+          tipo: values.tipo,
+          observaciones: values.observaciones.trim() || null,
+        });
+      } else {
+        await registrarMedicamento(adultoId, {
+          nombre: values.nombre.trim(),
+          dosis: values.dosis.trim() || null,
+          horario: values.horario.trim() || null,
+          tipo: values.tipo,
+          observaciones: values.observaciones.trim() || null,
+        });
+      }
     } catch {
       notifications.show({
-        title: "Error al registrar",
-        message: "No se pudo registrar el medicamento.",
+        title: editando ? "Error al actualizar" : "Error al registrar",
+        message: editando
+          ? "No se pudo actualizar el medicamento."
+          : "No se pudo registrar el medicamento.",
         color: "red",
       });
 
       return;
+    } finally {
+      setGuardando(false);
     }
 
     notifications.show({
-      title: "Medicamento registrado",
-      message: "El medicamento se registró correctamente.",
+      title: editando ? "Medicamento actualizado" : "Medicamento registrado",
+      message: editando
+        ? "El medicamento se actualizó correctamente."
+        : "El medicamento se registró correctamente.",
       color: "green",
     });
 
     form.reset();
-    onRegistrado();
+    onGuardado();
   }
 
   return (
-    <form onSubmit={form.onSubmit(manejarRegistro)}>
+    <form onSubmit={form.onSubmit(manejarGuardado)}>
       <Stack gap="md">
         <TextInput
           label="Nombre"
@@ -131,12 +163,17 @@ export function MedicamentoForm({
         />
 
         <Group justify="flex-end" mt="sm">
-          <Button type="button" variant="default" onClick={onCancelar}>
+          <Button
+            type="button"
+            variant="default"
+            disabled={guardando}
+            onClick={onCancelar}
+          >
             Cancelar
           </Button>
 
-          <Button type="submit" loading={form.submitting}>
-            Registrar
+          <Button type="submit" loading={guardando}>
+            {editando ? "Guardar cambios" : "Registrar"}
           </Button>
         </Group>
       </Stack>

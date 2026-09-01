@@ -108,6 +108,7 @@ public class MedicamentoServiceImpl implements MedicamentoService {
                 medicamento.getHorario(),
                 medicamento.getTipo(),
                 medicamento.getObservaciones(),
+                medicamento.getCreatedBy().getPersonalId(),
                 medicamento.getCreatedBy().getNombreCompleto(),
                 medicamento.getCreatedAt(),
                 medicamento.getUpdatedBy() != null ? medicamento.getUpdatedBy().getNombreCompleto() : null,

@@ -80,7 +80,10 @@ import { EncargadoLegalForm } from "../../components/ui/forms/EncargadoLegalForm
 
 import { MedicamentoTable } from "../../components/ui/tables/MedicamentoTable";
 
-import { listarMedicamentosPorAdulto } from "../../services/medicamentoService";
+import {
+  desactivarMedicamento,
+  listarMedicamentosPorAdulto,
+} from "../../services/medicamentoService";
 
 import type { MedicamentoResponse } from "../../services/interfaces/medicamentoInterface";
 
@@ -153,6 +156,13 @@ export function AdultoMayorExpediente() {
   const [medicamentos, setMedicamentos] = useState<MedicamentoResponse[]>([]);
   const [medicamentosLoading, setMedicamentosLoading] = useState(true);
   const [medicamentosError, setMedicamentosError] = useState(false);
+  const [medicamentoAEditar, setMedicamentoAEditar] =
+    useState<MedicamentoResponse | null>(null);
+
+  const [medicamentoADesactivar, setMedicamentoADesactivar] =
+    useState<MedicamentoResponse | null>(null);
+
+  const [desactivandoMedicamento, setDesactivandoMedicamento] = useState(false);
   const [modalMedicamentoAbierto, setModalMedicamentoAbierto] = useState(false);
   const [historialLoading, setHistorialLoading] = useState(true);
   const [historialError, setHistorialError] = useState(false);
@@ -243,6 +253,40 @@ export function AdultoMayorExpediente() {
   function manejarMedicamentoRegistrado() {
     setModalMedicamentoAbierto(false);
     void cargarMedicamentos();
+  }
+
+  function manejarMedicamentoActualizado() {
+    setMedicamentoAEditar(null);
+    void cargarMedicamentos();
+  }
+
+  async function confirmarDesactivacionMedicamento() {
+    if (!medicamentoADesactivar) {
+      return;
+    }
+
+    try {
+      setDesactivandoMedicamento(true);
+
+      await desactivarMedicamento(medicamentoADesactivar.medicamentoId);
+
+      setMedicamentoADesactivar(null);
+      await cargarMedicamentos();
+
+      notifications.show({
+        title: "Medicamento desactivado",
+        message: "El medicamento dejó de mostrarse en el expediente.",
+        color: "green",
+      });
+    } catch {
+      notifications.show({
+        title: "Error al desactivar",
+        message: "No se pudo desactivar el medicamento.",
+        color: "red",
+      });
+    } finally {
+      setDesactivandoMedicamento(false);
+    }
   }
 
   useEffect(() => {
@@ -1354,7 +1398,12 @@ export function AdultoMayorExpediente() {
           ) : medicamentosError ? (
             <Alert color="red">No se pudieron cargar los medicamentos.</Alert>
           ) : (
-            <MedicamentoTable medicamentos={medicamentos} />
+            <MedicamentoTable
+              medicamentos={medicamentos}
+              editable={expedienteEditable}
+              onEditar={setMedicamentoAEditar}
+              onDesactivar={setMedicamentoADesactivar}
+            />
           )}
           <Modal
             opened={modalMedicamentoAbierto}
@@ -1373,9 +1422,70 @@ export function AdultoMayorExpediente() {
           >
             <MedicamentoForm
               adultoId={adultoId}
-              onRegistrado={manejarMedicamentoRegistrado}
+              onGuardado={manejarMedicamentoRegistrado}
               onCancelar={() => setModalMedicamentoAbierto(false)}
             />
+          </Modal>
+          <Modal
+            opened={medicamentoAEditar !== null}
+            onClose={() => setMedicamentoAEditar(null)}
+            title={
+              <Stack gap={2}>
+                <Title order={3}>Editar medicamento</Title>
+
+                <Text size="sm" c="dimmed" fw={400}>
+                  Actualice la información del medicamento.
+                </Text>
+              </Stack>
+            }
+            centered
+            size="md"
+          >
+            {medicamentoAEditar && (
+              <MedicamentoForm
+                key={medicamentoAEditar.medicamentoId}
+                adultoId={adultoId}
+                medicamento={medicamentoAEditar}
+                onGuardado={manejarMedicamentoActualizado}
+                onCancelar={() => setMedicamentoAEditar(null)}
+              />
+            )}
+          </Modal>
+          <Modal
+            opened={medicamentoADesactivar !== null}
+            onClose={() => setMedicamentoADesactivar(null)}
+            title="Desactivar medicamento"
+            centered
+          >
+            <Stack gap="md">
+              <Text>
+                ¿Desea desactivar el medicamento{" "}
+                <strong>{medicamentoADesactivar?.nombre}</strong>?
+              </Text>
+
+              <Text size="sm" className={classes.secondaryText}>
+                El medicamento dejará de mostrarse, pero no será eliminado del
+                sistema.
+              </Text>
+
+              <Group justify="flex-end">
+                <Button
+                  variant="default"
+                  disabled={desactivandoMedicamento}
+                  onClick={() => setMedicamentoADesactivar(null)}
+                >
+                  Cancelar
+                </Button>
+
+                <Button
+                  color="red"
+                  loading={desactivandoMedicamento}
+                  onClick={() => void confirmarDesactivacionMedicamento()}
+                >
+                  Desactivar
+                </Button>
+              </Group>
+            </Stack>
           </Modal>
         </Tabs.Panel>
       </Tabs>
