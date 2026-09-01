@@ -19,6 +19,10 @@ import { registrarAdultoMayor } from "../../services/adultoMayorService";
 
 import type { AdultoMayorCreateRequest } from "../../services/interfaces/adultoMayorInterface";
 
+import { ESCOLARIDADES } from "../../services/interfaces/adultoMayorInterface";
+
+import { TIPOIDENTIFICACION } from "../../services/interfaces/personalCreateRequest";
+
 import classes from "../../components/ui/styleModules/PersonalForm.module.css";
 
 export function AdultoMayorRegistrar() {
@@ -80,9 +84,8 @@ export function AdultoMayorRegistrar() {
         form.elements.namedItem("direccion") as HTMLInputElement
       ).value.trim(),
 
-      escolaridad: (
-        form.elements.namedItem("escolaridad") as HTMLInputElement
-      ).value.trim(),
+      escolaridad: (form.elements.namedItem("escolaridad") as HTMLSelectElement)
+        .value,
 
       grupoFamiliar:
         (
@@ -242,14 +245,11 @@ export function AdultoMayorRegistrar() {
                   Seleccionar tipo
                 </option>
 
-                <option value="CIC">CIC</option>
-                <option value="CRP">CRP</option>
-                <option value="CRR">CRR</option>
-                <option value="RE">RE</option>
-                <option value="APO">APO</option>
-                <option value="CRT">CRT</option>
-                <option value="CRE">CRE</option>
-                <option value="PEX">PEX</option>
+                {TIPOIDENTIFICACION.map(({ value, label }) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -347,13 +347,22 @@ export function AdultoMayorRegistrar() {
                 <span className={classes.required}>*</span>
               </label>
 
-              <input
-                className={classes.input}
-                type="text"
+              <select
+                className={classes.select}
                 name="escolaridad"
-                maxLength={80}
+                defaultValue=""
                 required
-              />
+              >
+                <option value="" disabled>
+                  Seleccionar
+                </option>
+
+                {ESCOLARIDADES.map((opcion) => (
+                  <option key={opcion} value={opcion}>
+                    {opcion}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className={classes.fieldGroup}>

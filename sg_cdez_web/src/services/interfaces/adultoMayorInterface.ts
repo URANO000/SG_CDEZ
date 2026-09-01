@@ -1,5 +1,13 @@
 export type EstadoAdultoMayor = "ACTIVO" | "INACTIVO" | "FALLECIDO";
 
+export const ESCOLARIDADES = [
+  "Sin escolaridad",
+  "Primaria completa",
+  "Secundaria completa",
+  "Técnico",
+  "Universitaria completa",
+] as const;
+
 export interface AdultoMayorCreateRequest {
   tipoIdentificacion: string;
   identificacion: string;
