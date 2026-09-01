@@ -156,8 +156,6 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
         ConsultaNutricional consultaNutricional = obtenerConsultaNutricionalCheck(id);
         CONSULTA_SERVICE.desactivarConsulta(consultaNutricional.getConsulta().getConsultaId());
         validarEspecialidad(AUTH_HELPER.obtenerUsuarioAutenticado());
-
-        consultaNutricional.getConsulta().setActivo(false);
         REPOSITORY.save(consultaNutricional);
     }
 

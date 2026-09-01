@@ -8,7 +8,7 @@ public enum TipoTamizaje {
     MUST(Especialidad.NUTRICION, true),
     NRS(Especialidad.NUTRICION, true),
 
-    COGNITIVA(Especialidad.PSICOLOGIA, false),
+    COGNITIVO(Especialidad.PSICOLOGIA, false),
     ANSIEDAD(Especialidad.PSICOLOGIA, false),
     OTROS(Especialidad.PSICOLOGIA, false);
 

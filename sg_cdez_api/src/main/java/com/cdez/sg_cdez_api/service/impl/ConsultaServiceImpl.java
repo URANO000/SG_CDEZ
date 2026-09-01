@@ -166,10 +166,15 @@ public class ConsultaServiceImpl implements ConsultaService {
         AdultoMayor adultoMayor = consulta.getAdultoMayor();
         Personal personal = consulta.getCreatedBy();
 
-        ConsultaNutricionalPageResponse nutricional = null;
+        UUID nutricional = null;
+        UUID psych = null;
 
         if(consulta.getConsultaNutricional() != null){
-            nutricional = nutricionalMapDTO(consulta.getConsultaNutricional());
+            nutricional = nutricionalDetaiLResponse(consulta.getConsultaNutricional());
+        }
+
+        if(consulta.getConsultaPsych() != null){
+            psych = psychDetailResponse(consulta.getConsultaPsych());
         }
 
         return new ConsultaPageResponse(
@@ -191,7 +196,8 @@ public class ConsultaServiceImpl implements ConsultaService {
                 ),
                 consulta.getCreatedAt(),
                 consulta.getUpdatedAt(),
-                nutricional
+                nutricional,
+                psych
         );
     }
 
@@ -202,6 +208,11 @@ public class ConsultaServiceImpl implements ConsultaService {
         ConsultaNutricionalDetailResponse nutricional = null;
         if (consulta.getConsultaNutricional() != null) {
             nutricional = nutricionalMapDetailDTO(consulta.getConsultaNutricional());
+        }
+
+        ConsultaPsychResponse psych = null;
+        if(consulta.getConsultaPsych() != null){
+            psych = psychMapDetailDTO(consulta.getConsultaPsych());
         }
 
         Personal currentUser = AUTH_HELPER.obtenerUsuarioAutenticado();
@@ -235,14 +246,14 @@ public class ConsultaServiceImpl implements ConsultaService {
                 ),
                 consulta.getCreatedAt(),
                 consulta.getUpdatedAt(),
-                nutricional
+                nutricional,
+                psych
         );
     }
 
-    public ConsultaNutricionalPageResponse nutricionalMapDTO(ConsultaNutricional consultaNutricional){
-        return new ConsultaNutricionalPageResponse(
-                consultaNutricional.getConsultaNutricionalId()
-        );
+    public UUID nutricionalDetaiLResponse(ConsultaNutricional consultaNutricional){
+        return consultaNutricional.getConsultaNutricionalId();
+
     }
 
     private ConsultaNutricionalDetailResponse nutricionalMapDetailDTO(ConsultaNutricional consultaNutricional){
@@ -266,6 +277,17 @@ public class ConsultaServiceImpl implements ConsultaService {
                 EXAMENLAB_SERVICE.listarExamenesPorConsulta(consultaNutricional),
                 ANTROPOMETRIA_SERVICE.obtenerAntropometriaPorConsulta(consultaNutricional)
         );
+    }
+
+    private ConsultaPsychResponse psychMapDetailDTO(ConsultaPsych consultaPsych){
+        return new ConsultaPsychResponse(
+                consultaPsych.getConsultaPsychId(),
+                TAMIZAJE_SERVICE.listarTamizajesPorConsultaPsych(consultaPsych)
+        );
+    }
+
+    private UUID psychDetailResponse(ConsultaPsych consultaPsych){
+        return consultaPsych.getConsultaPsychId();
     }
 
     public Consulta obtenerConsultaCheck(UUID id){

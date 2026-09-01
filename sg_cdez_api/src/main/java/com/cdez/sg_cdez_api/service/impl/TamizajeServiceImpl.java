@@ -19,11 +19,11 @@ public class TamizajeServiceImpl implements TamizajeService {
 
     @Override
     public List<TamizajeResponse> listarTamizajesPorConsultaNutricional(ConsultaNutricional consultaNutricional) {
-        return REPOSITORY.findByConsultaNutricional(consultaNutricional).stream().map(this::mapDTO).toList();
+        return REPOSITORY.findByConsultaConsultaNutricional(consultaNutricional).stream().map(this::mapDTO).toList();
     }
 
-    public List<TamizajeResponse> listarTamizajesPorConsultaPsycg(ConsultaPsych consultaPsych){
-        return REPOSITORY.findByConsultaPsych(consultaPsych).stream().map(this::mapDTO).toList();
+    public List<TamizajeResponse> listarTamizajesPorConsultaPsych(ConsultaPsych consultaPsych){
+        return REPOSITORY.findByConsultaConsultaPsych(consultaPsych).stream().map(this::mapDTO).toList();
     }
 
     @Override
@@ -67,7 +67,7 @@ public class TamizajeServiceImpl implements TamizajeService {
     public List<TamizajeResponse> actualizarTamizajesNutricional(List<TamizajeUpdateRequest> requests, ConsultaNutricional consultaNutricional) {
         List<TamizajeResponse> tamizajesActualizados = new ArrayList<>();
         for(var tamizaje : requests){
-            Tamizaje tamizajeNutricional = REPOSITORY.findByTamizajeIdAndConsultaNutricionalConsultaNutricionalId(tamizaje.tamizajeId(), consultaNutricional.getConsultaNutricionalId())
+            Tamizaje tamizajeNutricional = REPOSITORY.findByTamizajeIdAndConsultaConsultaNutricionalConsultaNutricionalId(tamizaje.tamizajeId(), consultaNutricional.getConsultaNutricionalId())
                     .orElseThrow(() -> new ResponseStatusException(
                             HttpStatus.NOT_FOUND,
                             "Tamizaje indicado no fue encontrado."
@@ -80,6 +80,27 @@ public class TamizajeServiceImpl implements TamizajeService {
             Tamizaje tamizajeNutricionalNuevo =  REPOSITORY.save(tamizajeNutricional);
             tamizajesActualizados.add(mapDTO(tamizajeNutricionalNuevo));
         }
+        return tamizajesActualizados;
+    }
+
+    public List<TamizajeResponse> actualizarTamizajesPsych(List<TamizajeUpdateRequest> requests, ConsultaPsych consultaPsych){
+        List<TamizajeResponse> tamizajesActualizados = new ArrayList<>();
+        for(var tamizaje: requests){
+            Tamizaje tamizajePsych = REPOSITORY.findByTamizajeIdAndConsultaConsultaPsychConsultaPsychId(tamizaje.tamizajeId(),consultaPsych.getConsultaPsychId())
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Tamizaje indicado no fue encontrado."
+                    ));
+            tamizajePsych.setTipo(tamizaje.tipo());
+            tamizajePsych.setResultado(tamizaje.resultado());
+            tamizajePsych.setObservaciones(tamizaje.observaiones());
+
+            // No aplica
+            tamizajePsych.setPuntaje(null);
+            Tamizaje tamizajePsychNuevo = REPOSITORY.save(tamizajePsych);
+            tamizajesActualizados.add(mapDTO(tamizajePsychNuevo));
+        }
+
         return tamizajesActualizados;
     }
 

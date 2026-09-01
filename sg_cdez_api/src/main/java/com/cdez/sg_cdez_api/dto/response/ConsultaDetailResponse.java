@@ -17,6 +17,7 @@ public record ConsultaDetailResponse(
         PersonalConsultaResponse createdBy,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        ConsultaNutricionalDetailResponse consultaNutricional
+        ConsultaNutricionalDetailResponse consultaNutricional,
+        ConsultaPsychResponse consultaPsych
 ) {
 }

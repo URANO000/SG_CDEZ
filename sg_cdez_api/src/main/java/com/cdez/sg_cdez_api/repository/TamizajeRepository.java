@@ -10,8 +10,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TamizajeRepository extends JpaRepository<Tamizaje, UUID> {
-    List<Tamizaje> findByConsultaNutricional(ConsultaNutricional consultaNutricional);
-    List<Tamizaje> findByConsultaPsych(ConsultaPsych consultaPsych);
-    Optional<Tamizaje> findByTamizajeIdAndConsultaNutricionalConsultaNutricionalId(UUID tamizajeId, UUID consultaId);
-    Optional<Tamizaje> findByTamizajeIdAndConsultaPsychConsultaPsychId(UUID tamizajeId, UUID consultaId);
+    List<Tamizaje> findByConsultaConsultaNutricional(ConsultaNutricional consultaNutricional);
+    List<Tamizaje> findByConsultaConsultaPsych(ConsultaPsych consultaPsych);
+    Optional<Tamizaje> findByTamizajeIdAndConsultaConsultaNutricionalConsultaNutricionalId(UUID tamizajeId, UUID consultaId);
+    Optional<Tamizaje> findByTamizajeIdAndConsultaConsultaPsychConsultaPsychId(UUID tamizajeId, UUID consultaId);
 }
