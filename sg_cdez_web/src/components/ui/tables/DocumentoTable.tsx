@@ -10,6 +10,7 @@ interface DocumentoTableProps {
   onVisualizar: (documento: DocumentoResponse) => void;
   onDescargar: (documento: DocumentoResponse) => void;
   onDesactivar: (documento: DocumentoResponse) => void;
+  editable: boolean;
 }
 
 function mostrarFecha(fecha: string | null): string {
@@ -37,6 +38,7 @@ export function DocumentoTable({
   onVisualizar,
   onDescargar,
   onDesactivar,
+  editable,
 }: DocumentoTableProps) {
   return (
     <div className={classes.wrapper}>
@@ -80,16 +82,18 @@ export function DocumentoTable({
                         </ActionIcon>
                       </Tooltip>
 
-                      <Tooltip label="Desactivar documento">
-                        <ActionIcon
-                          variant="subtle"
-                          color="red"
-                          onClick={() => onDesactivar(documento)}
-                          aria-label="Desactivar documento"
-                        >
-                          <BsTrash size={16} />
-                        </ActionIcon>
-                      </Tooltip>
+                      {editable && (
+                        <Tooltip label="Desactivar documento">
+                          <ActionIcon
+                            variant="subtle"
+                            color="red"
+                            onClick={() => onDesactivar(documento)}
+                            aria-label="Desactivar documento"
+                          >
+                            <BsTrash size={16} />
+                          </ActionIcon>
+                        </Tooltip>
+                      )}
                     </Group>
                   </Table.Td>
 

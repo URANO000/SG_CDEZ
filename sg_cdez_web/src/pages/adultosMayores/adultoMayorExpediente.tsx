@@ -118,62 +118,36 @@ export function AdultoMayorExpediente() {
   const [adultoMayor, setAdultoMayor] = useState<AdultoMayorResponse | null>(
     null,
   );
-
   const [loading, setLoading] = useState(true);
-
   const [error, setError] = useState(false);
-
   const [encargados, setEncargados] = useState<EncargadoLegalResponse[]>([]);
-
   const [encargadosLoading, setEncargadosLoading] = useState(true);
-
   const [encargadosError, setEncargadosError] = useState(false);
-
   const [modalEncargadoAbierto, setModalEncargadoAbierto] = useState(false);
-
   const [encargadoAEditar, setEncargadoAEditar] =
     useState<EncargadoLegalResponse | null>(null);
-
   const [direccionEncargado, setDireccionEncargado] = useState("");
-
   const [actualizandoEncargado, setActualizandoEncargado] = useState(false);
-
   const [encargadoADesactivar, setEncargadoADesactivar] =
     useState<EncargadoLegalResponse | null>(null);
-
   const [desactivandoEncargado, setDesactivandoEncargado] = useState(false);
-
   const [epicrisisVigente, setEpicrisisVigente] =
     useState<EpicrisisResponse | null>(null);
-
   const [historialEpicrisis, setHistorialEpicrisis] =
     useState<PageResponse<EpicrisisResponse> | null>(null);
-
   const [documentos, setDocumentos] = useState<DocumentoResponse[]>([]);
-
   const [documentosLoading, setDocumentosLoading] = useState(true);
-
   const [documentosError, setDocumentosError] = useState(false);
-
   const [modalDocumentoAbierto, setModalDocumentoAbierto] = useState(false);
-
   const [documentoADesactivar, setDocumentoADesactivar] =
     useState<DocumentoResponse | null>(null);
-
   const [desactivandoDocumento, setDesactivandoDocumento] = useState(false);
-
   const [historialLoading, setHistorialLoading] = useState(true);
-
   const [historialError, setHistorialError] = useState(false);
-
   const [anioEpicrisis, setAnioEpicrisis] = useState<string | null>(null);
-
   const cantidadEpicrisis = 5;
-
   const [epicrisisLoading, setEpicrisisLoading] = useState(true);
-
   const [epicrisisError, setEpicrisisError] = useState(false);
-
   const [modalEpicrisisAbierto, setModalEpicrisisAbierto] = useState(false);
 
   async function cargarHistorialEpicrisis(pagina: number, anio?: number) {
@@ -320,6 +294,8 @@ export function AdultoMayorExpediente() {
       </Alert>
     );
   }
+
+  const expedienteEditable = adultoMayor.activo === "Activo";
 
   const resumen: CampoInformacion[] = [
     {
@@ -472,9 +448,7 @@ export function AdultoMayorExpediente() {
       ventana.document.title = "Cargando archivo...";
 
       const archivo = await descargarEpicrisis(epicrisis.epicrisisId);
-
       const url = URL.createObjectURL(archivo);
-
       ventana.location.href = url;
 
       window.setTimeout(() => {
@@ -793,9 +767,11 @@ export function AdultoMayorExpediente() {
               </Text>
             </div>
 
-            <Button onClick={() => setModalEncargadoAbierto(true)}>
-              + Registrar encargado
-            </Button>
+            {expedienteEditable && (
+              <Button onClick={() => setModalEncargadoAbierto(true)}>
+                + Registrar encargado
+              </Button>
+            )}
           </Group>
           {encargadosLoading ? (
             <div className={classes.loadingState}>
@@ -835,28 +811,30 @@ export function AdultoMayorExpediente() {
                         {nombreCompleto}
                       </Title>
 
-                      <Group gap={4}>
-                        <Tooltip label="Editar">
-                          <ActionIcon
-                            variant="subtle"
-                            aria-label="Editar encargado legal"
-                            onClick={() => abrirEdicionEncargado(encargado)}
-                          >
-                            <BsPencilSquare size={17} />
-                          </ActionIcon>
-                        </Tooltip>
+                      {expedienteEditable && (
+                        <Group gap={4}>
+                          <Tooltip label="Editar">
+                            <ActionIcon
+                              variant="subtle"
+                              aria-label="Editar encargado legal"
+                              onClick={() => abrirEdicionEncargado(encargado)}
+                            >
+                              <BsPencilSquare size={17} />
+                            </ActionIcon>
+                          </Tooltip>
 
-                        <Tooltip label="Desactivar">
-                          <ActionIcon
-                            variant="subtle"
-                            color="red"
-                            aria-label="Desactivar encargado legal"
-                            onClick={() => setEncargadoADesactivar(encargado)}
-                          >
-                            <BsPersonDash size={18} />
-                          </ActionIcon>
-                        </Tooltip>
-                      </Group>
+                          <Tooltip label="Desactivar">
+                            <ActionIcon
+                              variant="subtle"
+                              color="red"
+                              aria-label="Desactivar encargado legal"
+                              onClick={() => setEncargadoADesactivar(encargado)}
+                            >
+                              <BsPersonDash size={18} />
+                            </ActionIcon>
+                          </Tooltip>
+                        </Group>
+                      )}
                     </Group>
 
                     <SimpleGrid
@@ -1020,14 +998,16 @@ export function AdultoMayorExpediente() {
         </Tabs.Panel>
 
         <Tabs.Panel value="epicrisis" className={classes.panel}>
-          <Group justify="flex-end" mb="lg">
-            <Button
-              onClick={() => setModalEpicrisisAbierto(true)}
-              className={classes.registerButton}
-            >
-              + Nueva epicrisis
-            </Button>
-          </Group>
+          {expedienteEditable && (
+            <Group justify="flex-end" mb="lg">
+              <Button
+                onClick={() => setModalEpicrisisAbierto(true)}
+                className={classes.registerButton}
+              >
+                + Nueva epicrisis
+              </Button>
+            </Group>
+          )}
           {epicrisisLoading ? (
             <div className={classes.loadingSection}>
               <Loader color="var(--color-primary)" />
@@ -1210,13 +1190,14 @@ export function AdultoMayorExpediente() {
                 Archivos asociados al expediente del adulto mayor.
               </Text>
             </div>
-
-            <Button
-              onClick={() => setModalDocumentoAbierto(true)}
-              className={classes.registerButton}
-            >
-              + Adjuntar documento
-            </Button>
+            {expedienteEditable && (
+              <Button
+                onClick={() => setModalDocumentoAbierto(true)}
+                className={classes.registerButton}
+              >
+                + Adjuntar documento
+              </Button>
+            )}
           </Group>
 
           {documentosLoading ? (
@@ -1233,6 +1214,7 @@ export function AdultoMayorExpediente() {
               onVisualizar={manejarVisualizacionDocumento}
               onDescargar={manejarDescargaDocumento}
               onDesactivar={solicitarDesactivacionDocumento}
+              editable={expedienteEditable}
             />
           )}
 
