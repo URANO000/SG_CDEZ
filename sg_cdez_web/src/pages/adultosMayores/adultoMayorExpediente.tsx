@@ -52,6 +52,8 @@ import { EpicrisisTable } from "../../components/ui/tables/EpicrisisTable";
 
 import { EpicrisisForm } from "../../components/ui/forms/EpicrisisForm";
 
+import { MedicamentoForm } from "../../components/ui/forms/MedicamentoForm";
+
 import {
   descargarEpicrisis,
   listarHistorialEpicrisis,
@@ -75,6 +77,12 @@ import { notifications } from "@mantine/notifications";
 import type { PageResponse } from "../../services/interfaces/pageResponse";
 
 import { EncargadoLegalForm } from "../../components/ui/forms/EncargadoLegalForm";
+
+import { MedicamentoTable } from "../../components/ui/tables/MedicamentoTable";
+
+import { listarMedicamentosPorAdulto } from "../../services/medicamentoService";
+
+import type { MedicamentoResponse } from "../../services/interfaces/medicamentoInterface";
 
 interface CampoInformacion {
   etiqueta: string;
@@ -142,6 +150,10 @@ export function AdultoMayorExpediente() {
   const [documentoADesactivar, setDocumentoADesactivar] =
     useState<DocumentoResponse | null>(null);
   const [desactivandoDocumento, setDesactivandoDocumento] = useState(false);
+  const [medicamentos, setMedicamentos] = useState<MedicamentoResponse[]>([]);
+  const [medicamentosLoading, setMedicamentosLoading] = useState(true);
+  const [medicamentosError, setMedicamentosError] = useState(false);
+  const [modalMedicamentoAbierto, setModalMedicamentoAbierto] = useState(false);
   const [historialLoading, setHistorialLoading] = useState(true);
   const [historialError, setHistorialError] = useState(false);
   const [anioEpicrisis, setAnioEpicrisis] = useState<string | null>(null);
@@ -210,6 +222,29 @@ export function AdultoMayorExpediente() {
     }
   }
 
+  async function cargarMedicamentos() {
+    if (!adultoId) {
+      return;
+    }
+
+    try {
+      setMedicamentosLoading(true);
+      setMedicamentosError(false);
+
+      const response = await listarMedicamentosPorAdulto(adultoId);
+
+      setMedicamentos(response);
+    } catch {
+      setMedicamentosError(true);
+    } finally {
+      setMedicamentosLoading(false);
+    }
+  }
+  function manejarMedicamentoRegistrado() {
+    setModalMedicamentoAbierto(false);
+    void cargarMedicamentos();
+  }
+
   useEffect(() => {
     if (!adultoId) {
       return;
@@ -222,6 +257,14 @@ export function AdultoMayorExpediente() {
     if (!adultoId) return;
 
     void cargarHistorialEpicrisis(0);
+  }, [adultoId]);
+
+  useEffect(() => {
+    if (!adultoId) {
+      return;
+    }
+
+    void cargarMedicamentos();
   }, [adultoId]);
 
   useEffect(() => {
@@ -720,6 +763,8 @@ export function AdultoMayorExpediente() {
           <Tabs.Tab value="epicrisis">Epicrisis</Tabs.Tab>
 
           <Tabs.Tab value="documentos">Documentos</Tabs.Tab>
+
+          <Tabs.Tab value="medicamentos">Medicamentos</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="resumen" className={classes.panel}>
@@ -1279,6 +1324,58 @@ export function AdultoMayorExpediente() {
                 </Button>
               </Group>
             </Stack>
+          </Modal>
+        </Tabs.Panel>
+        <Tabs.Panel value="medicamentos" className={classes.panel}>
+          <Group justify="space-between" align="center" mb="lg">
+            <div>
+              <Title order={4} className={classes.personName}>
+                Medicamentos
+              </Title>
+
+              <Text size="sm" className={classes.secondaryText}>
+                Medicamentos asociados al expediente del adulto mayor.
+              </Text>
+            </div>
+            {expedienteEditable && (
+              <Button
+                onClick={() => setModalMedicamentoAbierto(true)}
+                className={classes.registerButton}
+              >
+                + Registrar medicamento
+              </Button>
+            )}
+          </Group>
+
+          {medicamentosLoading ? (
+            <div className={classes.loadingSection}>
+              <Loader color="var(--color-primary)" />
+            </div>
+          ) : medicamentosError ? (
+            <Alert color="red">No se pudieron cargar los medicamentos.</Alert>
+          ) : (
+            <MedicamentoTable medicamentos={medicamentos} />
+          )}
+          <Modal
+            opened={modalMedicamentoAbierto}
+            onClose={() => setModalMedicamentoAbierto(false)}
+            title={
+              <Stack gap={2}>
+                <Title order={3}>Registrar medicamento</Title>
+
+                <Text size="sm" c="dimmed" fw={400}>
+                  Ingrese la información del medicamento.
+                </Text>
+              </Stack>
+            }
+            centered
+            size="md"
+          >
+            <MedicamentoForm
+              adultoId={adultoId}
+              onRegistrado={manejarMedicamentoRegistrado}
+              onCancelar={() => setModalMedicamentoAbierto(false)}
+            />
           </Modal>
         </Tabs.Panel>
       </Tabs>
