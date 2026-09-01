@@ -1,6 +1,6 @@
 import { ActionIcon, Group, Table, Tooltip } from "@mantine/core";
 
-import { BsPencilSquare, BsTrash } from "react-icons/bs";
+import { BsEye, BsPencilSquare, BsTrash } from "react-icons/bs";
 
 import { useAuth } from "../../../services/authContext";
 
@@ -11,6 +11,7 @@ import classes from "./Table.module.css";
 interface MedicamentoTableProps {
   medicamentos: MedicamentoResponse[];
   editable: boolean;
+  onConsultar: (medicamento: MedicamentoResponse) => void;
   onEditar: (medicamento: MedicamentoResponse) => void;
   onDesactivar: (medicamento: MedicamentoResponse) => void;
 }
@@ -32,6 +33,7 @@ function formatearFecha(fecha: string): string {
 export function MedicamentoTable({
   medicamentos,
   editable,
+  onConsultar,
   onEditar,
   onDesactivar,
 }: MedicamentoTableProps) {
@@ -61,31 +63,44 @@ export function MedicamentoTable({
                 return (
                   <Table.Tr key={medicamento.medicamentoId}>
                     <Table.Td>
-                      {editable && esCreador && (
-                        <Group gap={4} wrap="nowrap">
-                          <Tooltip label="Editar">
-                            <ActionIcon
-                              variant="subtle"
-                              className={classes.actionEdit}
-                              aria-label="Editar medicamento"
-                              onClick={() => onEditar(medicamento)}
-                            >
-                              <BsPencilSquare size={16} />
-                            </ActionIcon>
-                          </Tooltip>
+                      <Group gap={4} wrap="nowrap">
+                        <Tooltip label="Consultar detalle">
+                          <ActionIcon
+                            variant="subtle"
+                            className={classes.actionView}
+                            aria-label="Consultar medicamento"
+                            onClick={() => onConsultar(medicamento)}
+                          >
+                            <BsEye size={16} />
+                          </ActionIcon>
+                        </Tooltip>
 
-                          <Tooltip label="Desactivar">
-                            <ActionIcon
-                              variant="subtle"
-                              color="red"
-                              aria-label="Desactivar medicamento"
-                              onClick={() => onDesactivar(medicamento)}
-                            >
-                              <BsTrash size={16} />
-                            </ActionIcon>
-                          </Tooltip>
-                        </Group>
-                      )}
+                        {editable && esCreador && (
+                          <>
+                            <Tooltip label="Editar">
+                              <ActionIcon
+                                variant="subtle"
+                                className={classes.actionEdit}
+                                aria-label="Editar medicamento"
+                                onClick={() => onEditar(medicamento)}
+                              >
+                                <BsPencilSquare size={16} />
+                              </ActionIcon>
+                            </Tooltip>
+
+                            <Tooltip label="Desactivar">
+                              <ActionIcon
+                                variant="subtle"
+                                color="red"
+                                aria-label="Desactivar medicamento"
+                                onClick={() => onDesactivar(medicamento)}
+                              >
+                                <BsTrash size={16} />
+                              </ActionIcon>
+                            </Tooltip>
+                          </>
+                        )}
+                      </Group>
                     </Table.Td>
 
                     <Table.Td>{medicamento.nombre}</Table.Td>

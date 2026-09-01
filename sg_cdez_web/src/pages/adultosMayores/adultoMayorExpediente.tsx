@@ -153,6 +153,8 @@ export function AdultoMayorExpediente() {
   const [documentoADesactivar, setDocumentoADesactivar] =
     useState<DocumentoResponse | null>(null);
   const [desactivandoDocumento, setDesactivandoDocumento] = useState(false);
+  const [medicamentoSeleccionado, setMedicamentoSeleccionado] =
+    useState<MedicamentoResponse | null>(null);
   const [medicamentos, setMedicamentos] = useState<MedicamentoResponse[]>([]);
   const [medicamentosLoading, setMedicamentosLoading] = useState(true);
   const [medicamentosError, setMedicamentosError] = useState(false);
@@ -1401,6 +1403,7 @@ export function AdultoMayorExpediente() {
             <MedicamentoTable
               medicamentos={medicamentos}
               editable={expedienteEditable}
+              onConsultar={setMedicamentoSeleccionado}
               onEditar={setMedicamentoAEditar}
               onDesactivar={setMedicamentoADesactivar}
             />
@@ -1425,6 +1428,90 @@ export function AdultoMayorExpediente() {
               onGuardado={manejarMedicamentoRegistrado}
               onCancelar={() => setModalMedicamentoAbierto(false)}
             />
+          </Modal>
+          <Modal
+            opened={medicamentoSeleccionado !== null}
+            onClose={() => setMedicamentoSeleccionado(null)}
+            title="Detalle del medicamento"
+            centered
+            size="lg"
+          >
+            {medicamentoSeleccionado && (
+              <Stack gap="lg">
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+                  <Campo
+                    etiqueta="Nombre"
+                    valor={medicamentoSeleccionado.nombre}
+                  />
+
+                  <Campo
+                    etiqueta="Tipo"
+                    valor={medicamentoSeleccionado.tipo
+                      .replaceAll("_", " ")
+                      .toLowerCase()
+                      .replace(/\b\w/g, (letra) => letra.toUpperCase())}
+                  />
+
+                  <Campo
+                    etiqueta="Dosis"
+                    valor={medicamentoSeleccionado.dosis || "No registrada"}
+                  />
+
+                  <Campo
+                    etiqueta="Horario"
+                    valor={medicamentoSeleccionado.horario || "No registrado"}
+                  />
+
+                  <Campo
+                    etiqueta="Registrado por"
+                    valor={medicamentoSeleccionado.createdBy}
+                  />
+
+                  <Campo
+                    etiqueta="Fecha de registro"
+                    valor={new Intl.DateTimeFormat("es-CR", {
+                      dateStyle: "long",
+                      timeStyle: "short",
+                    }).format(new Date(medicamentoSeleccionado.createdAt))}
+                  />
+
+                  {medicamentoSeleccionado.updatedBy && (
+                    <Campo
+                      etiqueta="Actualizado por"
+                      valor={medicamentoSeleccionado.updatedBy}
+                    />
+                  )}
+
+                  {medicamentoSeleccionado.updatedAt && (
+                    <Campo
+                      etiqueta="Fecha de actualización"
+                      valor={new Intl.DateTimeFormat("es-CR", {
+                        dateStyle: "long",
+                        timeStyle: "short",
+                      }).format(new Date(medicamentoSeleccionado.updatedAt))}
+                    />
+                  )}
+                </SimpleGrid>
+
+                <div>
+                  <Text className={classes.label}>Observaciones</Text>
+
+                  <Text className={classes.value}>
+                    {medicamentoSeleccionado.observaciones ||
+                      "Sin observaciones registradas."}
+                  </Text>
+                </div>
+
+                <Group justify="flex-end">
+                  <Button
+                    variant="default"
+                    onClick={() => setMedicamentoSeleccionado(null)}
+                  >
+                    Cerrar
+                  </Button>
+                </Group>
+              </Stack>
+            )}
           </Modal>
           <Modal
             opened={medicamentoAEditar !== null}
