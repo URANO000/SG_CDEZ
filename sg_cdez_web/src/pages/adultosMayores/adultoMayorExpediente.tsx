@@ -32,7 +32,7 @@ import {
   BsPersonDash,
 } from "react-icons/bs";
 
-import { useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 
 import { obtenerAdultoMayorPorId } from "../../services/adultoMayorService";
 
@@ -114,7 +114,7 @@ function Campo({ etiqueta, valor }: CampoInformacion) {
 export function AdultoMayorExpediente() {
   const { adultoId } = useParams();
   const navigate = useNavigate();
-
+  const location = useLocation();
   const [adultoMayor, setAdultoMayor] = useState<AdultoMayorResponse | null>(
     null,
   );
@@ -659,7 +659,11 @@ export function AdultoMayorExpediente() {
           variant="subtle"
           aria-label="Volver al listado"
           onClick={() => {
-            navigate("/adultosMayores");
+            navigate("/adultosMayores", {
+              state: {
+                estadoListado: location.state?.estadoListado ?? "ACTIVO",
+              },
+            });
           }}
         >
           <BsArrowLeft size={18} />

@@ -60,6 +60,11 @@ export function AdultosMayoresTable({
                           onClick={() =>
                             navigate(
                               `/adultosMayores/${adultoMayor.adultoId}/expediente`,
+                              {
+                                state: {
+                                  estadoListado,
+                                },
+                              },
                             )
                           }
                         >

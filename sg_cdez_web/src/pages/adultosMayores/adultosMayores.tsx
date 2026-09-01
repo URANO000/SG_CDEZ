@@ -18,7 +18,7 @@ import {
 
 import { AiOutlineSearch } from "react-icons/ai";
 
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { TbFileTypePdf, TbFileTypeXls, TbChevronDown } from "react-icons/tb";
 
 import { BsPlusLg } from "react-icons/bs";
@@ -61,14 +61,18 @@ function obtenerFechaHoraLocal(): string {
 }
 
 export function AdultosMayores() {
+  const location = useLocation();
+
+  const estadoInicial = location.state?.estadoListado ?? "ACTIVO";
+
   const [filtros, setFiltros] = useState<AdultoMayorFiltro>({
     searchTerm: null,
-    estado: "ACTIVO",
+    estado: estadoInicial,
   });
 
   const [filtrosAplicados, setFiltrosAplicados] = useState<AdultoMayorFiltro>({
     searchTerm: null,
-    estado: "ACTIVO",
+    estado: estadoInicial,
   });
 
   const { user } = useAuth();
@@ -188,7 +192,7 @@ export function AdultosMayores() {
   useEffect(() => {
     const filtrosIniciales: AdultoMayorFiltro = {
       searchTerm: null,
-      estado: "ACTIVO",
+      estado: estadoInicial,
     };
 
     listarAdultosMayoresFiltrados(filtrosIniciales, 0, pageSize)
