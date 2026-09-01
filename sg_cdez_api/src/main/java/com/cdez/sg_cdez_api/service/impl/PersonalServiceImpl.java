@@ -239,7 +239,7 @@ public class PersonalServiceImpl implements PersonalService {
         );
         return mapDTO(personal);
     }
-    
+
     @Override
     public byte[] generarReportePersonalPDF() {
         try{

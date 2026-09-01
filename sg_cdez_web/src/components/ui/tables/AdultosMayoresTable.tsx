@@ -66,21 +66,23 @@ export function AdultosMayoresTable({
                           <BsEye size={16} />
                         </ActionIcon>
                       </Tooltip>
-                      <Tooltip label="Editar">
-                        <ActionIcon
-                          variant="subtle"
-                          className={classes.actionEdit}
-                          aria-label="Editar"
-                          onClick={() =>
-                            navigate(
-                              `/adultosMayores/${adultoMayor.adultoId}/editar`,
-                            )
-                          }
-                        >
-                          <BsPencilSquare size={16} />
-                        </ActionIcon>
-                      </Tooltip>
-
+                      {adultoMayor.activo === "Activo" &&
+                        estadoListado === "ACTIVO" && (
+                          <Tooltip label="Editar">
+                            <ActionIcon
+                              variant="subtle"
+                              className={classes.actionEdit}
+                              aria-label="Editar"
+                              onClick={() =>
+                                navigate(
+                                  `/adultosMayores/${adultoMayor.adultoId}/editar`,
+                                )
+                              }
+                            >
+                              <BsPencilSquare size={16} />
+                            </ActionIcon>
+                          </Tooltip>
+                        )}
                       {adultoMayor.activo === "Activo" && (
                         <Tooltip label="Desactivar registro">
                           <ActionIcon
