@@ -9,7 +9,7 @@ public record UserSessionResponse(
         String usuario,
         String rol,
         String especialidad,
-
-        Instant expiresAt
+        Instant expiresAt,
+        boolean recordarme
 ) {
 }
