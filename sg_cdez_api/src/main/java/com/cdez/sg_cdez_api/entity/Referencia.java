@@ -14,7 +14,8 @@ import java.time.LocalDateTime;
 public class Referencia {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "referencia_id")
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "emisor_id", nullable = false)
@@ -28,7 +29,7 @@ public class Referencia {
     @JoinColumn(name = "consulta_id", nullable = false)
     private Consulta consulta;
 
-    @Column(nullable = false, length = 2000)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String mensaje;
 
     @Column(nullable = false)
