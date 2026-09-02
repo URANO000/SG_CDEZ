@@ -16,6 +16,7 @@ import { ConsultaClinicaCard } from "../../components/ui/InfoCards/ConsultaClini
 import { ProfesionalCard } from "../../components/ui/InfoCards/ProfesionalCard";
 import { HistorialConsultaCard } from "../../components/ui/InfoCards/HistorialConsultaCard";
 import { ConsultaNutricionalCard } from "../../components/ui/InfoCards/ConsultaNutricionalCard";
+import { ConsultaPsychCard } from "../../components/ui/InfoCards/ConsultaPsychCard";
 
 export function ConsultaDetalle() {
 
@@ -127,6 +128,14 @@ export function ConsultaDetalle() {
                             }
                         />
                     )}
+
+                    {
+                        consulta.consultaPsych && (
+                            <ConsultaPsychCard
+                                psych={consulta.consultaPsych}
+                            />
+                        )
+                    }
 
                 </div>
 

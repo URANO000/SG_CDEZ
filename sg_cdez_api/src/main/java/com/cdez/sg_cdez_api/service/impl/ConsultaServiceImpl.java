@@ -247,7 +247,7 @@ public class ConsultaServiceImpl implements ConsultaService {
                 consulta.getCreatedAt(),
                 consulta.getUpdatedAt(),
                 nutricional,
-                psych
+                puedeVerCamposClinicos ? psych : null
         );
     }
 

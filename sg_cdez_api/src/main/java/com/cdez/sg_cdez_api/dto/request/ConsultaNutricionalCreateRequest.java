@@ -1,6 +1,7 @@
 package com.cdez.sg_cdez_api.dto.request;
 
 import com.cdez.sg_cdez_api.entity.enums.Apetito;
+import jakarta.validation.Valid;
 
 import java.util.*;
 
@@ -20,6 +21,7 @@ public record ConsultaNutricionalCreateRequest(
         String frecuenciaEvacuaciones,
         String consistenciaBristol,
         String estadoCognitivo,
+        @Valid
         List<TamizajeCreateRequest> tamizajes,
         List<ExamenLaboratorioCreateRequest> examenesLaboratorio,
         AntropometriaCreateRequest antropometria
