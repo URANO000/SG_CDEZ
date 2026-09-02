@@ -30,6 +30,8 @@ export function AdultoMayorRegistrar() {
 
   const [loading, setLoading] = useState(false);
 
+  const [recibePension, setRecibePension] = useState<boolean | null>(null);
+
   async function manejarRegistro(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -92,9 +94,22 @@ export function AdultoMayorRegistrar() {
           form.elements.namedItem("grupoFamiliar") as HTMLInputElement
         ).value.trim() || null,
 
-      pension:
-        (form.elements.namedItem("pension") as HTMLSelectElement).value ===
-        "true",
+      pension: recibePension === true,
+
+      tipoPension:
+        recibePension === true
+          ? (
+              form.elements.namedItem("tipoPension") as HTMLSelectElement
+            ).value.trim()
+          : null,
+
+      montoPension:
+        recibePension === true
+          ? Number(
+              (form.elements.namedItem("montoPension") as HTMLInputElement)
+                .value,
+            )
+          : null,
 
       funcionalidadFisica:
         (
@@ -385,6 +400,32 @@ export function AdultoMayorRegistrar() {
               <select
                 className={classes.select}
                 name="pension"
+                value={recibePension === null ? "" : String(recibePension)}
+                onChange={(event) => {
+                  const valor = event.target.value;
+
+                  setRecibePension(valor === "" ? null : valor === "true");
+                }}
+                required
+              >
+                <option value="" disabled>
+                  Seleccionar
+                </option>
+
+                <option value="true">Sí</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+
+            <div className={classes.fieldGroup}>
+              <label className={classes.fieldLabel}>
+                ¿Utiliza ayuda biomecánica?
+                <span className={classes.required}>*</span>
+              </label>
+
+              <select
+                className={classes.select}
+                name="ayudaBiomecanica"
                 defaultValue=""
                 required
               >
@@ -393,10 +434,69 @@ export function AdultoMayorRegistrar() {
                 </option>
 
                 <option value="true">Sí</option>
-
                 <option value="false">No</option>
               </select>
             </div>
+
+            {recibePension === true && (
+              <>
+                <div className={classes.fieldGroup}>
+                  <label className={classes.fieldLabel}>
+                    Tipo de pensión
+                    <span className={classes.required}>*</span>
+                  </label>
+
+                  <select
+                    className={classes.select}
+                    name="tipoPension"
+                    defaultValue=""
+                    required
+                  >
+                    <option value="" disabled>
+                      Seleccionar tipo
+                    </option>
+
+                    <option value="Pensión contributiva (IVM)">
+                      Pensión contributiva (IVM)
+                    </option>
+
+                    <option value="Régimen no contributivo">
+                      Régimen no contributivo
+                    </option>
+
+                    <option value="Magisterio Nacional">
+                      Magisterio Nacional
+                    </option>
+
+                    <option value="Poder Judicial">Poder Judicial</option>
+
+                    <option value="Pensión alimentaria">
+                      Pensión alimentaria
+                    </option>
+
+                    <option value="Otra">Otra</option>
+                  </select>
+                </div>
+
+                <div className={classes.fieldGroup}>
+                  <label className={classes.fieldLabel}>
+                    Monto mensual de la pensión (₡)
+                    <span className={classes.required}>*</span>
+                  </label>
+
+                  <input
+                    className={classes.input}
+                    type="number"
+                    name="montoPension"
+                    min="0.01"
+                    step="0.01"
+                    inputMode="decimal"
+                    placeholder="Ejemplo: 150000"
+                    required
+                  />
+                </div>
+              </>
+            )}
 
             <div className={classes.fieldGroup}>
               <label className={classes.fieldLabel}>

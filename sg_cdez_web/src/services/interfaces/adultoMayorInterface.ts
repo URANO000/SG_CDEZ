@@ -22,6 +22,8 @@ export interface AdultoMayorCreateRequest {
   escolaridad: string;
   grupoFamiliar: string | null;
   pension: boolean;
+  tipoPension: string | null;
+  montoPension: number | null;
   funcionalidadFisica: string | null;
   ayudaBiomecanica: boolean;
   fechaIngreso: string;
@@ -52,6 +54,8 @@ export interface AdultoMayorResponse {
   escolaridad: string;
   grupoFamiliar: string | null;
   pension: boolean;
+  tipoPension: string | null;
+  montoPension: number | null;
   funcionalidadFisica: string | null;
   ayudaBiomecanica: boolean;
   fechaIngreso: string;

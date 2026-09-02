@@ -143,6 +143,8 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                 adultoMayor.getEscolaridad(),
                 adultoMayor.getGrupoFamiliar(),
                 adultoMayor.isPension(),
+                adultoMayor.getTipoPension(),
+                adultoMayor.getMontoPension(),
                 adultoMayor.getFuncionalidadFisica(),
                 adultoMayor.isAyudaBiomecanica(),
                 adultoMayor.getFechaIngreso(),
@@ -272,7 +274,42 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         adultoMayor.setDireccion(request.direccion());
         adultoMayor.setEscolaridad(request.escolaridad());
         adultoMayor.setGrupoFamiliar(request.grupoFamiliar());
-        adultoMayor.setPension(request.pension());
+        adultoMayor.setPension(
+                request.pension()
+        );
+
+        if (request.pension()) {
+            if (
+                    request.tipoPension() == null ||
+                            request.tipoPension().isBlank()
+            ) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Debe indicar el tipo de pensión."
+                );
+            }
+
+            if (
+                    request.montoPension() == null ||
+                            request.montoPension().signum() <= 0
+            ) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "El monto de la pensión debe ser mayor que cero."
+                );
+            }
+
+            adultoMayor.setTipoPension(
+                    request.tipoPension().trim()
+            );
+
+            adultoMayor.setMontoPension(
+                    request.montoPension()
+            );
+        } else {
+            adultoMayor.setTipoPension(null);
+            adultoMayor.setMontoPension(null);
+        }
         adultoMayor.setFuncionalidadFisica(request.funcionalidadFisica());
         adultoMayor.setAyudaBiomecanica(request.ayudaBiomecanica());
         adultoMayor.setFechaIngreso(request.fechaIngreso());
