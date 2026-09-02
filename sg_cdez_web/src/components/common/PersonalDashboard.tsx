@@ -31,6 +31,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { obtenerDashboardPersonal } from "../../services/dashboardService";
 import type { PersonalDashboardResponse } from "../../services/interfaces/dashboardInterface";
+import { mostrarFecha } from "../../utils/formatHelper";
 
 export function PersonalDashboard() {
   const navigate = useNavigate();
@@ -327,7 +328,7 @@ export function PersonalDashboard() {
                                 c="dimmed"
                                 style={{ whiteSpace: "nowrap" }}
                               >
-                                {formatearFecha(consulta.fecha)}
+                                {mostrarFecha(consulta.fecha)}
                               </Text>
                             </Group>
 
@@ -421,12 +422,4 @@ export function PersonalDashboard() {
       </Stack>
     </Container>
   );
-}
-
-function formatearFecha(fecha: string): string {
-  return new Intl.DateTimeFormat("es-CR", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(fecha));
 }

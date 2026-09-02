@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import jakarta.transaction.Transactional;
 
+import java.io.IOException;
 import java.time.*;
 import java.util.*;
 
@@ -31,6 +32,7 @@ public class ConsultaServiceImpl implements ConsultaService {
     private final AntropometriaService ANTROPOMETRIA_SERVICE;
     private final ExamenLaboratorioService EXAMENLAB_SERVICE;
     private final ReferenciaService REFERENCIA_SERVICE;
+    private final ReportService REPORT_SERVICE;
     private final AuditoriaService AUDITORIA_SERVICE;
 
     private void registrarAuditoria(
@@ -80,7 +82,6 @@ public class ConsultaServiceImpl implements ConsultaService {
 
         cambios.put(campo, detalle);
     }
-
     @Override
     public PageResponse<ConsultaPageResponse> listarConsultasFiltradas(ConsultaFiltro filtros, Pageable pageable) {
         Specification<Consulta> spec = Specification.unrestricted();
@@ -425,6 +426,11 @@ public class ConsultaServiceImpl implements ConsultaService {
         );
     }
 
+    public byte[] exportarConsultaPDF(UUID consultaId) throws IOException{
+        ConsultaDetailResponse detalle = obtenerConsultaPorId(consultaId);
+        return REPORT_SERVICE.generarConsultaPDF(detalle);
+    }
+
     private ConsultaDetailResponse mapDetailDTO(Consulta consulta) {
         AdultoMayor adultoMayor = consulta.getAdultoMayor();
         Personal personal = consulta.getCreatedBy();
@@ -471,7 +477,7 @@ public class ConsultaServiceImpl implements ConsultaService {
                 consulta.getCreatedAt(),
                 consulta.getUpdatedAt(),
                 nutricional,
-                psych
+                puedeVerCamposClinicos ? psych : null
         );
     }
 

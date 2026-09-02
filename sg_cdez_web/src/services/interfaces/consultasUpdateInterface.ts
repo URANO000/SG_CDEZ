@@ -1,4 +1,4 @@
-import type { Apetito, TipoTamizajeNutricional } from "./consultasDetailsResponse";
+import type { Apetito, TipoTamizajeNutricional, TipoTamizajePsych } from "./consultasDetailsResponse";
 
 export interface ConsultaUpdateRequest {
     tipoConsulta: string;
@@ -14,6 +14,14 @@ export interface TamizajeNutricionalUpdateRequest {
     tamizajeId: string;
     tipo: TipoTamizajeNutricional | null;
     puntaje: number | null;
+    resultado: string | null;
+    observaciones: string | null;
+}
+
+export interface TamizajePsychUpdateRequest {
+    tamizajeId: string;
+    tipo: TipoTamizajePsych | null;
+    puntaje: null;
     resultado: string | null;
     observaciones: string | null;
 }
@@ -61,4 +69,9 @@ export interface ConsultaNutricionalUpdateRequest {
     examenesLaboratorio: ExamenLaboratorioUpdateRequest[];
     antropometria: AntropometriaUpdateRequest;
 
+}
+
+export interface ConsultaPsychActualizarRequest {
+    consulta: ConsultaUpdateRequest;
+    tamizajes: TamizajePsychUpdateRequest[];
 }

@@ -3,8 +3,10 @@ package com.cdez.sg_cdez_api.service.impl;
 import com.cdez.sg_cdez_api.dto.request.*;
 import com.cdez.sg_cdez_api.dto.response.TamizajeResponse;
 import com.cdez.sg_cdez_api.entity.*;
+import com.cdez.sg_cdez_api.entity.enums.Especialidad;
 import com.cdez.sg_cdez_api.repository.TamizajeRepository;
 import com.cdez.sg_cdez_api.service.TamizajeService;
+import com.cdez.sg_cdez_api.util.TamizajeValidator;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import java.util.*;
 @AllArgsConstructor
 public class TamizajeServiceImpl implements TamizajeService {
     private final TamizajeRepository REPOSITORY;
+    private final TamizajeValidator TAMIZAJE_VALIDATOR;
 
     @Override
     public List<TamizajeResponse> listarTamizajesPorConsultaNutricional(ConsultaNutricional consultaNutricional) {
@@ -30,6 +33,12 @@ public class TamizajeServiceImpl implements TamizajeService {
     public List<TamizajeResponse> crearTamizajesNutricional(List<TamizajeCreateRequest> requests, ConsultaNutricional consultaNutricional) {
         List<TamizajeResponse> tamizajesNuevos = new ArrayList<>();
         for(var tamizaje : requests){
+            TAMIZAJE_VALIDATOR.validar(
+                    tamizaje.tipo(),
+                    tamizaje.puntaje(),
+                    Especialidad.NUTRICION
+            );
+
             Tamizaje tamizajeNutricional = new Tamizaje();
 
             tamizajeNutricional.setConsulta(consultaNutricional.getConsulta());
@@ -47,17 +56,23 @@ public class TamizajeServiceImpl implements TamizajeService {
     public List<TamizajeResponse> crearTamizajesPsych(List<TamizajeCreateRequest> requests, ConsultaPsych consultaPsych){
         List<TamizajeResponse> tamizajesNuevos = new ArrayList<>();
         for(var tamizaje: requests){
-            Tamizaje tamizajePsyh = new Tamizaje();
+            TAMIZAJE_VALIDATOR.validar(
+                    tamizaje.tipo(),
+                    tamizaje.puntaje(),
+                    Especialidad.PSICOLOGIA
+            );
 
-            tamizajePsyh.setConsulta(consultaPsych.getConsulta());
-            tamizajePsyh.setTipo(tamizaje.tipo());
-            tamizajePsyh.setResultado(tamizaje.resultado());
-            tamizajePsyh.setObservaciones(tamizaje.observaciones());
+            Tamizaje tamizajePsych = new Tamizaje();
+
+            tamizajePsych.setConsulta(consultaPsych.getConsulta());
+            tamizajePsych.setTipo(tamizaje.tipo());
+            tamizajePsych.setResultado(tamizaje.resultado());
+            tamizajePsych.setObservaciones(tamizaje.observaciones());
 
             // No aplica
-            tamizajePsyh.setPuntaje(null);
-            REPOSITORY.save(tamizajePsyh);
-            tamizajesNuevos.add(mapDTO(tamizajePsyh));
+            tamizajePsych.setPuntaje(null);
+            REPOSITORY.save(tamizajePsych);
+            tamizajesNuevos.add(mapDTO(tamizajePsych));
         }
 
         return tamizajesNuevos;

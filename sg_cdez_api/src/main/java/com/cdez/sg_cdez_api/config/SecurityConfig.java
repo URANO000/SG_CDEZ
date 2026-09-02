@@ -79,6 +79,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/consulta/**").hasAnyRole("PERSONAL", "AYUDANTE")
                         .requestMatchers("/api/consulta-nutricional/**").hasAnyRole("PERSONAL",  "AYUDANTE")
+                        .requestMatchers("/api/consulta-psych/**").hasAnyRole("PERSONAL", "AYUDANTE")
 
                         .requestMatchers("/error").permitAll()
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()

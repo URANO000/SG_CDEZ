@@ -3,6 +3,7 @@ package com.cdez.sg_cdez_api.entity.enums;
 import lombok.Getter;
 
 public enum TipoTamizaje {
+
     MNA(Especialidad.NUTRICION, true),
     SARC_F(Especialidad.NUTRICION, true),
     MUST(Especialidad.NUTRICION, true),
@@ -14,6 +15,7 @@ public enum TipoTamizaje {
 
     @Getter
     private final Especialidad especialidad;
+
     private final boolean requierePuntaje;
 
     TipoTamizaje(
@@ -26,5 +28,9 @@ public enum TipoTamizaje {
 
     public boolean requierePuntaje() {
         return requierePuntaje;
+    }
+
+    public boolean perteneceA(Especialidad especialidad) {
+        return this.especialidad == especialidad;
     }
 }
