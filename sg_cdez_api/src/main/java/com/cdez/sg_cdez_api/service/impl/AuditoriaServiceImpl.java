@@ -59,8 +59,31 @@ public class AuditoriaServiceImpl implements AuditoriaService {
     ) {
         Personal usuarioAutenticado = obtenerUsuarioAutenticado();
 
+        registrarAccion(
+                usuarioAutenticado,
+                accion,
+                modulo,
+                entidadAfectada,
+                registroAfectadoId,
+                descripcion,
+                cambios
+        );
+    }
+
+    @Override
+    @Transactional
+    public void registrarAccion(
+            Personal usuario,
+            String accion,
+            String modulo,
+            String entidadAfectada,
+            String registroAfectadoId,
+            String descripcion,
+            Map<String, Object> cambios
+    ) {
         Auditoria auditoria = new Auditoria();
-        auditoria.setUsuario(usuarioAutenticado);
+
+        auditoria.setUsuario(usuario);
         auditoria.setAccion(accion);
         auditoria.setModulo(modulo);
         auditoria.setEntidadAfectada(entidadAfectada);
@@ -71,6 +94,7 @@ public class AuditoriaServiceImpl implements AuditoriaService {
 
         auditoriaRepository.save(auditoria);
     }
+
 
     @Override
     @Transactional(readOnly = true)

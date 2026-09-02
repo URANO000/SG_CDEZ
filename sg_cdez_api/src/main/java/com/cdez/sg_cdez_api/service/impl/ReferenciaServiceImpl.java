@@ -9,6 +9,7 @@ import com.cdez.sg_cdez_api.repository.ReferenciaRepository;
 import com.cdez.sg_cdez_api.service.EmailService;
 import com.cdez.sg_cdez_api.service.ReferenciaService;
 import com.cdez.sg_cdez_api.util.AuthHelper;
+import com.cdez.sg_cdez_api.service.AuditoriaService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Service
 @AllArgsConstructor
@@ -25,6 +28,7 @@ public class ReferenciaServiceImpl implements ReferenciaService {
     private final PersonalRepository PERSONAL_REPOSITORY;
     private final ReferenciaRepository REPOSITORY;
     private final EmailService EMAIL_SERVICE;
+    private final AuditoriaService AUDITORIA_SERVICE;
     @Override
     @Transactional
     public void crearReferencia(Consulta consulta, ReferenciaCreateRequest request) {
@@ -57,7 +61,32 @@ public class ReferenciaServiceImpl implements ReferenciaService {
         referencia.setMensaje(request.mensaje());
         referencia.setCreatedAt(LocalDateTime.now(Clock.systemUTC()));
 
-        REPOSITORY.save(referencia);
+        Referencia referenciaGuardada =
+                REPOSITORY.save(referencia);
+
+        //Bendita auditoría
+        Map<String, Object> cambios =
+                new LinkedHashMap<>();
+
+        cambios.put(
+                "consultaId",
+                consulta.getConsultaId().toString()
+        );
+
+        cambios.put(
+                "receptorId",
+                personalReceptor.getPersonalId().toString()
+        );
+
+        AUDITORIA_SERVICE.registrarAccion(
+                personalEmisor,
+                "CREAR_REFERENCIA",
+                "CONSULTA",
+                "REFERENCIA",
+                referenciaGuardada.getId().toString(),
+                "El profesional creó una referencia para otro miembro del personal.",
+                cambios
+        );
 
         EMAIL_SERVICE.enviarCorreoReferencia(
                 personalReceptor.getUsuario(),

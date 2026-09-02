@@ -32,6 +32,7 @@ const modulosAuditoria = [
   { value: "PERFIL", label: "Perfil" },
   { value: "DOCUMENTO", label: "Documento" },
   { value: "EPICRISIS", label: "Epicrisis" },
+  { value: "MEDICAMENTO", label: "Medicamento" },
   { value: "CONSULTA", label: "Consulta" },
   { value: "PERSONAL", label: "Personal" },
   {

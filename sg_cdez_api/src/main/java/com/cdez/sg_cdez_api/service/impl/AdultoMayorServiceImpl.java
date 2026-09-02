@@ -476,12 +476,20 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
     @Override
     public byte[] generarReporteAdultoPDF() {
         try{
-            List<AdultoMayorResponse> adulosMayores = listarAdultosMayoresSinFiltro();
+            if (!AUTH_HELPER.isUsuarioAdmin()) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "Sólo un usuario administrador puede generar reportes de adultos mayores."
+                );
+            }
+
+            AUTH_HELPER.validarUsuarioActivo();
+            List<AdultoMayorResponse> adultosMayores = listarAdultosMayoresSinFiltro();
 
             PdfTableReport<AdultoMayorResponse> reporte =
                     PdfTableReport.<AdultoMayorResponse>builder()
                             .titulo("Reporte de Adultos Mayores")
-                            .datos(adulosMayores)
+                            .datos(adultosMayores)
                             .columnas(List.of(
                                     new Column<>("Tipo Identificación", AdultoMayorResponse::tipoIdentificacion, TextAlignment.LEFT, 2f),
                                     new Column<>("Identificación", AdultoMayorResponse::identificacion, TextAlignment.LEFT, 1.5f),
@@ -491,7 +499,15 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                                     new Column<>("Sexo", AdultoMayorResponse::sexo),
                                     new Column<>("Estado", AdultoMayorResponse::activo)
                             )).build();
-            return REPORT_SERVICE.generarTablaPDF(reporte);
+            byte[] archivo =
+                    REPORT_SERVICE.generarTablaPDF(reporte);
+
+            registrarAuditoriaReporte(
+                    "PDF",
+                    adultosMayores.size()
+            );
+
+            return archivo;
 
         }catch (IOException ex){
             throw new RuntimeException("Error de fuente.");
@@ -607,7 +623,15 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                         .autoFilter(true)
                         .freezeHeader(true)
                         .build();
-            return REPORT_SERVICE.generarTablaExcel(reporte);
+            byte[] archivo =
+                    REPORT_SERVICE.generarTablaExcel(reporte);
+
+            registrarAuditoriaReporte(
+                    "EXCEL",
+                    adultos.size()
+            );
+
+            return archivo;
         } catch (IOException ex) {
             throw new RuntimeException(
                     "Error al generar el reporte de personal en Excel.",
@@ -624,5 +648,26 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                 ));
     }
 
+    private void registrarAuditoriaReporte(
+            String formato,
+            int cantidadRegistros
+    ) {
+        Map<String, Object> cambios =
+                new LinkedHashMap<>();
 
+        cambios.put("formato", formato);
+        cambios.put(
+                "cantidadRegistros",
+                cantidadRegistros
+        );
+
+        auditoriaService.registrarAccion(
+                "GENERAR_REPORTE",
+                "ADULTO_MAYOR",
+                "REPORTE",
+                "ADULTOS_MAYORES",
+                "Se generó un reporte de adultos mayores.",
+                cambios
+        );
+    }
 }
