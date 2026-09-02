@@ -63,7 +63,7 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
 
         ConsultaNutricional consultaNutricionalGuardada = REPOSITORY.save(consultaNutricional);
 
-        TAMIZAJE_SERVICE.crearTamizajes(request.tamizajes(), consultaNutricionalGuardada);
+        TAMIZAJE_SERVICE.crearTamizajesNutricional(request.tamizajes(), consultaNutricionalGuardada);
 
         EXAMENLAB_SERVICE.crearExamenesLab(request.examenesLaboratorio(), consultaNutricionalGuardada);
 
@@ -142,7 +142,7 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
         ConsultaNutricional actualizada = REPOSITORY.save(consultaNutricionalVieja);
 
         if(request.tamizajes() != null){
-            TAMIZAJE_SERVICE.actualizarTamizajes(request.tamizajes(), actualizada);
+            TAMIZAJE_SERVICE.actualizarTamizajesNutricional(request.tamizajes(), actualizada);
         }
 
         if(request.examenesLaboratorio() != null){
@@ -161,8 +161,6 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
         ConsultaNutricional consultaNutricional = obtenerConsultaNutricionalCheck(id);
         CONSULTA_SERVICE.desactivarConsulta(consultaNutricional.getConsulta().getConsultaId());
         validarEspecialidad(AUTH_HELPER.obtenerUsuarioAutenticado());
-
-        consultaNutricional.getConsulta().setActivo(false);
         REPOSITORY.save(consultaNutricional);
     }
 

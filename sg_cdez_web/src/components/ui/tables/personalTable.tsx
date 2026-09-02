@@ -9,6 +9,7 @@ import { useState } from 'react';
 
 import { desactivarPersonal } from '../../../services/personalService';
 import { activarPersonal } from '../../../services/personalService';
+import { ESPECIALIDADES, ROL } from '../../../services/interfaces/personalCreateRequest';
 
 interface PersonalTableProps { personal: PersonalResponse[]; onRefresh: () => void; }
 
@@ -148,8 +149,8 @@ export function PersonalTable({ personal, onRefresh }: PersonalTableProps) {
                                                 .join(" ")}
                                         </Table.Td>
                                         <Table.Td>{persona.identificacion}</Table.Td>
-                                        <Table.Td>{persona.especialidad}</Table.Td>
-                                        <Table.Td>{persona.rol.nombre}</Table.Td>
+                                        <Table.Td>{ESPECIALIDADES.find(t => t.value === persona.especialidad)?.label ?? persona.especialidad}</Table.Td>
+                                        <Table.Td>{ROL.find(r => r.value === persona.rol.nombre)?.label ?? persona.rol.nombre}</Table.Td>
                                         <Table.Td>{persona.usuario}</Table.Td>
                                         <Table.Td>
                                             <span

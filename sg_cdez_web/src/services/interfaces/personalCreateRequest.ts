@@ -24,6 +24,20 @@ export const TIPOIDENTIFICACION = [
     {value: "PEX", label: "Pasaporte extranjero"}
 ]
 
+export const ROLES = [
+    { value: "1", label: "Administrador" },
+    { value: "2", label: "Usuario normal" },
+    { value: "3", label: "Ayudante administrativo" },
+] as const;
+
+export const ROL = [
+    { value: "ADMIN", label: "Administrador" },
+    { value: "PERSONAL", label: "Usuario normal" },
+    { value: "AYUDANTE", label: "Ayudante administrativo" },
+]
+
+export type Rol = typeof ROL[number]["value"];
+
 export type Tipoidentificacion = typeof TIPOIDENTIFICACION[number]["value"];
 
 export interface ContactoCreateRequest{

@@ -20,7 +20,7 @@ public record ConsultaNutricionalCreateRequest(
         String frecuenciaEvacuaciones,
         String consistenciaBristol,
         String estadoCognitivo,
-        List<TamizajeNutricionalCreateRequest> tamizajes,
+        List<TamizajeCreateRequest> tamizajes,
         List<ExamenLaboratorioCreateRequest> examenesLaboratorio,
         AntropometriaCreateRequest antropometria
 ) {

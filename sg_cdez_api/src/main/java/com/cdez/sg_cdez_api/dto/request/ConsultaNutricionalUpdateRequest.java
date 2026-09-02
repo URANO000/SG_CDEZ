@@ -3,7 +3,6 @@ package com.cdez.sg_cdez_api.dto.request;
 import com.cdez.sg_cdez_api.entity.enums.Apetito;
 
 import java.util.List;
-import java.util.UUID;
 
 public record ConsultaNutricionalUpdateRequest(
         ConsultaUpdateRequest consulta,
@@ -21,7 +20,7 @@ public record ConsultaNutricionalUpdateRequest(
         String frecuenciaEvacuaciones,
         String consistenciaBristol,
         String estadoCognitivo,
-        List<TamizajeNutricionalUpdateRequest> tamizajes,
+        List<TamizajeUpdateRequest> tamizajes,
         List<ExamenLaboratorioUpdateRequest> examenesLaboratorio,
         AntropometriaUpdateRequest antropometria
 

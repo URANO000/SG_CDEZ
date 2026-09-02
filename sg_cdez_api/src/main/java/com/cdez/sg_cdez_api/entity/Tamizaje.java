@@ -1,6 +1,6 @@
 package com.cdez.sg_cdez_api.entity;
 
-import com.cdez.sg_cdez_api.entity.enums.TipoTamizajeNutricion;
+import com.cdez.sg_cdez_api.entity.enums.TipoTamizaje;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,24 +12,24 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tamizajenutricional")
-public class TamizajeNutricional {
+@Table(name = "tamizaje")
+public class Tamizaje {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "tamizaje_id")
     private UUID tamizajeId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(
-            name = "consulta_nutricional_id",
-            nullable = false
+            name = "consulta_id",
+            nullable = true
     )
-    private ConsultaNutricional consultaNutricional;
+    private Consulta consulta;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo", nullable = false, length = 30)
-    private TipoTamizajeNutricion tipo;
+    private TipoTamizaje tipo;
 
     @Column(name = "puntaje", precision = 6, scale = 2)
     private BigDecimal puntaje;
