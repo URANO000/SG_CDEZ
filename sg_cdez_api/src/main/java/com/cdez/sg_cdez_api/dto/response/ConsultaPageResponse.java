@@ -11,6 +11,7 @@ public record ConsultaPageResponse(
         PersonalConsultaResponse createdBy,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        ConsultaNutricionalPageResponse consultaNutricional
+        UUID consultaNutricional,
+        UUID consultaPsych
 ) {
 }
