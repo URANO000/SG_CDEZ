@@ -4,11 +4,12 @@ import type { ConsultaFiltro } from "../../services/interfaces/consultasInterfac
 import type { ConsultaPageResponse } from "../../services/interfaces/consultasInterface";
 import { listarConsultasFiltradas } from "../../services/consultasService";
 import classes from '../../components/ui/tables/Filter.module.css'
-import { Group, Title, Select, Button, TextInput, Pagination, Tabs } from "@mantine/core";
+import { Group, Title, Select, Button, TextInput, Pagination, Tabs, SegmentedControl } from "@mantine/core";
 import { AiOutlineSearch } from "react-icons/ai";
 import { ConsultaTable } from "../../components/ui/tables/ConsultaTable";
 import { ESPECIALIDADES } from "../../services/interfaces/personalCreateRequest";
 import { Link } from "react-router";
+import { BsSliders } from "react-icons/bs";
 
 export function Consultas() {
 
@@ -16,7 +17,24 @@ export function Consultas() {
         searchTerm: null,
         personalView: true,
         especialidad: null,
+        fecha: null,
+        fechaDesde: null,
+        fechaHasta: null,
     });
+
+    const [mostrarFiltrosAvanzados, setMostrarFiltrosAvanzados] = useState(false);
+
+    const [modoFecha, setModoFecha] = useState<"single" | "range">("single");
+
+    const limpiarFiltros = () => {
+        setFiltros({
+            ...filtros,
+            fecha: null,
+            fechaDesde: null,
+            fechaHasta: null,
+        });
+    };
+
 
     const [pageSize] = useState(10);
 
@@ -26,7 +44,7 @@ export function Consultas() {
 
     const [currentPage, setCurrentPage] = useState(0);
 
-     const cargarConsultas = async (page: number) => {
+    const cargarConsultas = async (page: number) => {
         const response = await listarConsultasFiltradas(
             filtros,
             page,
@@ -113,7 +131,7 @@ export function Consultas() {
 
                     <TextInput
                         placeholder="Buscar por nombre de especialista o adulto mayor..."
-                        leftSection={ <AiOutlineSearch size={16} />}
+                        leftSection={<AiOutlineSearch size={16} />}
                         value={filtros.searchTerm ?? ""}
                         onChange={(e) =>
                             setFiltros({
@@ -154,6 +172,14 @@ export function Consultas() {
                     />
 
                     <Button
+                        variant="default"
+                        leftSection={<BsSliders size={16} />}
+                        onClick={() => setMostrarFiltrosAvanzados((v) => !v)}
+                    >
+                        {mostrarFiltrosAvanzados ? "Ocultar filtros" : "Más filtros"}
+                    </Button>
+
+                    <Button
                         onClick={handleBuscar}
                         className={classes.searchButton}
                         aria-label="Buscar"
@@ -161,11 +187,90 @@ export function Consultas() {
                         Buscar
                     </Button>
 
+
                 </div>
+
+                {/* FILTROS DE FECHA */}
+                {mostrarFiltrosAvanzados && (
+                    <Group mb="md" mt="xs" align="flex-end">
+                        <SegmentedControl
+                            value={modoFecha}
+                            onChange={(value) => {
+                                setModoFecha(value as "single" | "range");
+                                // limpiar el modo que no se está usando
+                                setFiltros({
+                                    ...filtros,
+                                    fecha: null,
+                                    fechaDesde: null,
+                                    fechaHasta: null,
+                                });
+                            }}
+                            data={[
+                                { label: "Fecha exacta", value: "single" },
+                                { label: "Rango de fechas", value: "range" },
+                            ]}
+                        />
+
+                        {modoFecha === "single" && (
+                            <TextInput
+                                type="date"
+                                label="Fecha"
+                                value={filtros.fecha ?? ""}
+                                onChange={(event) =>
+                                    setFiltros({
+                                        ...filtros,
+                                        fecha:
+                                            event.currentTarget.value === ""
+                                                ? null
+                                                : event.currentTarget.value,
+                                    })
+                                }
+                            />
+                        )}
+
+                        {modoFecha === "range" && (
+                            <>
+                                <TextInput
+                                    type="date"
+                                    label="Fecha desde"
+                                    value={filtros.fechaDesde ?? ""}
+                                    onChange={(event) =>
+                                        setFiltros({
+                                            ...filtros,
+                                            fechaDesde:
+                                                event.currentTarget.value === ""
+                                                    ? null
+                                                    : event.currentTarget.value,
+                                        })
+                                    }
+                                />
+
+                                <TextInput
+                                    type="date"
+                                    label="Fecha hasta"
+                                    value={filtros.fechaHasta ?? ""}
+                                    onChange={(event) =>
+                                        setFiltros({
+                                            ...filtros,
+                                            fechaHasta:
+                                                event.currentTarget.value === ""
+                                                    ? null
+                                                    : event.currentTarget.value,
+                                        })
+                                    }
+                                />
+                            </>
+                        )}
+
+                        <Button variant="default" onClick={limpiarFiltros}>
+                            Limpiar filtros
+                        </Button>
+                    </Group>
+                )}
 
                 <ConsultaTable
                     consultas={pageData?.content ?? []}
-                    onRefresh={handleRefresh}/>
+                    onRefresh={handleRefresh} />
 
                 <Group
                     justify="center"

@@ -426,13 +426,11 @@ CREATE INDEX IF NOT EXISTS ix_refresh_token_personal_activo
     ON refreshtoken (personal_id, expires_at)
     WHERE revocado = FALSE;
 
--- 02/09/2026
--- Información adicional de pensión del adulto mayor.
+CREATE INDEX IF NOT EXISTS ix_refresh_token_expires_at
+    ON refreshtoken (expires_at);
+
 ALTER TABLE adultomayor
 ADD COLUMN IF NOT EXISTS tipo_pension VARCHAR(100);
 
 ALTER TABLE adultomayor
 ADD COLUMN IF NOT EXISTS monto_pension NUMERIC(12, 2);
-
-CREATE INDEX IF NOT EXISTS ix_refresh_token_expires_at
-    ON refreshtoken (expires_at);
