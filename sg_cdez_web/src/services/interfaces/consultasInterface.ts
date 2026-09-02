@@ -33,4 +33,7 @@ export interface ConsultaFiltro {
     searchTerm: string | null;
     personalView: boolean;
     especialidad: string | null;
+    fecha: string | null;
+    fechaDesde: string | null;
+    fechaHasta: string | null;
 }

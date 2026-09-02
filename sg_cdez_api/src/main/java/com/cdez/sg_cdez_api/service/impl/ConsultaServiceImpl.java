@@ -102,6 +102,14 @@ public class ConsultaServiceImpl implements ConsultaService {
             spec = spec.and(ConsultaSpecs.hasEspecialidad(filtros.especialidad()));
         }
 
+        if(filtros.fecha() != null){
+            spec = spec.and(ConsultaSpecs.hasDate(filtros.fecha()));
+        }
+
+        if(filtros.fechaDesde() != null && filtros.fechaHasta() != null){
+            spec = spec.and(ConsultaSpecs.hasDateRange(filtros.fechaDesde(), filtros.fechaHasta()));
+        }
+
 
         spec = spec.and(ConsultaSpecs.isActivo(true)); // Siempre (por ahora).
 
