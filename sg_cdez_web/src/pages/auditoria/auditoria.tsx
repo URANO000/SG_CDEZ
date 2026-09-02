@@ -26,6 +26,7 @@ import type {
   AuditoriaResponse,
 } from "../../services/interfaces/auditoriaInterface";
 import filterClasses from "../../components/ui/tables/Filter.module.css";
+import classes from "./Auditoria.module.css";
 
 type SeccionAuditoria =
   | "GENERAL"
@@ -184,27 +185,38 @@ export function Auditoria() {
 
   return (
     <div className={filterClasses.mainpg}>
-      <div>
-        <Title order={2} className={filterClasses.pageTitle}>
+      <header className={classes.pageHeader}>
+        <Title order={2} className={classes.pageTitle}>
           Auditoría
         </Title>
-      </div>
-      <Tabs value={seccion} onChange={cambiarSeccion} mb="lg">
-        <Tabs.List>
-          <Tabs.Tab value="GENERAL">Actividad general</Tabs.Tab>
 
-          <Tabs.Tab value="EXPEDIENTES">Expedientes</Tabs.Tab>
-
-          <Tabs.Tab value="CONSULTAS">Consultas</Tabs.Tab>
-
-          <Tabs.Tab value="PERSONAL">Personal</Tabs.Tab>
-
-          <Tabs.Tab value="SESIONES">Sesiones</Tabs.Tab>
-        </Tabs.List>
-      </Tabs>
-
+        <Text className={classes.pageDescription}>
+          Consulte las acciones realizadas por los usuarios dentro del sistema.
+        </Text>
+      </header>
       <div className={filterClasses.subpg}>
-        
+        <Tabs
+          value={seccion}
+          onChange={cambiarSeccion}
+          classNames={{
+            root: classes.tabs,
+            list: classes.tabList,
+            tab: classes.tab,
+          }}
+        >
+          <Tabs.List>
+            <Tabs.Tab value="GENERAL">Actividad general</Tabs.Tab>
+
+            <Tabs.Tab value="EXPEDIENTES">Expedientes</Tabs.Tab>
+
+            <Tabs.Tab value="CONSULTAS">Consultas</Tabs.Tab>
+
+            <Tabs.Tab value="PERSONAL">Personal</Tabs.Tab>
+
+            <Tabs.Tab value="SESIONES">Sesiones</Tabs.Tab>
+          </Tabs.List>
+        </Tabs>
+
         {/* FILTROS PRINCIPALES */}
         <div className={filterClasses.filterBar}>
           <TextInput
