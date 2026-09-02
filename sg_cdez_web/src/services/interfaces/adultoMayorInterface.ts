@@ -1,5 +1,13 @@
 export type EstadoAdultoMayor = "ACTIVO" | "INACTIVO" | "FALLECIDO";
 
+export const ESCOLARIDADES = [
+  "Sin escolaridad",
+  "Primaria completa",
+  "Secundaria completa",
+  "Técnico",
+  "Universitaria completa",
+] as const;
+
 export interface AdultoMayorCreateRequest {
   tipoIdentificacion: string;
   identificacion: string;
@@ -14,6 +22,8 @@ export interface AdultoMayorCreateRequest {
   escolaridad: string;
   grupoFamiliar: string | null;
   pension: boolean;
+  tipoPension: string | null;
+  montoPension: number | null;
   funcionalidadFisica: string | null;
   ayudaBiomecanica: boolean;
   fechaIngreso: string;
@@ -44,6 +54,8 @@ export interface AdultoMayorResponse {
   escolaridad: string;
   grupoFamiliar: string | null;
   pension: boolean;
+  tipoPension: string | null;
+  montoPension: number | null;
   funcionalidadFisica: string | null;
   ayudaBiomecanica: boolean;
   fechaIngreso: string;

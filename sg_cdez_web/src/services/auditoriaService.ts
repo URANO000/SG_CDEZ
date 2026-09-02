@@ -14,7 +14,10 @@ export async function listarAuditorias(
     usuarioId: filtros.usuarioId || undefined,
     usuario: filtros.usuario || undefined,
     accion: filtros.accion || undefined,
-    modulo: filtros.modulo || undefined,
+    modulos:
+      filtros.modulos && filtros.modulos.length > 0
+        ? filtros.modulos.join(",")
+        : undefined,
     fechaDesde: filtros.fechaDesde || undefined,
     fechaHasta: filtros.fechaHasta || undefined,
 

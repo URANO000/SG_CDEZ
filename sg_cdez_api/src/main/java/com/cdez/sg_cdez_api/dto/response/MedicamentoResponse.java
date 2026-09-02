@@ -13,6 +13,7 @@ public record MedicamentoResponse(
         String horario,
         TipoMedicamento tipo,
         String observaciones,
+        UUID createdById,
         String createdBy,
         LocalDateTime createdAt,
         String updatedBy,

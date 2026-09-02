@@ -69,13 +69,18 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
 
         ANTROPOMETRIA_SERVICE.crearAntropometria(request.antropometria(), consultaNutricionalGuardada);
 
-        if(request.consultaGeneral().referencia() != null){
+        ReferenciaCreateRequest referencia =
+                request.consultaGeneral().referencia();
+
+        if (
+                referencia != null &&
+                        referencia.receptorId() != null
+        ) {
             REFERENCIA_SERVICE.crearReferencia(
                     consulta,
-                    request.consultaGeneral().referencia()
+                    referencia
             );
         }
-
     }
 
     @Override
