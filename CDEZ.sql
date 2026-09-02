@@ -316,7 +316,7 @@ CREATE TABLE Referencia (
 
 CREATE TABLE ConsultaPsych(
 	consulta_psych_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	consulta_id UUID NOT NULL UNIQUE REFERENCES Consulta(consulta_id)
+	consulta_id UUID NOT NULL UNIQUE REFERENCES Consulta(consulta_id),
 );
 
 CREATE TABLE Tamizaje(
@@ -337,10 +337,6 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_personal_usuario
 
 CREATE UNIQUE INDEX IF NOT EXISTS ux_personal_tipo_identificacion_identificacion
     ON personal (tipo_identificacion, identificacion);
-
-CREATE UNIQUE INDEX IF NOT EXISTS ux_personal_carnet
-    ON personal (carnet)
-    WHERE carnet IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS ix_personal_rol_id
     ON personal (rol_id);
