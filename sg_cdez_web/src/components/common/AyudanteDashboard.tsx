@@ -35,6 +35,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { obtenerDashboardAyudante } from "../../services/dashboardService";
 import type { AyudanteDashboardResponse } from "../../services/interfaces/dashboardInterface";
+import { mostrarFecha } from "../../utils/formatHelper";
 
 interface Estadistica {
   titulo: string;
@@ -489,7 +490,7 @@ export function AyudanteDashboard() {
                                   whiteSpace: "nowrap",
                                 }}
                               >
-                                {formatearFecha(
+                                {mostrarFecha(
                                   consulta.fecha
                                 )}
                               </Text>
@@ -577,12 +578,4 @@ export function AyudanteDashboard() {
       </Stack>
     </Container>
   );
-}
-
-function formatearFecha(fecha: string): string {
-  return new Intl.DateTimeFormat("es-CR", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(fecha));
 }
