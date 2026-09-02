@@ -22,7 +22,6 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
     private final ExamenLaboratorioService EXAMENLAB_SERVICE;
     private final AuthHelper AUTH_HELPER;
     private final ReferenciaService REFERENCIA_SERVICE;
-    private final AuditoriaService AUDITORIA_SERVICE;
 
 
     @Override
@@ -70,23 +69,18 @@ public class ConsultaNutricionalServiceImpl implements ConsultaNutricionalServic
 
         ANTROPOMETRIA_SERVICE.crearAntropometria(request.antropometria(), consultaNutricionalGuardada);
 
-        if(request.consultaGeneral().referencia() != null){
+        ReferenciaCreateRequest referencia =
+                request.consultaGeneral().referencia();
+
+        if (
+                referencia != null &&
+                        referencia.receptorId() != null
+        ) {
             REFERENCIA_SERVICE.crearReferencia(
                     consulta,
-                    request.consultaGeneral().referencia()
+                    referencia
             );
         }
-        AUDITORIA_SERVICE.registrarAccion(
-                "REGISTRAR_CONSULTA_NUTRICIONAL",
-                "CONSULTA",
-                "Consulta",
-                consulta.getConsultaId().toString(),
-                "Se registró una consulta nutricional para el adulto mayor: "
-                        + consulta
-                        .getAdultoMayor()
-                        .getNombreCompleto()
-                        + "."
-        );
     }
 
     @Override

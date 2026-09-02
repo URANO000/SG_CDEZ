@@ -14,6 +14,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import jakarta.transaction.Transactional;
 
 import java.time.*;
 import java.util.*;
@@ -154,26 +155,42 @@ public class ConsultaServiceImpl implements ConsultaService {
                 LocalDateTime.now(Clock.systemUTC())
         );
 
-        return REPOSITORY.save(nuevaConsulta);
-    }
-
-    @Override
-    public ConsultaDetailResponse crearConsulta(ConsultaCreateRequest request) {
-        Consulta consulta = crearConsultaEntity(request);
-        if(request.referencia() != null){
-            REFERENCIA_SERVICE.crearReferencia(
-                    consulta,
-                    request.referencia()
-            );
-        }
+        Consulta consultaGuardada =
+                REPOSITORY.save(nuevaConsulta);
 
         registrarAuditoria(
                 "REGISTRAR_CONSULTA",
-                consulta,
+                consultaGuardada,
                 "Se registró una consulta para el adulto mayor: "
-                        + consulta.getAdultoMayor().getNombreCompleto()
+                        + consultaGuardada
+                        .getAdultoMayor()
+                        .getNombreCompleto()
                         + "."
         );
+
+        return consultaGuardada;
+    }
+
+    @Override
+    @Transactional
+    public ConsultaDetailResponse crearConsulta(
+            ConsultaCreateRequest request
+    ) {
+        Consulta consulta =
+                crearConsultaEntity(request);
+
+        ReferenciaCreateRequest referencia =
+                request.referencia();
+
+        if (
+                referencia != null &&
+                        referencia.receptorId() != null
+        ) {
+            REFERENCIA_SERVICE.crearReferencia(
+                    consulta,
+                    referencia
+            );
+        }
 
         return mapDetailDTO(consulta);
     }

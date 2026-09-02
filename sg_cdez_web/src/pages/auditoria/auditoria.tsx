@@ -6,12 +6,12 @@ import {
   Group,
   Loader,
   Pagination,
-  Select,
   TextInput,
   Title,
   Modal,
   Table,
   Text,
+  Tabs,
 } from "@mantine/core";
 
 import { AiOutlineSearch } from "react-icons/ai";
@@ -27,22 +27,35 @@ import type {
 } from "../../services/interfaces/auditoriaInterface";
 import filterClasses from "../../components/ui/tables/Filter.module.css";
 
-const modulosAuditoria = [
-  { value: "ADULTO_MAYOR", label: "Adulto mayor" },
-  { value: "PERFIL", label: "Perfil" },
-  { value: "DOCUMENTO", label: "Documento" },
-  { value: "EPICRISIS", label: "Epicrisis" },
-  { value: "MEDICAMENTO", label: "Medicamento" },
-  { value: "CONSULTA", label: "Consulta" },
-  { value: "PERSONAL", label: "Personal" },
-  {
-    value: "ENCARGADO_LEGAL",
-    label: "Encargado legal",
-  },
-];
+type SeccionAuditoria =
+  | "GENERAL"
+  | "EXPEDIENTES"
+  | "CONSULTAS"
+  | "PERSONAL"
+  | "SESIONES";
+
+const MODULOS_POR_SECCION: Record<SeccionAuditoria, string[] | undefined> = {
+  GENERAL: undefined,
+
+  EXPEDIENTES: [
+    "ADULTO_MAYOR",
+    "ENCARGADO_LEGAL",
+    "EPICRISIS",
+    "DOCUMENTO",
+    "MEDICAMENTO",
+  ],
+
+  CONSULTAS: ["CONSULTA"],
+
+  PERSONAL: ["PERSONAL", "PERFIL"],
+
+  SESIONES: ["AUTENTICACION"],
+};
 
 export function Auditoria() {
   const [auditorias, setAuditorias] = useState<AuditoriaResponse[]>([]);
+
+  const [seccion, setSeccion] = useState<SeccionAuditoria>("GENERAL");
 
   const [pagina, setPagina] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
@@ -54,8 +67,6 @@ export function Auditoria() {
 
   // Filtros
   const [usuario, setUsuario] = useState("");
-
-  const [modulo, setModulo] = useState<string | null>(null);
 
   const [fechaDesde, setFechaDesde] = useState("");
   const [fechaHasta, setFechaHasta] = useState("");
@@ -96,7 +107,16 @@ export function Auditoria() {
 
     return String(valor);
   }
-
+  function esCambioDetallado(valor: unknown): valor is {
+    anterior: unknown;
+    nuevo: unknown;
+  } {
+    return (
+      typeof valor === "object" &&
+      valor !== null &&
+      ("anterior" in valor || "nuevo" in valor)
+    );
+  }
   useEffect(() => {
     async function cargarAuditorias() {
       try {
@@ -123,11 +143,23 @@ export function Auditoria() {
     cargarAuditorias();
   }, [pagina, filtrosAplicados]);
 
+  function cambiarSeccion(valor: string | null) {
+    const nuevaSeccion = (valor as SeccionAuditoria | null) ?? "GENERAL";
+
+    setSeccion(nuevaSeccion);
+    setPagina(1);
+
+    setFiltrosAplicados((actuales) => ({
+      ...actuales,
+      modulos: MODULOS_POR_SECCION[nuevaSeccion],
+    }));
+  }
+
   function buscar() {
     const filtros: AuditoriaFiltros = {
       usuario: usuario.trim() || undefined,
 
-      modulo: modulo || undefined,
+      modulos: MODULOS_POR_SECCION[seccion],
 
       fechaDesde: fechaDesde ? `${fechaDesde}T00:00:00` : undefined,
 
@@ -140,12 +172,14 @@ export function Auditoria() {
 
   function limpiarFiltros() {
     setUsuario("");
-    setModulo(null);
     setFechaDesde("");
     setFechaHasta("");
 
     setPagina(1);
-    setFiltrosAplicados({});
+
+    setFiltrosAplicados({
+      modulos: MODULOS_POR_SECCION[seccion],
+    });
   }
 
   return (
@@ -155,8 +189,22 @@ export function Auditoria() {
           Auditoría
         </Title>
       </div>
+      <Tabs value={seccion} onChange={cambiarSeccion} mb="lg">
+        <Tabs.List>
+          <Tabs.Tab value="GENERAL">Actividad general</Tabs.Tab>
+
+          <Tabs.Tab value="EXPEDIENTES">Expedientes</Tabs.Tab>
+
+          <Tabs.Tab value="CONSULTAS">Consultas</Tabs.Tab>
+
+          <Tabs.Tab value="PERSONAL">Personal</Tabs.Tab>
+
+          <Tabs.Tab value="SESIONES">Sesiones</Tabs.Tab>
+        </Tabs.List>
+      </Tabs>
 
       <div className={filterClasses.subpg}>
+        
         {/* FILTROS PRINCIPALES */}
         <div className={filterClasses.filterBar}>
           <TextInput
@@ -164,18 +212,6 @@ export function Auditoria() {
             value={usuario}
             onChange={(event) => setUsuario(event.currentTarget.value)}
             leftSection={<AiOutlineSearch size={17} />}
-            classNames={{
-              input: filterClasses.input,
-              root: filterClasses.field,
-            }}
-          />
-
-          <Select
-            placeholder="Todos los módulos"
-            value={modulo}
-            onChange={setModulo}
-            data={modulosAuditoria}
-            clearable
             classNames={{
               input: filterClasses.input,
               root: filterClasses.field,
@@ -346,11 +382,15 @@ export function Auditoria() {
                               </Table.Td>
 
                               <Table.Td>
-                                {formatearValor(cambio.anterior)}
+                                {esCambioDetallado(cambio)
+                                  ? formatearValor(cambio.anterior)
+                                  : "No aplica"}
                               </Table.Td>
 
                               <Table.Td>
-                                {formatearValor(cambio.nuevo)}
+                                {esCambioDetallado(cambio)
+                                  ? formatearValor(cambio.nuevo)
+                                  : formatearValor(cambio)}
                               </Table.Td>
                             </Table.Tr>
                           ),

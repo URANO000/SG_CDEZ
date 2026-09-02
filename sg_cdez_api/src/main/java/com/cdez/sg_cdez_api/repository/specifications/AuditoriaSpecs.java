@@ -8,6 +8,11 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import jakarta.persistence.criteria.Predicate;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class AuditoriaSpecs {
 
@@ -19,7 +24,7 @@ public class AuditoriaSpecs {
                 .where(usuarioIdEs(filtro.usuarioId()))
                 .and(usuarioContiene(filtro.usuario()))
                 .and(accionEs(filtro.accion()))
-                .and(moduloEs(filtro.modulo()))
+                .and(modulosEn(filtro.modulos()))
                 .and(fechaDesde(filtro.fechaDesde()))
                 .and(fechaHasta(filtro.fechaHasta()));
     }
@@ -37,17 +42,69 @@ public class AuditoriaSpecs {
         };
     }
 
-    private static Specification<Auditoria> usuarioContiene(String usuario) {
+    private static Specification<Auditoria> usuarioContiene(
+            String usuario
+    ) {
         return (root, query, criteriaBuilder) -> {
             if (usuario == null || usuario.isBlank()) {
                 return criteriaBuilder.conjunction();
             }
 
-            Join<Auditoria, Personal> usuarioJoin = root.join("usuario");
+            Join<Auditoria, Personal> usuarioJoin =
+                    root.join("usuario");
 
-            return criteriaBuilder.like(
-                    criteriaBuilder.lower(usuarioJoin.get("usuario")),
-                    "%" + usuario.toLowerCase().trim() + "%"
+            String[] terminos =
+                    usuario.trim()
+                            .toLowerCase(Locale.ROOT)
+                            .split("\\s+");
+
+            List<Predicate> condiciones =
+                    new ArrayList<>();
+
+            for (String termino : terminos) {
+                String patron = "%" + termino + "%";
+
+                Predicate coincideTermino =
+                        criteriaBuilder.or(
+                                criteriaBuilder.like(
+                                        criteriaBuilder.lower(
+                                                usuarioJoin.get("usuario")
+                                        ),
+                                        patron
+                                ),
+                                criteriaBuilder.like(
+                                        criteriaBuilder.lower(
+                                                usuarioJoin.get("primerNombre")
+                                        ),
+                                        patron
+                                ),
+                                criteriaBuilder.like(
+                                        criteriaBuilder.lower(
+                                                usuarioJoin.get("segundoNombre")
+                                        ),
+                                        patron
+                                ),
+                                criteriaBuilder.like(
+                                        criteriaBuilder.lower(
+                                                usuarioJoin.get("primerApellido")
+                                        ),
+                                        patron
+                                ),
+                                criteriaBuilder.like(
+                                        criteriaBuilder.lower(
+                                                usuarioJoin.get("segundoApellido")
+                                        ),
+                                        patron
+                                )
+                        );
+
+                condiciones.add(coincideTermino);
+            }
+
+            return criteriaBuilder.and(
+                    condiciones.toArray(
+                            new Predicate[0]
+                    )
             );
         };
     }
@@ -65,16 +122,33 @@ public class AuditoriaSpecs {
         };
     }
 
-    private static Specification<Auditoria> moduloEs(String modulo) {
+    private static Specification<Auditoria> modulosEn(
+            List<String> modulos
+    ) {
         return (root, query, criteriaBuilder) -> {
-            if (modulo == null || modulo.isBlank()) {
+            if (modulos == null || modulos.isEmpty()) {
                 return criteriaBuilder.conjunction();
             }
 
-            return criteriaBuilder.equal(
-                    criteriaBuilder.upper(root.get("modulo")),
-                    modulo.trim().toUpperCase()
-            );
+            List<String> modulosNormalizados =
+                    modulos.stream()
+                            .filter(modulo ->
+                                    modulo != null &&
+                                            !modulo.isBlank()
+                            )
+                            .map(modulo ->
+                                    modulo.trim().toUpperCase()
+                            )
+                            .distinct()
+                            .toList();
+
+            if (modulosNormalizados.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+
+            return criteriaBuilder
+                    .upper(root.get("modulo"))
+                    .in(modulosNormalizados);
         };
     }
 
