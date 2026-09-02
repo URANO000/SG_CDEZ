@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { ActionIcon, Loader, Group, Text } from "@mantine/core";
+import { ActionIcon, Loader, Group, Text, Button } from "@mantine/core";
 import { BsArrowLeft } from "react-icons/bs";
 import { useNavigate, useParams } from "react-router";
 import { notifications } from "@mantine/notifications";
 
 import classes from "../../components/ui/styleModules/ConsultaDetalle.module.css";
 
-import { obtenerConsultaPorId } from "../../services/consultasService";
+import { generarReportePDF, obtenerConsultaPorId } from "../../services/consultasService";
 
 import type { ConsultaDetailResponse } from "../../services/interfaces/consultasDetailsResponse";
 
@@ -27,6 +27,7 @@ export function ConsultaDetalle() {
         useState<ConsultaDetailResponse | null>(null);
 
     const [loading, setLoading] = useState(true);
+    const [generating, isGenerating] = useState(false);
     const [error, setError] = useState(false);
 
     useEffect(() => {
@@ -91,18 +92,40 @@ export function ConsultaDetalle() {
         );
     }
 
+    function downloadBlob(blob: Blob, filename: string) {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+    }
+
+
+    const handleGenerateReport = async () => {
+        isGenerating(true);
+        try {
+            const blob = await generarReportePDF(consultaId!);
+            downloadBlob(blob, 'reporte_de_consulta.pdf');
+        } finally {
+            isGenerating(false);
+        }
+    };
+
 
     return (
         <div className={classes.container}>
 
-            <Group className={classes.topBar}>
-                <ActionIcon
-                    variant="subtle"
-                    onClick={() => navigate(-1)}
-                    aria-label="Volver"
-                >
+            <Group className={classes.topBar} justify="space-between">
+                <ActionIcon variant="subtle" onClick={() => navigate(-1)} aria-label="Volver">
                     <BsArrowLeft size={18} />
                 </ActionIcon>
+
+                <Button className={classes.reportBtn} onClick={handleGenerateReport} loading={generating}>
+                    Generar PDF
+                </Button>
             </Group>
 
 

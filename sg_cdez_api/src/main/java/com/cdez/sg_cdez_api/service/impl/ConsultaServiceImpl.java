@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.time.*;
 import java.util.UUID;
 
@@ -30,6 +31,7 @@ public class ConsultaServiceImpl implements ConsultaService {
     private final AntropometriaService ANTROPOMETRIA_SERVICE;
     private final ExamenLaboratorioService EXAMENLAB_SERVICE;
     private final ReferenciaService REFERENCIA_SERVICE;
+    private final ReportService REPORT_SERVICE;
 
     @Override
     public PageResponse<ConsultaPageResponse> listarConsultasFiltradas(ConsultaFiltro filtros, Pageable pageable) {
@@ -199,6 +201,11 @@ public class ConsultaServiceImpl implements ConsultaService {
                 nutricional,
                 psych
         );
+    }
+
+    public byte[] exportarConsultaPDF(UUID consultaId) throws IOException{
+        ConsultaDetailResponse detalle = obtenerConsultaPorId(consultaId);
+        return REPORT_SERVICE.generarConsultaPDF(detalle);
     }
 
     private ConsultaDetailResponse mapDetailDTO(Consulta consulta) {

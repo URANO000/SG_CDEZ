@@ -6,6 +6,7 @@ import com.cdez.sg_cdez_api.entity.Consulta;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.UUID;
 
 
@@ -18,4 +19,5 @@ public interface ConsultaService {
     ConsultaDetailResponse actualizarConsulta(ConsultaUpdateRequest request, UUID id);
     ConsultaDetailResponse desactivarConsulta(UUID id);
     Consulta obtenerConsultaCheck(UUID id);
+    byte[] exportarConsultaPDF(UUID consultaId) throws IOException;
 }
