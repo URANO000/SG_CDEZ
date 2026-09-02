@@ -404,3 +404,27 @@ CREATE INDEX IF NOT EXISTS ix_consulta_updated_by
 
 CREATE INDEX IF NOT EXISTS ix_tamizaje_consulta_tipo
     ON tamizajenutricional (consulta_nutricional_id, tipo);
+
+-- 30/08/2026
+CREATE TABLE RefreshToken (
+    refresh_token_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    personal_id UUID NOT NULL
+        REFERENCES Personal(personal_id),
+    token_hash VARCHAR(64) NOT NULL UNIQUE,
+    recordarme BOOLEAN NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_used_at TIMESTAMP NULL,
+    expires_at TIMESTAMP NOT NULL,
+    revocado BOOLEAN NOT NULL DEFAULT FALSE,
+    revoked_at TIMESTAMP NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_refresh_token_hash
+    ON refreshtoken (token_hash);
+
+CREATE INDEX IF NOT EXISTS ix_refresh_token_personal_activo
+    ON refreshtoken (personal_id, expires_at)
+    WHERE revocado = FALSE;
+
+CREATE INDEX IF NOT EXISTS ix_refresh_token_expires_at
+    ON refreshtoken (expires_at);

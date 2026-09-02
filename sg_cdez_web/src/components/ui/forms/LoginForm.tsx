@@ -19,7 +19,9 @@ import { notifications } from "@mantine/notifications";
 export function LoginForm() {
   const [usuario, setUsuario] = useState("");
   const [contrasena, setContrasena] = useState("");
+  const [recordarme, setRecordarme] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
   const { refreshSession } = useAuth();
 
@@ -29,18 +31,16 @@ export function LoginForm() {
     setLoading(true);
 
     try {
-      await iniciarSesion(usuario, contrasena);
+      await iniciarSesion(usuario, contrasena, recordarme);
       await refreshSession();
       navigate("/");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 429) {
-
         notifications.show({
           title: "Demasiados intentos de inicio de sesión. ",
           message: "Intente nuevamente más tarde.",
           color: "orange",
         });
-
       } else {
         notifications.show({
           title: "Error de inicio de sesión",
@@ -79,7 +79,11 @@ export function LoginForm() {
       />
 
       <Group justify="space-between" mt="lg">
-        <Checkbox label="Recordarme" />
+        <Checkbox
+          label="Recordarme"
+          checked={recordarme}
+          onChange={(event) => setRecordarme(event.currentTarget.checked)}
+        />
 
         <Link to="/forgot-password">
           <Anchor component="button" size="sm">
