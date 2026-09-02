@@ -143,6 +143,8 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                 adultoMayor.getEscolaridad(),
                 adultoMayor.getGrupoFamiliar(),
                 adultoMayor.isPension(),
+                adultoMayor.getTipoPension(),
+                adultoMayor.getMontoPension(),
                 adultoMayor.getFuncionalidadFisica(),
                 adultoMayor.isAyudaBiomecanica(),
                 adultoMayor.getFechaIngreso(),
@@ -272,7 +274,42 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         adultoMayor.setDireccion(request.direccion());
         adultoMayor.setEscolaridad(request.escolaridad());
         adultoMayor.setGrupoFamiliar(request.grupoFamiliar());
-        adultoMayor.setPension(request.pension());
+        adultoMayor.setPension(
+                request.pension()
+        );
+
+        if (request.pension()) {
+            if (
+                    request.tipoPension() == null ||
+                            request.tipoPension().isBlank()
+            ) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Debe indicar el tipo de pensión."
+                );
+            }
+
+            if (
+                    request.montoPension() == null ||
+                            request.montoPension().signum() <= 0
+            ) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "El monto de la pensión debe ser mayor que cero."
+                );
+            }
+
+            adultoMayor.setTipoPension(
+                    request.tipoPension().trim()
+            );
+
+            adultoMayor.setMontoPension(
+                    request.montoPension()
+            );
+        } else {
+            adultoMayor.setTipoPension(null);
+            adultoMayor.setMontoPension(null);
+        }
         adultoMayor.setFuncionalidadFisica(request.funcionalidadFisica());
         adultoMayor.setAyudaBiomecanica(request.ayudaBiomecanica());
         adultoMayor.setFechaIngreso(request.fechaIngreso());
@@ -476,12 +513,20 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
     @Override
     public byte[] generarReporteAdultoPDF() {
         try{
-            List<AdultoMayorResponse> adulosMayores = listarAdultosMayoresSinFiltro();
+            if (!AUTH_HELPER.isUsuarioAdmin()) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "Sólo un usuario administrador puede generar reportes de adultos mayores."
+                );
+            }
+
+            AUTH_HELPER.validarUsuarioActivo();
+            List<AdultoMayorResponse> adultosMayores = listarAdultosMayoresSinFiltro();
 
             PdfTableReport<AdultoMayorResponse> reporte =
                     PdfTableReport.<AdultoMayorResponse>builder()
                             .titulo("Reporte de Adultos Mayores")
-                            .datos(adulosMayores)
+                            .datos(adultosMayores)
                             .columnas(List.of(
                                     new Column<>("Tipo Identificación", AdultoMayorResponse::tipoIdentificacion, TextAlignment.LEFT, 2f),
                                     new Column<>("Identificación", AdultoMayorResponse::identificacion, TextAlignment.LEFT, 1.5f),
@@ -491,7 +536,15 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                                     new Column<>("Sexo", AdultoMayorResponse::sexo),
                                     new Column<>("Estado", AdultoMayorResponse::activo)
                             )).build();
-            return REPORT_SERVICE.generarTablaPDF(reporte);
+            byte[] archivo =
+                    REPORT_SERVICE.generarTablaPDF(reporte);
+
+            registrarAuditoriaReporte(
+                    "PDF",
+                    adultosMayores.size()
+            );
+
+            return archivo;
 
         }catch (IOException ex){
             throw new RuntimeException("Error de fuente.");
@@ -607,7 +660,15 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                         .autoFilter(true)
                         .freezeHeader(true)
                         .build();
-            return REPORT_SERVICE.generarTablaExcel(reporte);
+            byte[] archivo =
+                    REPORT_SERVICE.generarTablaExcel(reporte);
+
+            registrarAuditoriaReporte(
+                    "EXCEL",
+                    adultos.size()
+            );
+
+            return archivo;
         } catch (IOException ex) {
             throw new RuntimeException(
                     "Error al generar el reporte de personal en Excel.",
@@ -624,5 +685,26 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                 ));
     }
 
+    private void registrarAuditoriaReporte(
+            String formato,
+            int cantidadRegistros
+    ) {
+        Map<String, Object> cambios =
+                new LinkedHashMap<>();
 
+        cambios.put("formato", formato);
+        cambios.put(
+                "cantidadRegistros",
+                cantidadRegistros
+        );
+
+        auditoriaService.registrarAccion(
+                "GENERAR_REPORTE",
+                "ADULTO_MAYOR",
+                "REPORTE",
+                "ADULTOS_MAYORES",
+                "Se generó un reporte de adultos mayores.",
+                cambios
+        );
+    }
 }

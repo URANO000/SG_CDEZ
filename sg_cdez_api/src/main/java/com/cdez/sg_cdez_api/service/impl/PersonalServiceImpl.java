@@ -38,6 +38,38 @@ public class PersonalServiceImpl implements PersonalService {
     private final ReportService REPORT_SERVICE;
     private final DocumentoService DOCUMENTO_SERVICE;
     private final RefreshTokenService REFRESH_TOKEN_SERVICE;
+    private final AuditoriaService AUDITORIA_SERVICE;
+
+    private void registrarAuditoria(
+            String accion,
+            Personal personal,
+            String descripcion
+    ) {
+        AUDITORIA_SERVICE.registrarAccion(
+                accion,
+                "PERSONAL",
+                "Personal",
+                personal.getPersonalId().toString(),
+                descripcion
+        );
+    }
+
+    private void agregarCambio(
+            Map<String, Object> cambios,
+            String campo,
+            Object valorAnterior,
+            Object valorNuevo
+    ) {
+        if (Objects.equals(valorAnterior, valorNuevo)) {
+            return;
+        }
+
+        Map<String, Object> detalle = new LinkedHashMap<>();
+        detalle.put("anterior", valorAnterior);
+        detalle.put("nuevo", valorNuevo);
+
+        cambios.put(campo, detalle);
+    }
 
     @Override
     public List<PersonalResponse> listarPersonal() {
@@ -127,6 +159,15 @@ public class PersonalServiceImpl implements PersonalService {
         // Enviar correo de verificación
         VERIFICATION_SERVICE.verificacionCrearYEnviar(personalGuardado);
 
+        // para la auditoría
+        registrarAuditoria(
+                "REGISTRAR_PERSONAL",
+                personalGuardado,
+                "Se registró un nuevo miembro del personal: "
+                        + personalGuardado.getNombreCompleto()
+                        + "."
+        );
+
         return mapDTO(personalGuardado);
     }
 
@@ -143,6 +184,142 @@ public class PersonalServiceImpl implements PersonalService {
         AUTH_HELPER.validarUsuarioActivo();
 
         Personal personalViejo = obtenerPersonalCheck(id);
+
+        Map<String, Object> cambios = new LinkedHashMap<>();
+
+        agregarCambio(
+                cambios,
+                "rol",
+                personalViejo.getRol().getRolId(),
+                request.rol()
+        );
+
+        agregarCambio(
+                cambios,
+                "especialidad",
+                personalViejo.getEspecialidad(),
+                request.especialidad()
+        );
+
+        agregarCambio(
+                cambios,
+                "tipoIdentificacion",
+                personalViejo.getTipoIdentificacion(),
+                request.tipoIdentificacion()
+        );
+
+        agregarCambio(
+                cambios,
+                "identificacion",
+                personalViejo.getIdentificacion(),
+                request.identificacion()
+        );
+
+        agregarCambio(
+                cambios,
+                "primerNombre",
+                personalViejo.getPrimerNombre(),
+                request.primerNombre()
+        );
+
+        agregarCambio(
+                cambios,
+                "segundoNombre",
+                personalViejo.getSegundoNombre(),
+                request.segundoNombre()
+        );
+
+        agregarCambio(
+                cambios,
+                "primerApellido",
+                personalViejo.getPrimerApellido(),
+                request.primerApellido()
+        );
+
+        agregarCambio(
+                cambios,
+                "segundoApellido",
+                personalViejo.getSegundoApellido(),
+                request.segundoApellido()
+        );
+
+        agregarCambio(
+                cambios,
+                "direccion",
+                personalViejo.getDireccion(),
+                request.direccion()
+        );
+
+        agregarCambio(
+                cambios,
+                "carnet",
+                personalViejo.getCarnet(),
+                request.carnet()
+        );
+
+        agregarCambio(
+                cambios,
+                "usuario",
+                personalViejo.getUsuario(),
+                request.usuario()
+        );
+
+        if (
+                request.contactosActualizar() != null
+                        && !request.contactosActualizar().isEmpty()
+        ) {
+            agregarCambio(
+                    cambios,
+                    "contactosActualizados",
+                    null,
+                    request.contactosActualizar().size()
+            );
+        }
+
+        if (
+                request.contactosCrear() != null
+                        && !request.contactosCrear().isEmpty()
+        ) {
+            agregarCambio(
+                    cambios,
+                    "contactosCreados",
+                    null,
+                    request.contactosCrear().size()
+            );
+        }
+
+        if (
+                request.contactosDesactivar() != null
+                        && !request.contactosDesactivar().isEmpty()
+        ) {
+            agregarCambio(
+                    cambios,
+                    "contactosDesactivados",
+                    null,
+                    request.contactosDesactivar().size()
+            );
+        }
+
+        if (
+                request.documentosDesactivar() != null
+                        && !request.documentosDesactivar().isEmpty()
+        ) {
+            agregarCambio(
+                    cambios,
+                    "documentosDesactivados",
+                    null,
+                    request.documentosDesactivar().size()
+            );
+        }
+
+        if (documentosCrear != null && !documentosCrear.isEmpty()) {
+            agregarCambio(
+                    cambios,
+                    "documentosAdjuntados",
+                    null,
+                    documentosCrear.size()
+            );
+        }
 
         Rol rol = ROL_REPOSITORY.findById(request.rol()).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND,
@@ -187,6 +364,19 @@ public class PersonalServiceImpl implements PersonalService {
             DOCUMENTO_SERVICE.registrarDocumentoPersonal(documentosCrear, personalNuevo);
         }
 
+        AUDITORIA_SERVICE.registrarAccion(
+                "ACTUALIZAR_PERSONAL",
+                "PERSONAL",
+                "Personal",
+                personalNuevo.getPersonalId().toString(),
+                cambios.isEmpty()
+                        ? "Se procesó una actualización del personal sin cambios."
+                        : "Se actualizaron los datos del miembro del personal: "
+                        + personalNuevo.getNombreCompleto()
+                        + ".",
+                cambios.isEmpty() ? null : cambios
+        );
+
         return mapDTO(personalNuevo);
     }
 
@@ -209,8 +399,20 @@ public class PersonalServiceImpl implements PersonalService {
             );
         }
         personal.setActivo(true);
-        REPOSITORY.save(personal);
-        return mapDTO(personal);
+        personal.setUpdatedBy(AUTH_HELPER.obtenerUsuarioAutenticado());
+        personal.setUpdatedAt(LocalDateTime.now(Clock.systemUTC()));
+
+        Personal personalActivado = REPOSITORY.save(personal);
+
+        registrarAuditoria(
+                "ACTIVAR_PERSONAL",
+                personalActivado,
+                "Se activó al miembro del personal: "
+                        + personalActivado.getNombreCompleto()
+                        + "."
+        );
+
+        return mapDTO(personalActivado);
     }
 
     @Transactional
@@ -232,14 +434,27 @@ public class PersonalServiceImpl implements PersonalService {
             );
         }
         personal.setActivo(false);
-        REPOSITORY.save(personal);
-        // Al desactivar la cuenta se invalidan todas sus sesiones persistentes
+        personal.setUpdatedBy(AUTH_HELPER.obtenerUsuarioAutenticado());
+        personal.setUpdatedAt(LocalDateTime.now(Clock.systemUTC()));
+
+        Personal personalDesactivado = REPOSITORY.save(personal);
+
+    // Al desactivar la cuenta se invalidan sus sesiones persistentes.
         REFRESH_TOKEN_SERVICE.revocarTodosPorPersonal(
-                personal.getPersonalId()
+                personalDesactivado.getPersonalId()
         );
-        return mapDTO(personal);
+
+        registrarAuditoria(
+                "DESACTIVAR_PERSONAL",
+                personalDesactivado,
+                "Se desactivó al miembro del personal: "
+                        + personalDesactivado.getNombreCompleto()
+                        + "."
+        );
+
+        return mapDTO(personalDesactivado);
     }
-    
+
     @Override
     public byte[] generarReportePersonalPDF() {
         try{
@@ -287,7 +502,15 @@ public class PersonalServiceImpl implements PersonalService {
                                     new Column<>("Estado", PersonalResponse::activo, TextAlignment.CENTER, 1f)
                             )).build();
 
-            return REPORT_SERVICE.generarTablaPDF(reporte);
+            byte[] archivo =
+                    REPORT_SERVICE.generarTablaPDF(reporte);
+
+            registrarAuditoriaReportePersonal(
+                    "PDF",
+                    personal.size()
+            );
+
+            return archivo;
         }catch(IOException ex){
             throw new RuntimeException("Error de fuente.");
         }
@@ -446,7 +669,15 @@ public class PersonalServiceImpl implements PersonalService {
                             .freezeHeader(true)
                             .build();
 
-            return REPORT_SERVICE.generarTablaExcel(reporte);
+            byte[] archivo =
+                    REPORT_SERVICE.generarTablaExcel(reporte);
+
+            registrarAuditoriaReportePersonal(
+                    "EXCEL",
+                    personal.size()
+            );
+
+            return archivo;
 
         } catch (IOException ex) {
             throw new RuntimeException(
@@ -498,5 +729,27 @@ public class PersonalServiceImpl implements PersonalService {
                         HttpStatus.NOT_FOUND,
                         "Miembro del personal indicado no existe."
                 ));
+    }
+    private void registrarAuditoriaReportePersonal(
+            String formato,
+            int cantidadRegistros
+    ) {
+        Map<String, Object> cambios =
+                new LinkedHashMap<>();
+
+        cambios.put("formato", formato);
+        cambios.put(
+                "cantidadRegistros",
+                cantidadRegistros
+        );
+
+        AUDITORIA_SERVICE.registrarAccion(
+                "GENERAR_REPORTE",
+                "PERSONAL",
+                "REPORTE",
+                "PERSONAL",
+                "Se generó un reporte del personal.",
+                cambios
+        );
     }
 }

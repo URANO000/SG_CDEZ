@@ -18,6 +18,8 @@ import { BsArrowLeft } from "react-icons/bs";
 
 import { useNavigate, useParams } from "react-router";
 
+import { ESCOLARIDADES } from "../../services/interfaces/adultoMayorInterface";
+
 import {
   actualizarAdultoMayor,
   obtenerAdultoMayorPorId,
@@ -280,14 +282,22 @@ export function AdultoMayorEditar() {
                 <span className={classes.required}>*</span>
               </label>
 
-              <input
-                className={classes.input}
-                type="text"
+              <select
+                className={classes.select}
                 value={escolaridad}
-                maxLength={80}
                 required
                 onChange={(event) => setEscolaridad(event.target.value)}
-              />
+              >
+                <option value="" disabled>
+                  Seleccionar
+                </option>
+
+                {ESCOLARIDADES.map((opcion) => (
+                  <option key={opcion} value={opcion}>
+                    {opcion}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className={classes.fieldGroup}>
