@@ -438,7 +438,7 @@ export function AdultoMayorExpediente() {
   const informacionGeneral: CampoInformacion[] = [
     {
       etiqueta: "Tipo de identificación",
-      valor: adultoMayor.tipoIdentificacion,
+      valor: mostrarTipoIdentificacion(adultoMayor.tipoIdentificacion),
     },
     {
       etiqueta: "Identificación",
@@ -798,7 +798,7 @@ export function AdultoMayorExpediente() {
             </Title>
 
             <Text size="sm" className={classes.secondaryText}>
-              {adultoMayor.tipoIdentificacion}
+              {mostrarTipoIdentificacion(adultoMayor.tipoIdentificacion)}
               {": "}
               {adultoMayor.identificacion}
             </Text>
