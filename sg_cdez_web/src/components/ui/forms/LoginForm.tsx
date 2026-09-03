@@ -44,7 +44,7 @@ export function LoginForm() {
       } else {
         notifications.show({
           title: "Error de inicio de sesión",
-          message: "Error al inciiar sesión.",
+          message: "Error al iniciar sesión.",
           color: "red",
         });
       }

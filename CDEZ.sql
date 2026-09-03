@@ -450,3 +450,4 @@ ADD COLUMN IF NOT EXISTS tipo_pension VARCHAR(100);
 
 ALTER TABLE adultomayor
 ADD COLUMN IF NOT EXISTS monto_pension NUMERIC(12, 2);
+

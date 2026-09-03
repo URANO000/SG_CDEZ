@@ -9,7 +9,7 @@ import { AiOutlineSearch } from "react-icons/ai";
 import { ConsultaTable } from "../../components/ui/tables/ConsultaTable";
 import { ESPECIALIDADES } from "../../services/interfaces/personalCreateRequest";
 import { Link } from "react-router";
-import { BsSliders } from "react-icons/bs";
+import { BsSliders, BsPlusLg } from "react-icons/bs";
 
 export function Consultas() {
 
@@ -107,7 +107,12 @@ export function Consultas() {
                             ? "mis-consultas"
                             : "todas-consultas"
                     }
-                    onChange={handleTabChange}>
+                    onChange={handleTabChange}
+                    classNames={{
+                        root: classes.tabs,
+                        list: classes.tabList,
+                        tab: classes.tab,
+                    }}>
                     <Tabs.List>
                         <Tabs.Tab value="mis-consultas">
                             Mis consultas
@@ -121,7 +126,7 @@ export function Consultas() {
 
                 <div className={classes.btnBar}>
                     <Link to={'/consulta/registrar'} className={classes.createBtn}>
-                        <Button>
+                        <Button leftSection={<BsPlusLg size={15} />}>
                             Registrar Consulta
                         </Button>
                     </Link>
