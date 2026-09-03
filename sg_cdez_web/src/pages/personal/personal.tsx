@@ -11,6 +11,7 @@ import { Link } from "react-router";
 import { generarReportePDF, generarReporteExcel } from "../../services/personalService";
 import { ESPECIALIDADES } from "../../services/interfaces/personalCreateRequest";
 import {TbFileTypePdf, TbFileTypeXls, TbChevronDown} from "react-icons/tb";
+import { BsPlusLg } from "react-icons/bs";
 
 export function Personal() {
     const [filtros, setFiltros] = useState<PersonalFiltro>({
@@ -66,7 +67,8 @@ export function Personal() {
             <div className={classes.subpg}>
                 <div className={classes.btnBar}>
                     <Link to={'/personal/registrar'} className={classes.createBtn}>
-                        <Button>
+                        <Button
+                        leftSection={<BsPlusLg size={15} />}>
                             Registrar Personal
                         </Button>
                     </Link>

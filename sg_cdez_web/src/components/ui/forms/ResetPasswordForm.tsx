@@ -5,6 +5,8 @@ import { restablecerContrasena } from "../../../services/authService";
 import { useForm } from "@mantine/form";
 import { Button, PasswordInput } from "@mantine/core";
 import { PasswordStrengthInput } from "../../../components/common/Passwordstrengthinput";
+import { notifications } from "@mantine/notifications";
+import axios from "axios";
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const [loading, setLoading] = useState(false);
@@ -44,7 +46,19 @@ export function ResetPasswordForm({ token }: { token: string }) {
       );
       navigate("/login");
     } catch (error) {
-      alert("Error genérico...manejo de errores pronto");
+      if (axios.isAxiosError(error) && error.response?.status === 400) {
+        notifications.show({
+          title: "Error de restablecimiento de contraseña",
+          message: error.response.data?.message,
+          color: "orange",
+        });
+      } else {
+        notifications.show({
+          title: "Error de restablecimiento de contraseña",
+          message: "Error al restablecer la contraseña.",
+          color: "red",
+        });
+      }
     } finally {
       setLoading(false);
     }

@@ -179,7 +179,8 @@ public class AuthServiceImpl implements AuthService {
                 ));
 
         if (verificationToken.isUsado()){
-            throw new RuntimeException("El token ya fue utilizado.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "El token ya fue utilizado.");
         }
 
         if (verificationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
@@ -243,14 +244,18 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void resetContrasena(ResetPasswordRequest request) {
         PasswordResetToken resetToken = RESET_REPOSITORY.findByToken(request.token())
-                .orElseThrow(() -> new RuntimeException("Token inválido."));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Token Inválido."
+                ));
 
         if(resetToken.isUsado()){
-            throw new RuntimeException("El token ya fue utilizado.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "El token ya fue utilizado.");
         }
 
         if(resetToken.getExpiresAt().isBefore(LocalDateTime.now())){
-            throw new RuntimeException("El token ha expirado.");
+            throw new TokenExpiradoException();
         }
 
         Personal personal = resetToken.getPersonal();
