@@ -94,6 +94,18 @@ export function AdultoMayorRegistrar() {
           form.elements.namedItem("grupoFamiliar") as HTMLInputElement
         ).value.trim() || null,
 
+      estadoCivil:
+        (form.elements.namedItem("estadoCivil") as HTMLSelectElement).value ||
+        null,
+
+      gradoDependencia:
+        (form.elements.namedItem("gradoDependencia") as HTMLSelectElement)
+          .value || null,
+
+      cuotaMensual: Number(
+        (form.elements.namedItem("cuotaMensual") as HTMLInputElement).value,
+      ),
+
       pension: recibePension === true,
 
       tipoPension:
@@ -390,7 +402,69 @@ export function AdultoMayorRegistrar() {
                 maxLength={200}
               />
             </div>
+            <div className={classes.fieldGroup}>
+              <label className={classes.fieldLabel}>
+                Estado civil
+                <span className={classes.required}>*</span>
+              </label>
 
+              <select
+                className={classes.select}
+                name="estadoCivil"
+                defaultValue=""
+                required
+              >
+                <option value="" disabled>
+                  Seleccionar
+                </option>
+
+                <option value="Soltero/a">Soltero/a</option>
+                <option value="Casado/a">Casado/a</option>
+                <option value="Unión libre">Unión libre</option>
+                <option value="Divorciado/a">Divorciado/a</option>
+                <option value="Viudo/a">Viudo/a</option>
+              </select>
+            </div>
+
+            <div className={classes.fieldGroup}>
+              <label className={classes.fieldLabel}>
+                Grado de dependencia
+                <span className={classes.required}>*</span>
+              </label>
+
+              <select
+                className={classes.select}
+                name="gradoDependencia"
+                defaultValue=""
+                required
+              >
+                <option value="" disabled>
+                  Seleccionar
+                </option>
+
+                <option value="Parcial">Parcial</option>
+                <option value="Específica">Específica</option>
+                <option value="Total">Total</option>
+              </select>
+            </div>
+
+            <div className={classes.fieldGroup}>
+              <label className={classes.fieldLabel}>
+                Cuota mensual (₡)
+                <span className={classes.required}>*</span>
+              </label>
+
+              <input
+                className={classes.input}
+                type="number"
+                name="cuotaMensual"
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                placeholder="Ejemplo: 25000"
+                required
+              />
+            </div>
             <div className={classes.fieldGroup}>
               <label className={classes.fieldLabel}>
                 ¿Recibe pensión?
@@ -416,28 +490,6 @@ export function AdultoMayorRegistrar() {
                 <option value="false">No</option>
               </select>
             </div>
-
-            <div className={classes.fieldGroup}>
-              <label className={classes.fieldLabel}>
-                ¿Utiliza ayuda biomecánica?
-                <span className={classes.required}>*</span>
-              </label>
-
-              <select
-                className={classes.select}
-                name="ayudaBiomecanica"
-                defaultValue=""
-                required
-              >
-                <option value="" disabled>
-                  Seleccionar
-                </option>
-
-                <option value="true">Sí</option>
-                <option value="false">No</option>
-              </select>
-            </div>
-
             {recibePension === true && (
               <>
                 <div className={classes.fieldGroup}>

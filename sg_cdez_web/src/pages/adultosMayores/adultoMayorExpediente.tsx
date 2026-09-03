@@ -111,6 +111,17 @@ function mostrarSexo(sexo: string): string {
 
   return sexo;
 }
+function mostrarMonto(monto: number | null): string {
+  if (monto === null) {
+    return "No registrado";
+  }
+
+  return new Intl.NumberFormat("es-CR", {
+    style: "currency",
+    currency: "CRC",
+    minimumFractionDigits: 2,
+  }).format(monto);
+}
 
 function Campo({ etiqueta, valor }: CampoInformacion) {
   return (
@@ -443,8 +454,32 @@ export function AdultoMayorExpediente() {
       valor: adultoMayor.grupoFamiliar ?? "No registrado",
     },
     {
+      etiqueta: "Estado civil",
+      valor: adultoMayor.estadoCivil ?? "No registrado",
+    },
+    {
+      etiqueta: "Grado de dependencia",
+      valor: adultoMayor.gradoDependencia ?? "No registrado",
+    },
+    {
+      etiqueta: "Cuota mensual",
+      valor: mostrarMonto(adultoMayor.cuotaMensual),
+    },
+    {
       etiqueta: "Recibe pensión",
       valor: adultoMayor.pension ? "Sí" : "No",
+    },
+    {
+      etiqueta: "Tipo de pensión",
+      valor: adultoMayor.pension
+        ? (adultoMayor.tipoPension ?? "No registrado")
+        : "No aplica",
+    },
+    {
+      etiqueta: "Monto de pensión",
+      valor: adultoMayor.pension
+        ? mostrarMonto(adultoMayor.montoPension)
+        : "No aplica",
     },
     {
       etiqueta: "Funcionalidad física",
