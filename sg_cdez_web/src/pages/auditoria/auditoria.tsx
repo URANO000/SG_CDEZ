@@ -81,6 +81,7 @@ export function Auditoria() {
 
   function formatearTexto(valor: string) {
     return valor
+      .replace(/([a-záéíóúñ])([A-ZÁÉÍÓÚÑ])/g, "$1 $2")
       .replaceAll("_", " ")
       .toLowerCase()
       .replace(/\b\w/g, (letra) => letra.toUpperCase());
@@ -118,6 +119,25 @@ export function Auditoria() {
       ("anterior" in valor || "nuevo" in valor)
     );
   }
+
+  function formatearResumenOperacion(campo: string, valor: unknown) {
+    const cantidad = Number(valor);
+
+    if (!Number.isFinite(cantidad)) {
+      return formatearValor(valor);
+    }
+
+    const entidad = campo.toLowerCase().includes("contactos")
+      ? cantidad === 1
+        ? "contacto"
+        : "contactos"
+      : cantidad === 1
+        ? "registro"
+        : "registros";
+
+    return `${cantidad} ${entidad}`;
+  }
+
   useEffect(() => {
     async function cargarAuditorias() {
       try {
@@ -368,47 +388,96 @@ export function Auditoria() {
               {auditoriaSeleccionada.cambios &&
                 Object.keys(auditoriaSeleccionada.cambios).length > 0 && (
                   <>
-                    <Title order={4} mt="xl" mb="md">
-                      Cambios realizados
-                    </Title>
+                    {Object.entries(auditoriaSeleccionada.cambios).some(
+                      ([, cambio]) => esCambioDetallado(cambio),
+                    ) && (
+                      <>
+                        <Title order={4} mt="xl" mb="md">
+                          Valores modificados
+                        </Title>
 
-                    <Table
-                      withTableBorder
-                      withColumnBorders
-                      verticalSpacing="sm"
-                    >
-                      <Table.Thead>
-                        <Table.Tr>
-                          <Table.Th>Campo</Table.Th>
-                          <Table.Th>Valor anterior</Table.Th>
-                          <Table.Th>Valor nuevo</Table.Th>
-                        </Table.Tr>
-                      </Table.Thead>
-
-                      <Table.Tbody>
-                        {Object.entries(auditoriaSeleccionada.cambios).map(
-                          ([campo, cambio]) => (
-                            <Table.Tr key={campo}>
-                              <Table.Td fw={600}>
-                                {formatearTexto(campo)}
-                              </Table.Td>
-
-                              <Table.Td>
-                                {esCambioDetallado(cambio)
-                                  ? formatearValor(cambio.anterior)
-                                  : "No aplica"}
-                              </Table.Td>
-
-                              <Table.Td>
-                                {esCambioDetallado(cambio)
-                                  ? formatearValor(cambio.nuevo)
-                                  : formatearValor(cambio)}
-                              </Table.Td>
+                        <Table
+                          withTableBorder
+                          withColumnBorders
+                          verticalSpacing="sm"
+                        >
+                          <Table.Thead>
+                            <Table.Tr>
+                              <Table.Th>Campo</Table.Th>
+                              <Table.Th>Valor anterior</Table.Th>
+                              <Table.Th>Valor nuevo</Table.Th>
                             </Table.Tr>
-                          ),
-                        )}
-                      </Table.Tbody>
-                    </Table>
+                          </Table.Thead>
+
+                          <Table.Tbody>
+                            {Object.entries(auditoriaSeleccionada.cambios)
+                              .filter(([, cambio]) => esCambioDetallado(cambio))
+                              .map(([campo, cambio]) => {
+                                if (!esCambioDetallado(cambio)) {
+                                  return null;
+                                }
+
+                                return (
+                                  <Table.Tr key={campo}>
+                                    <Table.Td fw={600}>
+                                      {formatearTexto(campo)}
+                                    </Table.Td>
+
+                                    <Table.Td>
+                                      {formatearValor(cambio.anterior)}
+                                    </Table.Td>
+
+                                    <Table.Td>
+                                      {formatearValor(cambio.nuevo)}
+                                    </Table.Td>
+                                  </Table.Tr>
+                                );
+                              })}
+                          </Table.Tbody>
+                        </Table>
+                      </>
+                    )}
+
+                    {Object.entries(auditoriaSeleccionada.cambios).some(
+                      ([, cambio]) => !esCambioDetallado(cambio),
+                    ) && (
+                      <>
+                        <Title order={4} mt="xl" mb="md">
+                          Resumen de operaciones
+                        </Title>
+
+                        <Table
+                          withTableBorder
+                          withColumnBorders
+                          verticalSpacing="sm"
+                        >
+                          <Table.Thead>
+                            <Table.Tr>
+                              <Table.Th>Operación</Table.Th>
+                              <Table.Th>Resultado</Table.Th>
+                            </Table.Tr>
+                          </Table.Thead>
+
+                          <Table.Tbody>
+                            {Object.entries(auditoriaSeleccionada.cambios)
+                              .filter(
+                                ([, cambio]) => !esCambioDetallado(cambio),
+                              )
+                              .map(([campo, cambio]) => (
+                                <Table.Tr key={campo}>
+                                  <Table.Td fw={600}>
+                                    {formatearTexto(campo)}
+                                  </Table.Td>
+
+                                  <Table.Td>
+                                    {formatearResumenOperacion(campo, cambio)}
+                                  </Table.Td>
+                                </Table.Tr>
+                              ))}
+                          </Table.Tbody>
+                        </Table>
+                      </>
+                    )}
                   </>
                 )}
             </>

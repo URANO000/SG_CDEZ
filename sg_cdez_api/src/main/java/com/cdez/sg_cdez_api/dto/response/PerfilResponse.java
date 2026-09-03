@@ -1,5 +1,6 @@
 package com.cdez.sg_cdez_api.dto.response;
 
+import java.util.List;
 import java.util.UUID;
 
 public record PerfilResponse(
@@ -12,6 +13,7 @@ public record PerfilResponse(
         String direccion,
         String carnet,
         String correo,
-        String estado
+        String estado,
+        List<ContactoResponse> contactos
 ) {
 }

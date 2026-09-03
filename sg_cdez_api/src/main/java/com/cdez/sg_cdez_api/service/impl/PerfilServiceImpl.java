@@ -11,10 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
+import com.cdez.sg_cdez_api.service.ContactoService;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class PerfilServiceImpl implements PerfilService {
@@ -22,15 +23,18 @@ public class PerfilServiceImpl implements PerfilService {
     private final AuthHelper authHelper;
     private final PersonalRepository personalRepository;
     private final AuditoriaService auditoriaService;
+    private final ContactoService contactoService;
 
     public PerfilServiceImpl(
             AuthHelper authHelper,
             PersonalRepository personalRepository,
-            AuditoriaService auditoriaService
+            AuditoriaService auditoriaService,
+            ContactoService contactoService
     ) {
         this.authHelper = authHelper;
         this.personalRepository = personalRepository;
         this.auditoriaService = auditoriaService;
+        this.contactoService = contactoService;
     }
 
     @Override
@@ -51,16 +55,25 @@ public class PerfilServiceImpl implements PerfilService {
                 personal.getDireccion(),
                 personal.getCarnet(),
                 personal.getUsuario(),
-                personal.isActivo() ? "Activo" : "Inactivo"
+                personal.isActivo() ? "Activo" : "Inactivo",
+                contactoService.listarContactoPorPersonal(personal)
         );
     }
 
     @Override
     @Transactional
     public PerfilResponse actualizarPerfil(PerfilActualizarRequest request) {
-        if (request == null
-                || request.direccion() == null
-                || request.direccion().isBlank()) {
+        if (request == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Debe proporcionar la información del perfil."
+            );
+        }
+
+        if (
+                request.direccion() == null ||
+                        request.direccion().isBlank()
+        ) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "La dirección es obligatoria."
@@ -77,34 +90,84 @@ public class PerfilServiceImpl implements PerfilService {
         }
 
         Personal personal = authHelper.obtenerUsuarioAutenticado();
-        String direccionAnterior = personal.getDireccion();
+        Map<String, Object> cambios = new LinkedHashMap<>();
 
-        if (nuevaDireccion.equals(direccionAnterior)) {
-            return convertirAPerfilResponse(personal);
+        if (!Objects.equals(personal.getDireccion(), nuevaDireccion)) {
+            cambios.put(
+                    "direccion",
+                    Map.of(
+                            "anterior",
+                            personal.getDireccion() == null
+                                    ? ""
+                                    : personal.getDireccion(),
+                            "nuevo",
+                            nuevaDireccion
+                    )
+            );
+
+            personal.setDireccion(nuevaDireccion);
         }
 
-        personal.setDireccion(nuevaDireccion);
-        personal.setUpdatedBy(personal);
-        personal.setUpdatedAt(LocalDateTime.now());
+        if (
+                request.contactosActualizar() != null &&
+                        !request.contactosActualizar().isEmpty()
+        ) {
+            contactoService.actualizarContacto(
+                    request.contactosActualizar(),
+                    personal
+            );
 
-        Personal personalActualizado = personalRepository.save(personal);
+            cambios.put(
+                    "contactosActualizados",
+                    request.contactosActualizar().size()
+            );
+        }
 
-        Map<String, Object> detalleDireccion = new LinkedHashMap<>();
-        detalleDireccion.put("anterior", direccionAnterior);
-        detalleDireccion.put("nuevo", nuevaDireccion);
+        if (
+                request.contactosDesactivar() != null &&
+                        !request.contactosDesactivar().isEmpty()
+        ) {
+            contactoService.desactivarContactosPersonal(
+                    request.contactosDesactivar(),
+                    personal
+            );
 
-        Map<String, Object> cambios = new LinkedHashMap<>();
-        cambios.put("direccion", detalleDireccion);
+            cambios.put(
+                    "contactosDesactivados",
+                    request.contactosDesactivar().size()
+            );
+        }
 
-        auditoriaService.registrarAccion(
-                "ACTUALIZAR_PERFIL",
-                "PERFIL",
-                "Personal",
-                personalActualizado.getPersonalId().toString(),
-                "El usuario actualizó la dirección de su perfil.",
-                cambios
-        );
+        if (
+                request.contactosCrear() != null &&
+                        !request.contactosCrear().isEmpty()
+        ) {
+            contactoService.crearContactoPersonal(
+                    request.contactosCrear(),
+                    personal
+            );
 
-        return convertirAPerfilResponse(personalActualizado);
+            cambios.put(
+                    "contactosCreados",
+                    request.contactosCrear().size()
+            );
+        }
+
+        if (!cambios.isEmpty()) {
+            personal.setUpdatedAt(LocalDateTime.now());
+            personal.setUpdatedBy(personal);
+            personalRepository.save(personal);
+
+            auditoriaService.registrarAccion(
+                    "ACTUALIZAR_PERFIL",
+                    "PERFIL",
+                    "Personal",
+                    personal.getPersonalId().toString(),
+                    "El usuario actualizó la información de su perfil.",
+                    cambios
+            );
+        }
+
+        return convertirAPerfilResponse(personal);
     }
 }
