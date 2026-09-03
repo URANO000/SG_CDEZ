@@ -19,7 +19,7 @@ import classes from "./Table.module.css";
 interface AdultosMayoresTableProps {
   adultosMayores: AdultoMayorResponse[];
   estadoListado: EstadoAdultoMayor;
-
+  puedeGestionar: boolean;
   onDesactivar: (adultoMayor: AdultoMayorResponse) => void;
   onActivar: (adultoMayor: AdultoMayorResponse) => void;
 }
@@ -27,6 +27,7 @@ interface AdultosMayoresTableProps {
 export function AdultosMayoresTable({
   adultosMayores,
   estadoListado,
+  puedeGestionar,
   onDesactivar,
   onActivar,
 }: AdultosMayoresTableProps) {
@@ -71,48 +72,54 @@ export function AdultosMayoresTable({
                           <BsEye size={16} />
                         </ActionIcon>
                       </Tooltip>
-                      {adultoMayor.activo === "Activo" &&
-                        estadoListado === "ACTIVO" && (
-                          <Tooltip label="Editar">
-                            <ActionIcon
-                              variant="subtle"
-                              className={classes.actionEdit}
-                              aria-label="Editar"
-                              onClick={() =>
-                                navigate(
-                                  `/adultosMayores/${adultoMayor.adultoId}/editar`,
-                                )
-                              }
-                            >
-                              <BsPencilSquare size={16} />
-                            </ActionIcon>
-                          </Tooltip>
-                        )}
-                      {adultoMayor.activo === "Activo" && (
-                        <Tooltip label="Desactivar registro">
-                          <ActionIcon
-                            variant="subtle"
-                            color="red"
-                            aria-label="Desactivar registro"
-                            onClick={() => onDesactivar(adultoMayor)}
-                          >
-                            <BsPersonDash size={17} />
-                          </ActionIcon>
-                        </Tooltip>
+                      {puedeGestionar && (
+                        <>
+                          {adultoMayor.activo === "Activo" &&
+                            estadoListado === "ACTIVO" && (
+                              <Tooltip label="Editar">
+                                <ActionIcon
+                                  variant="subtle"
+                                  className={classes.actionEdit}
+                                  aria-label="Editar"
+                                  onClick={() =>
+                                    navigate(
+                                      `/adultosMayores/${adultoMayor.adultoId}/editar`,
+                                    )
+                                  }
+                                >
+                                  <BsPencilSquare size={16} />
+                                </ActionIcon>
+                              </Tooltip>
+                            )}
+
+                          {adultoMayor.activo === "Activo" && (
+                            <Tooltip label="Desactivar registro">
+                              <ActionIcon
+                                variant="subtle"
+                                color="red"
+                                aria-label="Desactivar registro"
+                                onClick={() => onDesactivar(adultoMayor)}
+                              >
+                                <BsPersonDash size={17} />
+                              </ActionIcon>
+                            </Tooltip>
+                          )}
+
+                          {adultoMayor.activo === "Inactivo" &&
+                            estadoListado === "INACTIVO" && (
+                              <Tooltip label="Activar registro">
+                                <ActionIcon
+                                  variant="subtle"
+                                  color="green"
+                                  aria-label="Activar registro"
+                                  onClick={() => onActivar(adultoMayor)}
+                                >
+                                  <BsPersonCheck size={17} />
+                                </ActionIcon>
+                              </Tooltip>
+                            )}
+                        </>
                       )}
-                      {adultoMayor.activo === "Inactivo" &&
-                        estadoListado === "INACTIVO" && (
-                          <Tooltip label="Activar registro">
-                            <ActionIcon
-                              variant="subtle"
-                              color="green"
-                              aria-label="Activar registro"
-                              onClick={() => onActivar(adultoMayor)}
-                            >
-                              <BsPersonCheck size={17} />
-                            </ActionIcon>
-                          </Tooltip>
-                        )}
                     </Group>
                   </Table.Td>
 

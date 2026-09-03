@@ -77,6 +77,9 @@ export function AdultosMayores() {
 
   const { user } = useAuth();
 
+  const puedeGestionarAdultos =
+    user?.rol === "ROLE_ADMIN" || user?.rol === "ROLE_AYUDANTE";
+
   const navigate = useNavigate();
 
   const [pageData, setPageData] =
@@ -452,6 +455,7 @@ export function AdultosMayores() {
             <AdultosMayoresTable
               adultosMayores={pageData?.content ?? []}
               estadoListado={filtrosAplicados.estado}
+              puedeGestionar={puedeGestionarAdultos}
               onDesactivar={setAdultoAProcesarBaja}
               onActivar={setAdultoAActivar}
             />
