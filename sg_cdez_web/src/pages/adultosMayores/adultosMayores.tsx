@@ -421,6 +421,8 @@ export function AdultosMayores() {
             classNames={{
               input: filterClasses.input,
               root: filterClasses.field,
+              dropdown: filterClasses.dropdown,
+              option: filterClasses.option,
             }}
           />
 
