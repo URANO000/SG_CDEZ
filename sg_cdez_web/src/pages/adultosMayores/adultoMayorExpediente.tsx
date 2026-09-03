@@ -37,6 +37,8 @@ import { obtenerAdultoMayorPorId } from "../../services/adultoMayorService";
 
 import type { AdultoMayorResponse } from "../../services/interfaces/adultoMayorInterface";
 
+import { useAuth } from "../../services/authContext";
+
 import {
   desactivarEncargadoLegal,
   listarEncargadosPorAdulto,
@@ -145,6 +147,9 @@ export function AdultoMayorExpediente() {
   const { adultoId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
+  const puedeGestionarExpediente =
+    user?.rol === "ROLE_ADMIN" || user?.rol === "ROLE_AYUDANTE";
   const [adultoMayor, setAdultoMayor] = useState<AdultoMayorResponse | null>(
     null,
   );
@@ -433,7 +438,7 @@ export function AdultoMayorExpediente() {
   const informacionGeneral: CampoInformacion[] = [
     {
       etiqueta: "Tipo de identificación",
-      valor: adultoMayor.tipoIdentificacion,
+      valor: mostrarTipoIdentificacion(adultoMayor.tipoIdentificacion),
     },
     {
       etiqueta: "Identificación",
@@ -793,7 +798,7 @@ export function AdultoMayorExpediente() {
             </Title>
 
             <Text size="sm" className={classes.secondaryText}>
-              {adultoMayor.tipoIdentificacion}
+              {mostrarTipoIdentificacion(adultoMayor.tipoIdentificacion)}
               {": "}
               {adultoMayor.identificacion}
             </Text>
@@ -877,6 +882,7 @@ export function AdultoMayorExpediente() {
             </div>
 
             {expedienteEditable &&
+              puedeGestionarExpediente &&
               (encargados.length < 2 ? (
                 <Button onClick={() => setModalEncargadoAbierto(true)}>
                   + Registrar encargado
@@ -925,7 +931,7 @@ export function AdultoMayorExpediente() {
                         {nombreCompleto}
                       </Title>
 
-                      {expedienteEditable && (
+                      {expedienteEditable && puedeGestionarExpediente && (
                         <Group gap={4}>
                           <Tooltip label="Editar">
                             <ActionIcon
@@ -1088,7 +1094,7 @@ export function AdultoMayorExpediente() {
         </Tabs.Panel>
 
         <Tabs.Panel value="epicrisis" className={classes.panel}>
-          {expedienteEditable && (
+          {expedienteEditable && puedeGestionarExpediente && (
             <Group justify="flex-end" mb="lg">
               <Button
                 onClick={() => setModalEpicrisisAbierto(true)}
