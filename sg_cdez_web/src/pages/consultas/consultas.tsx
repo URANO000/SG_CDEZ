@@ -107,7 +107,12 @@ export function Consultas() {
                             ? "mis-consultas"
                             : "todas-consultas"
                     }
-                    onChange={handleTabChange}>
+                    onChange={handleTabChange}
+                    classNames={{
+                        root: classes.tabs,
+                        list: classes.tabList,
+                        tab: classes.tab,
+                    }}>
                     <Tabs.List>
                         <Tabs.Tab value="mis-consultas">
                             Mis consultas
