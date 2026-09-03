@@ -174,9 +174,15 @@
 
 .contactRow {
   display: grid;
-  grid-template-columns: 160px 1fr auto;
-  gap: 10px;
+  grid-template-columns: minmax(220px, 0.35fr) minmax(280px, 1fr) auto;
+  gap: 12px;
   align-items: center;
+}
+
+.contactRow .select {
+  width: 100%;
+  padding-right: 38px;
+  text-overflow: ellipsis;
 }
 
 .contactActions {
