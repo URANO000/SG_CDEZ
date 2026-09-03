@@ -1,5 +1,6 @@
 import type { ContactoResponse } from "./personalResponse";
 import type { ContactoCreateRequest } from "./personalCreateRequest";
+import type { ContactoUpdateRequest } from "./personalUpdateRequest";
 
 export interface EncargadoLegalResponse {
   encargadoId: string;
@@ -27,4 +28,7 @@ export interface EncargadoLegalCreateRequest {
 
 export interface EncargadoLegalUpdateRequest {
   direccion: string;
+  contactosActualizar: ContactoUpdateRequest[];
+  contactosDesactivar: number[];
+  contactosCrear: ContactoCreateRequest[];
 }

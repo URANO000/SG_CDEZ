@@ -15,6 +15,13 @@ public interface ContactoService {
     List<ContactoResponse> crearContactoPersonal(List<ContactoCreateRequest> requests, Personal personal);
     List<ContactoResponse> crearContactoEncargado(List<ContactoCreateRequest> requests, EncargadoLegal encargadoLegal);
     List<ContactoResponse> actualizarContacto(List<ContactoUpdateRequest> requests, Personal personal);
+    List<ContactoResponse> actualizarContactoEncargado(
+            List<ContactoUpdateRequest> requests,
+            EncargadoLegal encargado
+    );
     void desactivarContactosPersonal(List<Integer> requests, Personal personal);
-
+    void desactivarContactosEncargado(
+            List<Integer> requests,
+            EncargadoLegal encargado
+    );
 }
