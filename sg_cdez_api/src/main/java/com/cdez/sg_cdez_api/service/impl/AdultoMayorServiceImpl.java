@@ -309,6 +309,14 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
             UUID id,
             AdultoMayorUpdateRequest request
     ) {
+        if (!AUTH_HELPER.isUsuarioAdmin() && !AUTH_HELPER.isUsuarioAyudante() ) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Sólo un usuario administrador o ayudante puede editar un adulto mayor."
+            );
+        }
+
+        AUTH_HELPER.validarUsuarioActivo();
         AdultoMayor adultoMayor = adultoMayorRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
