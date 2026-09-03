@@ -32,6 +32,17 @@ public class AdultoMayor {
     private String direccion;
     private String escolaridad;
     private String grupoFamiliar;
+    @Column(name = "estado_civil", length = 30)
+    private String estadoCivil;
+    @Column(name = "grado_dependencia", length = 30)
+    private String gradoDependencia;
+    @Column(
+            name = "cuota_mensual",
+            precision = 12,
+            scale = 2,
+            nullable = false
+    )
+    private BigDecimal cuotaMensual;
     private boolean pension;
     @Column(name = "tipo_pension", length = 100)
     private String tipoPension;

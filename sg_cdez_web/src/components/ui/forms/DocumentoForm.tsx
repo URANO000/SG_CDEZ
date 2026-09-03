@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, FileInput, Group, Stack } from "@mantine/core";
+import { Button, FileInput, Group, Paper, Stack, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 
@@ -14,6 +14,18 @@ interface DocumentoFormProps {
 
 interface DocumentoFormValues {
   archivo: File | null;
+}
+
+function mostrarTamano(bytes: number): string {
+  if (bytes < 1024) {
+    return `${bytes} bytes`;
+  }
+
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 export function DocumentoForm({
@@ -62,13 +74,44 @@ export function DocumentoForm({
   return (
     <form onSubmit={form.onSubmit(manejarRegistro)}>
       <Stack gap="md">
+        <Text size="sm" c="dimmed">
+          Adjunte documentos generales relacionados con el expediente del adulto
+          mayor, como constancias, resultados, referencias u otros respaldos.
+        </Text>
+
+        <Text size="sm" c="dimmed">
+          Las epicrisis deben registrarse desde la sección de Epicrisis para
+          conservar sus fechas y centro de salud.
+        </Text>
+
         <FileInput
           required
           clearable
-          label="Documento"
+          label="Archivo del documento"
+          description="Utilice un nombre descriptivo que permita identificar fácilmente el contenido."
           placeholder="Seleccione un archivo"
           {...form.getInputProps("archivo")}
         />
+
+        {form.values.archivo && (
+          <Paper p="sm" withBorder>
+            <Stack gap={2}>
+              <Text size="sm" fw={600}>
+                Archivo seleccionado
+              </Text>
+
+              <Text size="sm">Nombre: {form.values.archivo.name}</Text>
+
+              <Text size="sm">
+                Tipo: {form.values.archivo.type || "No identificado"}
+              </Text>
+
+              <Text size="sm">
+                Tamaño: {mostrarTamano(form.values.archivo.size)}
+              </Text>
+            </Stack>
+          </Paper>
+        )}
 
         <Group justify="flex-end" gap="sm" mt="md">
           <Button

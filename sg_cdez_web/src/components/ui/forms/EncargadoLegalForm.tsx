@@ -10,7 +10,10 @@ import type {
   EncargadoLegalResponse,
 } from "../../../services/interfaces/encargadoLegalInterface";
 
-import type { ContactoCreateRequest } from "../../../services/interfaces/personalCreateRequest";
+import {
+  TIPOIDENTIFICACION,
+  type ContactoCreateRequest,
+} from "../../../services/interfaces/personalCreateRequest";
 
 import classes from "../styleModules/PersonalForm.module.css";
 
@@ -194,14 +197,11 @@ export function EncargadoLegalForm({
                 Seleccionar tipo
               </option>
 
-              <option value="CIC">CIC</option>
-              <option value="CRP">CRP</option>
-              <option value="CRR">CRR</option>
-              <option value="RE">RE</option>
-              <option value="APO">APO</option>
-              <option value="CRT">CRT</option>
-              <option value="CRE">CRE</option>
-              <option value="PEX">PEX</option>
+              {TIPOIDENTIFICACION.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </select>
           </div>
 

@@ -71,6 +71,31 @@
   --shadow:
     rgba(0, 0, 0, 0.3) 0 10px 15px -3px, rgba(0, 0, 0, 0.18) 0 4px 6px -2px;
 }
+/* Controles nativos en modo claro */
+select,
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"] {
+  color-scheme: light;
+}
+
+select option {
+  color: #2f2935;
+  background-color: #ffffff;
+}
+
+/* Controles nativos en modo oscuro */
+[data-mantine-color-scheme="dark"] select,
+[data-mantine-color-scheme="dark"] input[type="date"],
+[data-mantine-color-scheme="dark"] input[type="datetime-local"],
+[data-mantine-color-scheme="dark"] input[type="time"] {
+  color-scheme: dark;
+}
+
+[data-mantine-color-scheme="dark"] select option {
+  color: #e7e4ea;
+  background-color: #222624;
+}
 
 /* =========================================================
    ACCESIBILIDAD - TAMAÑO DEL TEXTO

@@ -53,8 +53,10 @@ export function EpicrisisForm({
       setLoading(true);
 
       const epicrisis = await registrarEpicrisis(adultoId, {
-        fechaEmision: values.fechaEmision,
-        fechaRecepcion: values.fechaRecepcion || null,
+        fechaEmision: `${values.fechaEmision}T00:00:00`,
+        fechaRecepcion: values.fechaRecepcion
+          ? `${values.fechaRecepcion}T00:00:00`
+          : null,
         centroSalud: values.centroSalud.trim(),
         archivo: values.archivo,
       });
@@ -77,13 +79,13 @@ export function EpicrisisForm({
       <Stack gap="md">
         <TextInput
           required
-          type="datetime-local"
+          type="date"
           label="Fecha de emisión"
           {...form.getInputProps("fechaEmision")}
         />
 
         <TextInput
-          type="datetime-local"
+          type="date"
           label="Fecha de recepción"
           description="Este campo es opcional."
           {...form.getInputProps("fechaRecepcion")}

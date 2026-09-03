@@ -16,7 +16,6 @@ import {
   Pagination,
   Select,
   Modal,
-  TextInput,
   Tooltip,
 } from "@mantine/core";
 
@@ -39,7 +38,6 @@ import { obtenerAdultoMayorPorId } from "../../services/adultoMayorService";
 import type { AdultoMayorResponse } from "../../services/interfaces/adultoMayorInterface";
 
 import {
-  actualizarEncargadoLegal,
   desactivarEncargadoLegal,
   listarEncargadosPorAdulto,
 } from "../../services/encargadoLegalService";
@@ -78,7 +76,11 @@ import type { PageResponse } from "../../services/interfaces/pageResponse";
 
 import { EncargadoLegalForm } from "../../components/ui/forms/EncargadoLegalForm";
 
+import { EncargadoLegalEditarForm } from "../../components/ui/forms/EncargadoLegalEditarForm";
+
 import { MedicamentoTable } from "../../components/ui/tables/MedicamentoTable";
+
+import { TIPOIDENTIFICACION } from "../../services/interfaces/personalCreateRequest";
 
 import {
   desactivarMedicamento,
@@ -101,15 +103,26 @@ function mostrarFecha(fecha: string | null): string {
 }
 
 function mostrarSexo(sexo: string): string {
-  if (sexo === "H") {
-    return "Hombre";
+  if (sexo === "M") {
+    return "Masculino";
   }
 
-  if (sexo === "M") {
-    return "Mujer";
+  if (sexo === "F") {
+    return "Femenino";
   }
 
   return sexo;
+}
+function mostrarMonto(monto: number | null): string {
+  if (monto === null) {
+    return "No registrado";
+  }
+
+  return new Intl.NumberFormat("es-CR", {
+    style: "currency",
+    currency: "CRC",
+    minimumFractionDigits: 2,
+  }).format(monto);
 }
 
 function Campo({ etiqueta, valor }: CampoInformacion) {
@@ -119,6 +132,12 @@ function Campo({ etiqueta, valor }: CampoInformacion) {
 
       <Text className={classes.value}>{valor}</Text>
     </div>
+  );
+}
+
+function mostrarTipoIdentificacion(tipo: string): string {
+  return (
+    TIPOIDENTIFICACION.find((opcion) => opcion.value === tipo)?.label ?? tipo
   );
 }
 
@@ -137,8 +156,6 @@ export function AdultoMayorExpediente() {
   const [modalEncargadoAbierto, setModalEncargadoAbierto] = useState(false);
   const [encargadoAEditar, setEncargadoAEditar] =
     useState<EncargadoLegalResponse | null>(null);
-  const [direccionEncargado, setDireccionEncargado] = useState("");
-  const [actualizandoEncargado, setActualizandoEncargado] = useState(false);
   const [encargadoADesactivar, setEncargadoADesactivar] =
     useState<EncargadoLegalResponse | null>(null);
   const [desactivandoEncargado, setDesactivandoEncargado] = useState(false);
@@ -443,8 +460,32 @@ export function AdultoMayorExpediente() {
       valor: adultoMayor.grupoFamiliar ?? "No registrado",
     },
     {
+      etiqueta: "Estado civil",
+      valor: adultoMayor.estadoCivil ?? "No registrado",
+    },
+    {
+      etiqueta: "Grado de dependencia",
+      valor: adultoMayor.gradoDependencia ?? "No registrado",
+    },
+    {
+      etiqueta: "Cuota mensual",
+      valor: mostrarMonto(adultoMayor.cuotaMensual),
+    },
+    {
       etiqueta: "Recibe pensión",
       valor: adultoMayor.pension ? "Sí" : "No",
+    },
+    {
+      etiqueta: "Tipo de pensión",
+      valor: adultoMayor.pension
+        ? (adultoMayor.tipoPension ?? "No registrado")
+        : "No aplica",
+    },
+    {
+      etiqueta: "Monto de pensión",
+      valor: adultoMayor.pension
+        ? mostrarMonto(adultoMayor.montoPension)
+        : "No aplica",
     },
     {
       etiqueta: "Funcionalidad física",
@@ -634,47 +675,20 @@ export function AdultoMayorExpediente() {
 
   function abrirEdicionEncargado(encargado: EncargadoLegalResponse) {
     setEncargadoAEditar(encargado);
-    setDireccionEncargado(encargado.direccion);
   }
 
-  async function guardarEdicionEncargado() {
-    if (!encargadoAEditar) {
-      return;
-    }
+  function manejarEncargadoActualizado(
+    encargadoActualizado: EncargadoLegalResponse,
+  ) {
+    setEncargados((actuales) =>
+      actuales.map((encargado) =>
+        encargado.encargadoId === encargadoActualizado.encargadoId
+          ? encargadoActualizado
+          : encargado,
+      ),
+    );
 
-    const direccion = direccionEncargado.trim();
-
-    if (!direccion) {
-      return;
-    }
-
-    try {
-      setActualizandoEncargado(true);
-
-      await actualizarEncargadoLegal(encargadoAEditar.encargadoId, {
-        direccion,
-      });
-
-      setEncargadoAEditar(null);
-      setDireccionEncargado("");
-
-      await cargarEncargados();
-
-      notifications.show({
-        title: "Encargado actualizado",
-        message:
-          "La información del encargado legal se actualizó correctamente.",
-        color: "green",
-      });
-    } catch {
-      notifications.show({
-        title: "Error al actualizar",
-        message: "No se pudo actualizar el encargado legal.",
-        color: "red",
-      });
-    } finally {
-      setActualizandoEncargado(false);
-    }
+    setEncargadoAEditar(null);
   }
 
   async function confirmarDesactivacionEncargado() {
@@ -862,11 +876,16 @@ export function AdultoMayorExpediente() {
               </Text>
             </div>
 
-            {expedienteEditable && (
-              <Button onClick={() => setModalEncargadoAbierto(true)}>
-                + Registrar encargado
-              </Button>
-            )}
+            {expedienteEditable &&
+              (encargados.length < 2 ? (
+                <Button onClick={() => setModalEncargadoAbierto(true)}>
+                  + Registrar encargado
+                </Button>
+              ) : (
+                <Text size="sm" c="dimmed">
+                  Máximo de 2 encargados alcanzado.
+                </Text>
+              ))}
           </Group>
           {encargadosLoading ? (
             <div className={classes.loadingState}>
@@ -940,8 +959,10 @@ export function AdultoMayorExpediente() {
                       spacing="lg"
                     >
                       <Campo
-                        etiqueta={"Tipo de identificación"}
-                        valor={encargado.tipoIdentificacion}
+                        etiqueta="Tipo de identificación"
+                        valor={mostrarTipoIdentificacion(
+                          encargado.tipoIdentificacion,
+                        )}
                       />
 
                       <Campo
@@ -1011,53 +1032,27 @@ export function AdultoMayorExpediente() {
           </Modal>
           <Modal
             opened={encargadoAEditar !== null}
-            onClose={() => {
-              setEncargadoAEditar(null);
-              setDireccionEncargado("");
-            }}
+            onClose={() => setEncargadoAEditar(null)}
             title={
               <Stack gap={2}>
                 <Title order={3}>Editar encargado legal</Title>
 
                 <Text size="sm" c="dimmed" fw={400}>
-                  Actualice la información disponible del encargado legal.
+                  Actualice la dirección y los contactos del encargado legal.
                 </Text>
               </Stack>
             }
             centered
-            size="md"
+            size="lg"
           >
-            <Stack gap="lg">
-              <TextInput
-                label="Dirección"
-                value={direccionEncargado}
-                onChange={(event) =>
-                  setDireccionEncargado(event.currentTarget.value)
-                }
-                maxLength={200}
-                required
+            {encargadoAEditar && (
+              <EncargadoLegalEditarForm
+                key={encargadoAEditar.encargadoId}
+                encargado={encargadoAEditar}
+                onActualizado={manejarEncargadoActualizado}
+                onCancelar={() => setEncargadoAEditar(null)}
               />
-
-              <Group justify="flex-end">
-                <Button
-                  variant="default"
-                  onClick={() => {
-                    setEncargadoAEditar(null);
-                    setDireccionEncargado("");
-                  }}
-                >
-                  Cancelar
-                </Button>
-
-                <Button
-                  loading={actualizandoEncargado}
-                  disabled={!direccionEncargado.trim()}
-                  onClick={() => void guardarEdicionEncargado()}
-                >
-                  Guardar cambios
-                </Button>
-              </Group>
-            </Stack>
+            )}
           </Modal>
           <Modal
             opened={encargadoADesactivar !== null}

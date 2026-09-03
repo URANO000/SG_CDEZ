@@ -50,14 +50,14 @@ import classes from "./AdultosMayores.module.css";
 
 import filterClasses from "../../components/ui/tables/Filter.module.css";
 
-function obtenerFechaHoraLocal(): string {
+function obtenerFechaLocal(): string {
   const fechaActual = new Date();
 
   fechaActual.setMinutes(
     fechaActual.getMinutes() - fechaActual.getTimezoneOffset(),
   );
 
-  return fechaActual.toISOString().slice(0, 16);
+  return fechaActual.toISOString().slice(0, 10);
 }
 
 export function AdultosMayores() {
@@ -218,7 +218,7 @@ export function AdultosMayores() {
 
   function abrirDesactivacion(adultoMayor: AdultoMayorResponse) {
     setSeleccionado(adultoMayor);
-    setFechaRetiro(obtenerFechaHoraLocal());
+    setFechaRetiro(obtenerFechaLocal());
     setMotivoRetiro("");
   }
 
@@ -315,7 +315,7 @@ export function AdultosMayores() {
 
     try {
       await desactivarAdultoMayor(seleccionado.adultoId, {
-        fechaRetiro,
+        fechaRetiro: `${fechaRetiro}T00:00:00`,
         motivoRetiro: motivoRetiro.trim(),
       });
 
@@ -421,6 +421,8 @@ export function AdultosMayores() {
             classNames={{
               input: filterClasses.input,
               root: filterClasses.field,
+              dropdown: filterClasses.dropdown,
+              option: filterClasses.option,
             }}
           />
 
@@ -547,7 +549,7 @@ export function AdultosMayores() {
           </Text>
 
           <TextInput
-            type="datetime-local"
+            type="date"
             label="Fecha de retiro"
             required
             value={fechaRetiro}

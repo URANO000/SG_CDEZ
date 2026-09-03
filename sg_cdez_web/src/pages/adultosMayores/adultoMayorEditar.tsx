@@ -55,6 +55,15 @@ export function AdultoMayorEditar() {
   const [direccion, setDireccion] = useState("");
   const [escolaridad, setEscolaridad] = useState("");
   const [grupoFamiliar, setGrupoFamiliar] = useState("");
+
+  const [estadoCivil, setEstadoCivil] = useState("");
+  const [gradoDependencia, setGradoDependencia] = useState("");
+  const [cuotaMensual, setCuotaMensual] = useState("");
+
+  const [recibePension, setRecibePension] = useState(false);
+  const [tipoPension, setTipoPension] = useState("");
+  const [montoPension, setMontoPension] = useState("");
+
   const [funcionalidadFisica, setFuncionalidadFisica] = useState("");
   const [ayudaBiomecanica, setAyudaBiomecanica] = useState(false);
 
@@ -77,6 +86,17 @@ export function AdultoMayorEditar() {
         setDireccion(response.direccion);
         setEscolaridad(response.escolaridad);
         setGrupoFamiliar(response.grupoFamiliar ?? "");
+
+        setEstadoCivil(response.estadoCivil ?? "");
+        setGradoDependencia(response.gradoDependencia ?? "");
+        setCuotaMensual(String(response.cuotaMensual ?? 0));
+
+        setRecibePension(response.pension);
+        setTipoPension(response.tipoPension ?? "");
+        setMontoPension(
+          response.montoPension !== null ? String(response.montoPension) : "",
+        );
+
         setFuncionalidadFisica(response.funcionalidadFisica ?? "");
         setAyudaBiomecanica(response.ayudaBiomecanica);
       } catch {
@@ -100,6 +120,15 @@ export function AdultoMayorEditar() {
       direccion: direccion.trim(),
       escolaridad: escolaridad.trim(),
       grupoFamiliar: grupoFamiliar.trim() || null,
+
+      estadoCivil: estadoCivil || null,
+      gradoDependencia: gradoDependencia || null,
+      cuotaMensual: Number(cuotaMensual),
+
+      pension: recibePension,
+      tipoPension: recibePension ? tipoPension || null : null,
+      montoPension: recibePension ? Number(montoPension) : null,
+
       funcionalidadFisica: funcionalidadFisica.trim() || null,
       ayudaBiomecanica,
     };
@@ -311,20 +340,151 @@ export function AdultoMayorEditar() {
                 onChange={(event) => setGrupoFamiliar(event.target.value)}
               />
             </div>
-
             <div className={classes.fieldGroup}>
-              <label className={classes.fieldLabel}>Recibe pensión</label>
+              <label className={classes.fieldLabel}>
+                Estado civil
+                <span className={classes.required}>*</span>
+              </label>
 
               <select
                 className={classes.select}
-                value={adultoMayor.pension ? "true" : "false"}
-                disabled
+                value={estadoCivil}
+                required
+                onChange={(event) => setEstadoCivil(event.target.value)}
+              >
+                <option value="" disabled>
+                  Seleccionar
+                </option>
+
+                <option value="Soltero/a">Soltero/a</option>
+                <option value="Casado/a">Casado/a</option>
+                <option value="Unión libre">Unión libre</option>
+                <option value="Divorciado/a">Divorciado/a</option>
+                <option value="Viudo/a">Viudo/a</option>
+              </select>
+            </div>
+
+            <div className={classes.fieldGroup}>
+              <label className={classes.fieldLabel}>
+                Grado de dependencia
+                <span className={classes.required}>*</span>
+              </label>
+
+              <select
+                className={classes.select}
+                value={gradoDependencia}
+                required
+                onChange={(event) => setGradoDependencia(event.target.value)}
+              >
+                <option value="" disabled>
+                  Seleccionar
+                </option>
+
+                <option value="Parcial">Parcial</option>
+                <option value="Específica">Específica</option>
+                <option value="Total">Total</option>
+              </select>
+            </div>
+
+            <div className={classes.fieldGroup}>
+              <label className={classes.fieldLabel}>
+                Cuota mensual (₡)
+                <span className={classes.required}>*</span>
+              </label>
+
+              <input
+                className={classes.input}
+                type="number"
+                value={cuotaMensual}
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                required
+                onChange={(event) => setCuotaMensual(event.target.value)}
+              />
+            </div>
+            <div className={classes.fieldGroup}>
+              <label className={classes.fieldLabel}>
+                ¿Recibe pensión?
+                <span className={classes.required}>*</span>
+              </label>
+
+              <select
+                className={classes.select}
+                value={String(recibePension)}
+                required
+                onChange={(event) => {
+                  const recibe = event.target.value === "true";
+
+                  setRecibePension(recibe);
+
+                  if (!recibe) {
+                    setTipoPension("");
+                    setMontoPension("");
+                  }
+                }}
               >
                 <option value="true">Sí</option>
                 <option value="false">No</option>
               </select>
             </div>
 
+            {recibePension && (
+              <>
+                <div className={classes.fieldGroup}>
+                  <label className={classes.fieldLabel}>
+                    Tipo de pensión
+                    <span className={classes.required}>*</span>
+                  </label>
+
+                  <select
+                    className={classes.select}
+                    value={tipoPension}
+                    required
+                    onChange={(event) => setTipoPension(event.target.value)}
+                  >
+                    <option value="" disabled>
+                      Seleccionar tipo
+                    </option>
+
+                    <option value="Pensión contributiva (IVM)">
+                      Pensión contributiva (IVM)
+                    </option>
+
+                    <option value="Régimen no contributivo">
+                      Régimen no contributivo
+                    </option>
+
+                    <option value="Magisterio Nacional">
+                      Magisterio Nacional
+                    </option>
+                    <option value="Poder Judicial">Poder Judicial</option>
+                    <option value="Pensión alimentaria">
+                      Pensión alimentaria
+                    </option>
+                    <option value="Otra">Otra</option>
+                  </select>
+                </div>
+
+                <div className={classes.fieldGroup}>
+                  <label className={classes.fieldLabel}>
+                    Monto mensual de la pensión (₡)
+                    <span className={classes.required}>*</span>
+                  </label>
+
+                  <input
+                    className={classes.input}
+                    type="number"
+                    value={montoPension}
+                    min="0.01"
+                    step="0.01"
+                    inputMode="decimal"
+                    required
+                    onChange={(event) => setMontoPension(event.target.value)}
+                  />
+                </div>
+              </>
+            )}
             <div className={classes.fieldGroup}>
               <label className={classes.fieldLabel}>Ayuda biomecánica</label>
 
