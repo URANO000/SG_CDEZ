@@ -10,7 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +40,13 @@ public class AuthHelper {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean esAdmin = authentication.getAuthorities().stream().anyMatch(r -> r.getAuthority().equals("ROLE_ADMIN"));
         return esAdmin;
+
+    }
+
+    public boolean isUsuarioAyudante(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean esAyudante = authentication.getAuthorities().stream().anyMatch(r -> r.getAuthority().equals("ROLE_AYUDANTE"));
+        return esAyudante;
 
     }
 

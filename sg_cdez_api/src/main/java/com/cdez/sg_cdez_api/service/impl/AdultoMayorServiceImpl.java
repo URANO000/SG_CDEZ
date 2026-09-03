@@ -368,10 +368,11 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
             UUID id,
             AdultoMayorUpdateRequest request
     ) {
-        if (!AUTH_HELPER.isUsuarioAdmin()) {
+
+        if (!AUTH_HELPER.isUsuarioAdmin() && !AUTH_HELPER.isUsuarioAyudante() ) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
-                    "Sólo un usuario administrador puede editar un adulto mayor."
+                    "Sólo un usuario administrador o ayudante puede editar un adulto mayor."
             );
         }
 
@@ -660,7 +661,6 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                                     new Column<>("Identificación", AdultoMayorResponse::identificacion, TextAlignment.LEFT, 1.5f),
                                     new Column<>("Nombre Completo", AdultoMayorResponse::nombreCompleto, TextAlignment.LEFT, 2.5f),
                                     new Column<>("Nacionalidad", AdultoMayorResponse::nacionalidad, TextAlignment.LEFT, 1.5f),
-                                    new Column<>("Dirección", AdultoMayorResponse::direccion, TextAlignment.LEFT, 2.5f),
                                     new Column<>("Estado civil", adulto -> adulto.estadoCivil() == null
                                                     ? "No registrado"
                                                     : adulto.estadoCivil(),
@@ -678,11 +678,11 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                                                     ? "₡0.00"
                                                     : "₡" + adulto.cuotaMensual().toPlainString(),
                                             TextAlignment.RIGHT,
-                                            1.3f
+                                            1f
                                     ),
                                     new Column<>("Pensión", adulto -> adulto.pension() ? "Sí" : "No",
                                             TextAlignment.CENTER,
-                                            0.8f
+                                            0.5f
                                     ),
                                     new Column<>("Tipo de pensión", adulto -> adulto.pension() &&
                                                     adulto.tipoPension() != null
@@ -699,7 +699,7 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                                             TextAlignment.RIGHT,
                                             1.4f
                                     ),
-                                    new Column<>("Sexo", AdultoMayorResponse::sexo),
+                                    new Column<>("Sexo", AdultoMayorResponse::sexo, TextAlignment.CENTER, 0.5f),
                                     new Column<>("Estado", AdultoMayorResponse::activo)
                             )).build();
             byte[] archivo =
@@ -850,12 +850,6 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                                                     .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
                                             30,
                                             org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
-                                    ),
-                                    new ExcelColumn<>(
-                                            "Motivo Retiro",
-                                            AdultoMayorResponse::activo,
-                                            15,
-                                            org.apache.poi.ss.usermodel.HorizontalAlignment.CENTER
                                     )
 
                     )).showTimestamp(true)
