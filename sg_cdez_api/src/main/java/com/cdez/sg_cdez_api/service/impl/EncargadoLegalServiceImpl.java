@@ -14,6 +14,9 @@ import com.cdez.sg_cdez_api.util.AuthHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.cdez.sg_cdez_api.service.AuditoriaService;
+import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -36,11 +39,24 @@ public class EncargadoLegalServiceImpl implements EncargadoLegalService {
      * Registra un nuevo encargado legal y establece
      * su relación con un adulto mayor.
      */
+
     @Override
+    @Transactional
     public EncargadoLegalResponse registrarEncargado(UUID adultoId, EncargadoLegalRequest request) {
 
         AdultoMayor adultoMayor = adultoMayorRepository.findById(adultoId)
                 .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
+
+        long cantidadEncargadosActivos =
+                encargadoLegalRepository
+                        .countByAdultosAdultoIdAndActivoTrue(adultoId);
+
+        if (cantidadEncargadosActivos >= 2) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "El adulto mayor ya tiene el máximo de dos encargados legales activos."
+            );
+        }
 
         Personal personalActual = AUTH_HELPER.obtenerUsuarioAutenticado();
 

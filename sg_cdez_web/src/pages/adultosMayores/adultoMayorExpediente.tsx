@@ -80,6 +80,8 @@ import { EncargadoLegalForm } from "../../components/ui/forms/EncargadoLegalForm
 
 import { MedicamentoTable } from "../../components/ui/tables/MedicamentoTable";
 
+import { TIPOIDENTIFICACION } from "../../services/interfaces/personalCreateRequest";
+
 import {
   desactivarMedicamento,
   listarMedicamentosPorAdulto,
@@ -130,6 +132,12 @@ function Campo({ etiqueta, valor }: CampoInformacion) {
 
       <Text className={classes.value}>{valor}</Text>
     </div>
+  );
+}
+
+function mostrarTipoIdentificacion(tipo: string): string {
+  return (
+    TIPOIDENTIFICACION.find((opcion) => opcion.value === tipo)?.label ?? tipo
   );
 }
 
@@ -897,11 +905,16 @@ export function AdultoMayorExpediente() {
               </Text>
             </div>
 
-            {expedienteEditable && (
-              <Button onClick={() => setModalEncargadoAbierto(true)}>
-                + Registrar encargado
-              </Button>
-            )}
+            {expedienteEditable &&
+              (encargados.length < 2 ? (
+                <Button onClick={() => setModalEncargadoAbierto(true)}>
+                  + Registrar encargado
+                </Button>
+              ) : (
+                <Text size="sm" c="dimmed">
+                  Máximo de 2 encargados alcanzado.
+                </Text>
+              ))}
           </Group>
           {encargadosLoading ? (
             <div className={classes.loadingState}>
@@ -975,8 +988,10 @@ export function AdultoMayorExpediente() {
                       spacing="lg"
                     >
                       <Campo
-                        etiqueta={"Tipo de identificación"}
-                        valor={encargado.tipoIdentificacion}
+                        etiqueta="Tipo de identificación"
+                        valor={mostrarTipoIdentificacion(
+                          encargado.tipoIdentificacion,
+                        )}
                       />
 
                       <Campo
