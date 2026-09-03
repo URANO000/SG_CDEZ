@@ -7,6 +7,8 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.Map;
 
+import com.cdez.sg_cdez_api.entity.Personal;
+
 public interface AuditoriaService {
 
     void registrarAccion(
@@ -18,6 +20,16 @@ public interface AuditoriaService {
     );
 
     void registrarAccion(
+            String accion,
+            String modulo,
+            String entidadAfectada,
+            String registroAfectadoId,
+            String descripcion,
+            Map<String, Object> cambios
+    );
+
+    void registrarAccion(
+            Personal usuario,
             String accion,
             String modulo,
             String entidadAfectada,

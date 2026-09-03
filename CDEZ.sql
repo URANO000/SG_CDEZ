@@ -54,9 +54,26 @@ CREATE TABLE AdultoMayor(
 	direccion VARCHAR(200) NOT NULL,
 	escolaridad VARCHAR(80) NOT NULL,
 	grupo_familiar VARCHAR(200),
-	pension BOOL NOT NULL,
+	estado_civil VARCHAR(30) NULL,
+	grado_dependencia VARCHAR(30) NULL,
+	cuota_mensual NUMERIC(12, 2) NOT NULL DEFAULT 0,
+	pension BOOL NOT NULL DEFAULT FALSE,
+	tipo_pension VARCHAR(100) NULL,
+	monto_pension NUMERIC(12, 2) NULL,
 	funcionalidad_fisica VARCHAR(200) NULL,
-	ayuda_biomecanica BOOL NOT NULL,
+	ayuda_biomecanica BOOL NOT NULL DEFAULT FALSE,
+	CONSTRAINT chk_adulto_cuota_mensual
+	    CHECK (cuota_mensual >= 0),
+	CONSTRAINT chk_adulto_datos_pension
+	    CHECK (
+	        (pension = FALSE
+	            AND tipo_pension IS NULL
+	            AND monto_pension IS NULL)
+	        OR
+	        (pension = TRUE
+	            AND tipo_pension IS NOT NULL
+	            AND LENGTH(TRIM(tipo_pension)) > 0
+	            AND monto_pension > 0)),
 	fecha_ingreso TIMESTAMP NOT NULL,
 	fecha_retiro TIMESTAMP NULL,
 	fecha_fallecimiento TIMESTAMP NULL,
@@ -316,8 +333,7 @@ CREATE TABLE Referencia (
 
 CREATE TABLE ConsultaPsych(
 	consulta_psych_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	consulta_id UUID NOT NULL UNIQUE REFERENCES Consulta(consulta_id),
-);
+	consulta_id UUID NOT NULL UNIQUE REFERENCES Consulta(consulta_id));
 
 CREATE TABLE Tamizaje(
 	tamizaje_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -403,7 +419,7 @@ CREATE INDEX IF NOT EXISTS ix_consulta_updated_by
     WHERE updated_by IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS ix_tamizaje_consulta_tipo
-    ON tamizajenutricional (consulta_nutricional_id, tipo);
+    ON tamizaje (consulta_id, tipo);
 
 -- 30/08/2026
 CREATE TABLE RefreshToken (
@@ -428,3 +444,10 @@ CREATE INDEX IF NOT EXISTS ix_refresh_token_personal_activo
 
 CREATE INDEX IF NOT EXISTS ix_refresh_token_expires_at
     ON refreshtoken (expires_at);
+
+ALTER TABLE adultomayor
+ADD COLUMN IF NOT EXISTS tipo_pension VARCHAR(100);
+
+ALTER TABLE adultomayor
+ADD COLUMN IF NOT EXISTS monto_pension NUMERIC(12, 2);
+

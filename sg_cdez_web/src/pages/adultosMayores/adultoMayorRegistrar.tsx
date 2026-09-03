@@ -19,12 +19,18 @@ import { registrarAdultoMayor } from "../../services/adultoMayorService";
 
 import type { AdultoMayorCreateRequest } from "../../services/interfaces/adultoMayorInterface";
 
+import { ESCOLARIDADES } from "../../services/interfaces/adultoMayorInterface";
+
+import { TIPOIDENTIFICACION } from "../../services/interfaces/personalCreateRequest";
+
 import classes from "../../components/ui/styleModules/PersonalForm.module.css";
 
 export function AdultoMayorRegistrar() {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
+
+  const [recibePension, setRecibePension] = useState<boolean | null>(null);
 
   async function manejarRegistro(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -80,18 +86,42 @@ export function AdultoMayorRegistrar() {
         form.elements.namedItem("direccion") as HTMLInputElement
       ).value.trim(),
 
-      escolaridad: (
-        form.elements.namedItem("escolaridad") as HTMLInputElement
-      ).value.trim(),
+      escolaridad: (form.elements.namedItem("escolaridad") as HTMLSelectElement)
+        .value,
 
       grupoFamiliar:
         (
           form.elements.namedItem("grupoFamiliar") as HTMLInputElement
         ).value.trim() || null,
 
-      pension:
-        (form.elements.namedItem("pension") as HTMLSelectElement).value ===
-        "true",
+      estadoCivil:
+        (form.elements.namedItem("estadoCivil") as HTMLSelectElement).value ||
+        null,
+
+      gradoDependencia:
+        (form.elements.namedItem("gradoDependencia") as HTMLSelectElement)
+          .value || null,
+
+      cuotaMensual: Number(
+        (form.elements.namedItem("cuotaMensual") as HTMLInputElement).value,
+      ),
+
+      pension: recibePension === true,
+
+      tipoPension:
+        recibePension === true
+          ? (
+              form.elements.namedItem("tipoPension") as HTMLSelectElement
+            ).value.trim()
+          : null,
+
+      montoPension:
+        recibePension === true
+          ? Number(
+              (form.elements.namedItem("montoPension") as HTMLInputElement)
+                .value,
+            )
+          : null,
 
       funcionalidadFisica:
         (
@@ -242,14 +272,11 @@ export function AdultoMayorRegistrar() {
                   Seleccionar tipo
                 </option>
 
-                <option value="CIC">CIC</option>
-                <option value="CRP">CRP</option>
-                <option value="CRR">CRR</option>
-                <option value="RE">RE</option>
-                <option value="APO">APO</option>
-                <option value="CRT">CRT</option>
-                <option value="CRE">CRE</option>
-                <option value="PEX">PEX</option>
+                {TIPOIDENTIFICACION.map(({ value, label }) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -347,13 +374,22 @@ export function AdultoMayorRegistrar() {
                 <span className={classes.required}>*</span>
               </label>
 
-              <input
-                className={classes.input}
-                type="text"
+              <select
+                className={classes.select}
                 name="escolaridad"
-                maxLength={80}
+                defaultValue=""
                 required
-              />
+              >
+                <option value="" disabled>
+                  Seleccionar
+                </option>
+
+                {ESCOLARIDADES.map((opcion) => (
+                  <option key={opcion} value={opcion}>
+                    {opcion}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className={classes.fieldGroup}>
@@ -366,7 +402,69 @@ export function AdultoMayorRegistrar() {
                 maxLength={200}
               />
             </div>
+            <div className={classes.fieldGroup}>
+              <label className={classes.fieldLabel}>
+                Estado civil
+                <span className={classes.required}>*</span>
+              </label>
 
+              <select
+                className={classes.select}
+                name="estadoCivil"
+                defaultValue=""
+                required
+              >
+                <option value="" disabled>
+                  Seleccionar
+                </option>
+
+                <option value="Soltero/a">Soltero/a</option>
+                <option value="Casado/a">Casado/a</option>
+                <option value="Unión libre">Unión libre</option>
+                <option value="Divorciado/a">Divorciado/a</option>
+                <option value="Viudo/a">Viudo/a</option>
+              </select>
+            </div>
+
+            <div className={classes.fieldGroup}>
+              <label className={classes.fieldLabel}>
+                Grado de dependencia
+                <span className={classes.required}>*</span>
+              </label>
+
+              <select
+                className={classes.select}
+                name="gradoDependencia"
+                defaultValue=""
+                required
+              >
+                <option value="" disabled>
+                  Seleccionar
+                </option>
+
+                <option value="Parcial">Parcial</option>
+                <option value="Específica">Específica</option>
+                <option value="Total">Total</option>
+              </select>
+            </div>
+
+            <div className={classes.fieldGroup}>
+              <label className={classes.fieldLabel}>
+                Cuota mensual (₡)
+                <span className={classes.required}>*</span>
+              </label>
+
+              <input
+                className={classes.input}
+                type="number"
+                name="cuotaMensual"
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                placeholder="Ejemplo: 25000"
+                required
+              />
+            </div>
             <div className={classes.fieldGroup}>
               <label className={classes.fieldLabel}>
                 ¿Recibe pensión?
@@ -376,7 +474,12 @@ export function AdultoMayorRegistrar() {
               <select
                 className={classes.select}
                 name="pension"
-                defaultValue=""
+                value={recibePension === null ? "" : String(recibePension)}
+                onChange={(event) => {
+                  const valor = event.target.value;
+
+                  setRecibePension(valor === "" ? null : valor === "true");
+                }}
                 required
               >
                 <option value="" disabled>
@@ -384,10 +487,68 @@ export function AdultoMayorRegistrar() {
                 </option>
 
                 <option value="true">Sí</option>
-
                 <option value="false">No</option>
               </select>
             </div>
+            {recibePension === true && (
+              <>
+                <div className={classes.fieldGroup}>
+                  <label className={classes.fieldLabel}>
+                    Tipo de pensión
+                    <span className={classes.required}>*</span>
+                  </label>
+
+                  <select
+                    className={classes.select}
+                    name="tipoPension"
+                    defaultValue=""
+                    required
+                  >
+                    <option value="" disabled>
+                      Seleccionar tipo
+                    </option>
+
+                    <option value="Pensión contributiva (IVM)">
+                      Pensión contributiva (IVM)
+                    </option>
+
+                    <option value="Régimen no contributivo">
+                      Régimen no contributivo
+                    </option>
+
+                    <option value="Magisterio Nacional">
+                      Magisterio Nacional
+                    </option>
+
+                    <option value="Poder Judicial">Poder Judicial</option>
+
+                    <option value="Pensión alimentaria">
+                      Pensión alimentaria
+                    </option>
+
+                    <option value="Otra">Otra</option>
+                  </select>
+                </div>
+
+                <div className={classes.fieldGroup}>
+                  <label className={classes.fieldLabel}>
+                    Monto mensual de la pensión (₡)
+                    <span className={classes.required}>*</span>
+                  </label>
+
+                  <input
+                    className={classes.input}
+                    type="number"
+                    name="montoPension"
+                    min="0.01"
+                    step="0.01"
+                    inputMode="decimal"
+                    placeholder="Ejemplo: 150000"
+                    required
+                  />
+                </div>
+              </>
+            )}
 
             <div className={classes.fieldGroup}>
               <label className={classes.fieldLabel}>

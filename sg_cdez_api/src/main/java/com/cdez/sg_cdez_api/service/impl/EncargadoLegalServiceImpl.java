@@ -14,6 +14,9 @@ import com.cdez.sg_cdez_api.util.AuthHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.cdez.sg_cdez_api.service.AuditoriaService;
+import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -36,11 +39,24 @@ public class EncargadoLegalServiceImpl implements EncargadoLegalService {
      * Registra un nuevo encargado legal y establece
      * su relación con un adulto mayor.
      */
+
     @Override
+    @Transactional
     public EncargadoLegalResponse registrarEncargado(UUID adultoId, EncargadoLegalRequest request) {
 
         AdultoMayor adultoMayor = adultoMayorRepository.findById(adultoId)
                 .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
+
+        long cantidadEncargadosActivos =
+                encargadoLegalRepository
+                        .countByAdultosAdultoIdAndActivoTrue(adultoId);
+
+        if (cantidadEncargadosActivos >= 2) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "El adulto mayor ya tiene el máximo de dos encargados legales activos."
+            );
+        }
 
         Personal personalActual = AUTH_HELPER.obtenerUsuarioAutenticado();
 
@@ -84,17 +100,99 @@ public class EncargadoLegalServiceImpl implements EncargadoLegalService {
     }
 
     @Override
+    @Transactional
     public EncargadoLegalResponse actualizarEncargado(
             UUID encargadoId,
             EncargadoLegalUpdateRequest request
     ) {
-        EncargadoLegal encargado = obtenerEncargadoCheck(encargadoId);
+        EncargadoLegal encargado =
+                obtenerEncargadoCheck(encargadoId);
+
+        if (!encargado.isActivo()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "No se puede editar un encargado legal inactivo."
+            );
+        }
+
+        if (
+                request.direccion() == null ||
+                        request.direccion().isBlank()
+        ) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La dirección es obligatoria."
+            );
+        }
+
+        String nuevaDireccion =
+                request.direccion().trim();
+
+        if (nuevaDireccion.length() > 200) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La dirección no puede superar los 200 caracteres."
+            );
+        }
 
         Personal personalActual =
                 AUTH_HELPER.obtenerUsuarioAutenticado();
 
-        String direccionAnterior = encargado.getDireccion();
-        String nuevaDireccion = request.direccion();
+        Map<String, Object> cambios =
+                new LinkedHashMap<>();
+
+        if (!java.util.Objects.equals(
+                encargado.getDireccion(),
+                nuevaDireccion
+        )) {
+            Map<String, Object> detalleDireccion =
+                    new LinkedHashMap<>();
+
+            detalleDireccion.put(
+                    "anterior",
+                    encargado.getDireccion()
+            );
+
+            detalleDireccion.put(
+                    "nuevo",
+                    nuevaDireccion
+            );
+
+            cambios.put(
+                    "direccion",
+                    detalleDireccion
+            );
+        }
+
+        if (
+                request.contactosActualizar() != null &&
+                        !request.contactosActualizar().isEmpty()
+        ) {
+            cambios.put(
+                    "contactosActualizados",
+                    request.contactosActualizar().size()
+            );
+        }
+
+        if (
+                request.contactosCrear() != null &&
+                        !request.contactosCrear().isEmpty()
+        ) {
+            cambios.put(
+                    "contactosCreados",
+                    request.contactosCrear().size()
+            );
+        }
+
+        if (
+                request.contactosDesactivar() != null &&
+                        !request.contactosDesactivar().isEmpty()
+        ) {
+            cambios.put(
+                    "contactosDesactivados",
+                    request.contactosDesactivar().size()
+            );
+        }
 
         encargado.setDireccion(nuevaDireccion);
         encargado.setUpdatedAt(LocalDateTime.now());
@@ -103,31 +201,28 @@ public class EncargadoLegalServiceImpl implements EncargadoLegalService {
         EncargadoLegal actualizado =
                 encargadoLegalRepository.save(encargado);
 
-        if (!java.util.Objects.equals(
-                direccionAnterior,
-                nuevaDireccion
-        )) {
-            Map<String, Object> detalleDireccion =
-                    new LinkedHashMap<>();
-
-            detalleDireccion.put(
-                    "anterior",
-                    direccionAnterior
+        if (request.contactosActualizar() != null) {
+            CONTACTO_SERVICE.actualizarContactoEncargado(
+                    request.contactosActualizar(),
+                    actualizado
             );
+        }
 
-            detalleDireccion.put(
-                    "nuevo",
-                    nuevaDireccion
+        if (request.contactosDesactivar() != null) {
+            CONTACTO_SERVICE.desactivarContactosEncargado(
+                    request.contactosDesactivar(),
+                    actualizado
             );
+        }
 
-            Map<String, Object> cambios =
-                    new LinkedHashMap<>();
-
-            cambios.put(
-                    "direccion",
-                    detalleDireccion
+        if (request.contactosCrear() != null) {
+            CONTACTO_SERVICE.crearContactoEncargado(
+                    request.contactosCrear(),
+                    actualizado
             );
+        }
 
+        if (!cambios.isEmpty()) {
             auditoriaService.registrarAccion(
                     "ACTUALIZAR_ENCARGADO_LEGAL",
                     "ENCARGADO_LEGAL",

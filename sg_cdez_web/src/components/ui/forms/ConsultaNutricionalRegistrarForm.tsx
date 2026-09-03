@@ -28,6 +28,8 @@ import type {
     TipoTamizajeNutricional,
 } from "../../../services/interfaces/consultasDetailsResponse";
 
+import { TIPOS_TAMIZAJE } from "../../../services/interfaces/consultasDetailsResponse";
+
 import type {
     AdultoMayorResponse,
 } from "../../../services/interfaces/adultoMayorInterface";
@@ -35,6 +37,7 @@ import type { PersonalResponse } from "../../../services/interfaces/personalResp
 
 import { AdultoSelector } from "../../common/AdultoSelector";
 import { PersonalSelector } from "../../common/PersonalSelector";
+import type { TamizajeNutricionalCreateRequest } from "../../../services/interfaces/consultasCreateInterface";
 
 
 interface AntropometriaFormValues {
@@ -120,6 +123,12 @@ export function ConsultaNutricionalRegistrarForm() {
     const [selectorAbierto, setSelectorAbierto] =
         useState(false);
 
+    const OPCIONES_TAMIZAJE_NUTRICIONAL =
+        TIPOS_TAMIZAJE.NUTRICION.map((tipo) => ({
+            value: tipo,
+            label: tipo === "SARC_F" ? "SARC-F" : tipo,
+        }));
+
 
     const form = useForm<ConsultaNutricionalFormValues>({
         mode: "controlled",
@@ -189,22 +198,6 @@ export function ConsultaNutricionalRegistrarForm() {
                 errors["consultaGeneral.motivo"] =
                     "El motivo debe contener al menos 5 caracteres.";
             }
-
-            if (!values.frecuenciaEvacuaciones.trim()) {
-                errors.frecuenciaEvacuaciones =
-                    "La frecuencia de evacuaciones es obligatoria.";
-            }
-
-            if (!values.consistenciaBristol.trim()) {
-                errors.consistenciaBristol =
-                    "La consistencia de Bristol es obligatoria.";
-            }
-
-            if (!values.estadoCognitivo.trim()) {
-                errors.estadoCognitivo =
-                    "El estado cognitivo es obligatorio.";
-            }
-
 
             const validarDecimalPositivo = (
                 valor: string,
@@ -307,17 +300,21 @@ export function ConsultaNutricionalRegistrarForm() {
             }
 
             values.tamizajes.forEach((tamizaje, index) => {
-                if (!tamizaje.tipo) {
+                if (tamizaje.tipo === null) {
                     errors[`tamizajes.${index}.tipo`] =
                         "Debe seleccionar el tipo de tamizaje.";
                 }
 
-                if (
-                    tamizaje.puntaje.trim() &&
-                    Number.isNaN(Number(tamizaje.puntaje))
-                ) {
+                if (!tamizaje.puntaje.trim()) {
                     errors[`tamizajes.${index}.puntaje`] =
-                        "El puntaje debe ser un número válido.";
+                        "Debe ingresar el puntaje.";
+                } else {
+                    const puntaje = Number(tamizaje.puntaje);
+
+                    if (!Number.isFinite(puntaje)) {
+                        errors[`tamizajes.${index}.puntaje`] =
+                            "El puntaje debe ser un número válido.";
+                    }
                 }
             });
 
@@ -414,6 +411,7 @@ export function ConsultaNutricionalRegistrarForm() {
         setLoading(true);
 
         try {
+            const receptorId = values.consultaGeneral.referencia.receptorId.trim();
             const consulta = {
                 consultaGeneral: {
                     adultoId:
@@ -449,13 +447,14 @@ export function ConsultaNutricionalRegistrarForm() {
                         nullable(
                             values.consultaGeneral.notas
                         ),
-                    referencia:
-                    {
-                        receptorId:
-                            values.consultaGeneral.referencia.receptorId,
-                        mensaje:
-                            values.consultaGeneral.referencia.mensaje
-                    }
+                    referencia: receptorId
+                        ? {
+                            receptorId:
+                                values.consultaGeneral.referencia.receptorId,
+                            mensaje:
+                                values.consultaGeneral.referencia.mensaje
+                        }
+                        : null,
                 },
 
                 historiaAlimentaria:
@@ -500,22 +499,38 @@ export function ConsultaNutricionalRegistrarForm() {
                 estadoCognitivo:
                     values.estadoCognitivo.trim(),
 
-                tamizajes:
-                    values.tamizajes.map((tamizaje) => ({
-                        tipo:
-                            tamizaje.tipo,
+                tamizajes: values.tamizajes.map(
+                    (tamizaje): TamizajeNutricionalCreateRequest => {
+                        if (tamizaje.tipo === null) {
+                            throw new Error(
+                                "Debe seleccionar el tipo de tamizaje."
+                            );
+                        }
 
-                        puntaje:
-                            tamizaje.puntaje.trim()
-                                ? Number(tamizaje.puntaje)
-                                : null,
+                        if (!tamizaje.puntaje.trim()) {
+                            throw new Error(
+                                `Debe ingresar el puntaje para ${tamizaje.tipo}.`
+                            );
+                        }
 
-                        resultado:
-                            nullable(tamizaje.resultado),
+                        const puntaje = Number(tamizaje.puntaje);
 
-                        observaciones:
-                            nullable(tamizaje.observaciones),
-                    })),
+                        if (!Number.isFinite(puntaje)) {
+                            throw new Error(
+                                `El puntaje de ${tamizaje.tipo} no es válido.`
+                            );
+                        }
+
+                        return {
+                            tipo: tamizaje.tipo,
+                            puntaje,
+                            resultado: nullable(tamizaje.resultado),
+                            observaciones: nullable(
+                                tamizaje.observaciones
+                            ),
+                        };
+                    }
+                ),
 
                 examenesLaboratorio:
                     values.examenesLaboratorio.map((examen) => ({
@@ -1116,42 +1131,36 @@ export function ConsultaNutricionalRegistrarForm() {
 
                             <TextInput
                                 label="Frecuencia de evacuaciones"
-                                withAsterisk
                                 placeholder="Ej. 1 vez al día"
                                 classNames={{
                                     root: classes.fieldGroup,
                                     label: classes.fieldLabel,
-                                    required: classes.required,
                                     input: classes.input,
                                 }}
-                                {...form.getInputProps("frecuenciaEvacuaciones")}
+
                             />
 
                             <TextInput
                                 label="Consistencia Bristol"
-                                withAsterisk
                                 placeholder="Ej. Tipo 4"
                                 classNames={{
                                     root: classes.fieldGroup,
                                     label: classes.fieldLabel,
-                                    required: classes.required,
                                     input: classes.input,
                                 }}
-                                {...form.getInputProps("consistenciaBristol")}
+
                             />
 
 
                             <Textarea
                                 label="Estado cognitivo"
-                                withAsterisk
                                 minRows={3}
                                 classNames={{
                                     root: classes.fieldGroup,
                                     label: classes.fieldLabel,
-                                    required: classes.required,
                                     input: classes.textarea,
                                 }}
-                                {...form.getInputProps("estadoCognitivo")}
+
                             />
                         </div>
 
@@ -1446,15 +1455,8 @@ export function ConsultaNutricionalRegistrarForm() {
                                             label="Tipo de tamizaje"
                                             placeholder="Seleccione el tipo"
                                             withAsterisk
-                                            data={[
-                                                { value: "MNA", label: "MNA" },
-                                                { value: "SARC_F", label: "SARC-F" },
-                                                { value: "MUST", label: "MUST" },
-                                                { value: "NRS", label: "NRS" },
-                                            ]}
-                                            {...form.getInputProps(
-                                                `tamizajes.${index}.tipo`
-                                            )}
+                                            data={OPCIONES_TAMIZAJE_NUTRICIONAL}
+                                            {...form.getInputProps(`tamizajes.${index}.tipo`)}
                                         />
 
 

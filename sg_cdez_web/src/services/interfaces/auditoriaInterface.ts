@@ -18,7 +18,7 @@ export interface AuditoriaResponse {
 
   descripcion: string;
 
-  cambios: Record<string, AuditoriaCambio> | null;
+  cambios: Record<string, unknown> | null;
 
   createdAt: string;
 }
@@ -27,7 +27,7 @@ export interface AuditoriaFiltros {
   usuarioId?: string;
   usuario?: string;
   accion?: string;
-  modulo?: string;
+  modulos?: string[];
   fechaDesde?: string;
   fechaHasta?: string;
 }

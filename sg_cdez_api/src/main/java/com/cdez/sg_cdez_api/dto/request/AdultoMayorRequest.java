@@ -1,6 +1,7 @@
 package com.cdez.sg_cdez_api.dto.request;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 public record AdultoMayorRequest(
         String tipoIdentificacion,
@@ -15,7 +16,12 @@ public record AdultoMayorRequest(
         String direccion,
         String escolaridad,
         String grupoFamiliar,
+        String estadoCivil,
+        String gradoDependencia,
+        BigDecimal cuotaMensual,
         boolean pension,
+        String tipoPension,
+        BigDecimal montoPension,
         String funcionalidadFisica,
         boolean ayudaBiomecanica,
         LocalDateTime fechaIngreso

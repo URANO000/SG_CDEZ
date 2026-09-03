@@ -199,7 +199,7 @@ export function ConsultaTable({ consultas, onRefresh }: ConsultaTableProps) {
                 title={'Desactivar consulta'}
                 centered>
                 <Text size="sm" mb="md">
-                    Se desactivará la consulta de ${seleccionado?.adultoMayor.nombreCompleto}. Esta acción es irreversible.
+                    Se desactivará la consulta de {seleccionado?.adultoMayor.nombreCompleto}. Esta acción es irreversible.
                 </Text>
 
                 <Group justify="flex-end" mt="lg">

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,7 +28,8 @@ public class AuditoriaController {
             @RequestParam(required = false) UUID usuarioId,
             @RequestParam(required = false) String usuario,
             @RequestParam(required = false) String accion,
-            @RequestParam(required = false) String modulo,
+            @RequestParam(required = false)
+            List<String> modulos,
 
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -44,7 +46,7 @@ public class AuditoriaController {
                 usuarioId,
                 usuario,
                 accion,
-                modulo,
+                modulos,
                 fechaDesde,
                 fechaHasta
         );

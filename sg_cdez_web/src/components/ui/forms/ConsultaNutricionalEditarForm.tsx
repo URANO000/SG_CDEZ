@@ -180,20 +180,6 @@ export function ConsultaNutricionalEditarForm() {
                     "El motivo debe contener al menos 5 caracteres.";
             }
 
-            if (!values.frecuenciaEvacuaciones.trim()) {
-                errors.frecuenciaEvacuaciones =
-                    "La frecuencia de evacuaciones es obligatoria.";
-            }
-
-            if (!values.consistenciaBristol.trim()) {
-                errors.consistenciaBristol =
-                    "La consistencia de Bristol es obligatoria.";
-            }
-
-            if (!values.estadoCognitivo.trim()) {
-                errors.estadoCognitivo =
-                    "El estado cognitivo es obligatorio.";
-            }
 
             const validarDecimalPositivo = (
                 valor: string,
@@ -1205,42 +1191,33 @@ export function ConsultaNutricionalEditarForm() {
 
                             <TextInput
                                 label="Frecuencia de evacuaciones"
-                                withAsterisk
                                 placeholder="Ej. 1 vez al día"
                                 classNames={{
                                     root: classes.fieldGroup,
                                     label: classes.fieldLabel,
-                                    required: classes.required,
                                     input: classes.input,
                                 }}
-                                {...form.getInputProps("frecuenciaEvacuaciones")}
                             />
 
                             <TextInput
                                 label="Consistencia Bristol"
-                                withAsterisk
                                 placeholder="Ej. Tipo 4"
                                 classNames={{
                                     root: classes.fieldGroup,
                                     label: classes.fieldLabel,
-                                    required: classes.required,
                                     input: classes.input,
                                 }}
-                                {...form.getInputProps("consistenciaBristol")}
                             />
 
 
                             <Textarea
                                 label="Estado cognitivo"
-                                withAsterisk
                                 minRows={3}
                                 classNames={{
                                     root: classes.fieldGroup,
                                     label: classes.fieldLabel,
-                                    required: classes.required,
                                     input: classes.textarea,
                                 }}
-                                {...form.getInputProps("estadoCognitivo")}
                             />
                         </div>
 

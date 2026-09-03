@@ -113,7 +113,12 @@ public class AuthController {
 
     @PostMapping("/cerrarSesion")
     public ResponseEntity<Void> cerrarSesion(
-            HttpServletRequest request) {
+            HttpServletRequest request
+    ) {
+        SERVICE.registrarCierreSesion(
+                request.getRemoteAddr()
+        );
+
         String refreshToken =
                 obtenerCookie(
                         request,
