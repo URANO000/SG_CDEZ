@@ -6,7 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.UUID;
 
-public interface EncargadoLegalRepository extends JpaRepository<EncargadoLegal, UUID> {
+public interface EncargadoLegalRepository
+        extends JpaRepository<EncargadoLegal, UUID> {
 
-    List<EncargadoLegal> findByAdultosAdultoIdAndActivoTrue(UUID adultoId);
+    List<EncargadoLegal>
+    findByAdultosAdultoIdAndActivoTrue(UUID adultoId);
+
+    long countByAdultosAdultoIdAndActivoTrue(UUID adultoId);
 }

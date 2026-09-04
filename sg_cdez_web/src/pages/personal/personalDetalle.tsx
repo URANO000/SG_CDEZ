@@ -10,6 +10,7 @@ import { descargarDocumento } from "../../services/documentoService";
 import axios from "axios";
 import { notifications } from "@mantine/notifications";
 import { mostrarFecha } from "../../utils/formatHelper";
+import { ESPECIALIDADES, ROL, TIPOIDENTIFICACION } from "../../services/interfaces/personalCreateRequest";
 
 
 export function PersonalDetalle() {
@@ -125,7 +126,7 @@ export function PersonalDetalle() {
                     <div>
                         <Text className={classes.label}> Personal </Text>
                         <Title order={2} className={classes.name}>{nombreCompleto}</Title>
-                        <Text size="sm" className={classes.subText}>{personal.rol.nombre}</Text>
+                        <Text size="sm" className={classes.subText}>{ROL.find(r => r.value === personal.rol.nombre)?.label ?? personal.rol.nombre}</Text>
                     </div>
 
                     <Badge size="lg"
@@ -168,7 +169,7 @@ export function PersonalDetalle() {
                                 </Text>
 
                                 <Text className={classes.value}>
-                                    {personal.especialidad}
+                                    {ESPECIALIDADES.find(e => e.value === personal.especialidad)?.label ?? personal.especialidad}
                                 </Text>
                             </div>
 
@@ -208,7 +209,7 @@ export function PersonalDetalle() {
                                 </Text>
 
                                 <Text className={classes.value}>
-                                    {personal.tipoIdentificacion}
+                                    {TIPOIDENTIFICACION.find(t => t.value === personal.tipoIdentificacion)?.label ?? personal.tipoIdentificacion}
                                 </Text>
                             </div>
 

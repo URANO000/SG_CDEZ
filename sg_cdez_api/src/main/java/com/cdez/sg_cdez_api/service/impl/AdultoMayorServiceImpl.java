@@ -30,6 +30,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 import com.cdez.sg_cdez_api.dto.request.AdultoMayorFiltro;
 import com.cdez.sg_cdez_api.dto.response.PageResponse;
@@ -142,13 +143,22 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                 adultoMayor.getDireccion(),
                 adultoMayor.getEscolaridad(),
                 adultoMayor.getGrupoFamiliar(),
+
+                adultoMayor.getEstadoCivil(),
+                adultoMayor.getGradoDependencia(),
+                adultoMayor.getCuotaMensual(),
+
                 adultoMayor.isPension(),
+                adultoMayor.getTipoPension(),
+                adultoMayor.getMontoPension(),
+
                 adultoMayor.getFuncionalidadFisica(),
                 adultoMayor.isAyudaBiomecanica(),
                 adultoMayor.getFechaIngreso(),
                 MISC_HELPER.activoConversion(adultoMayor.isActivo())
         );
     }
+
     @Override
     public List<AdultoMayorResponse> buscarAdultosMayores(
             String texto
@@ -259,6 +269,20 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
             );
         }
         AdultoMayor adultoMayor = new AdultoMayor();
+        adultoMayor.setEstadoCivil(request.estadoCivil());
+        adultoMayor.setGradoDependencia(request.gradoDependencia());
+
+        if (
+                request.cuotaMensual() == null ||
+                        request.cuotaMensual().signum() < 0
+        ) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La cuota mensual no puede ser negativa."
+            );
+        }
+
+        adultoMayor.setCuotaMensual(request.cuotaMensual());
 
         adultoMayor.setTipoIdentificacion(request.tipoIdentificacion());
         adultoMayor.setIdentificacion(request.identificacion());
@@ -272,7 +296,42 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         adultoMayor.setDireccion(request.direccion());
         adultoMayor.setEscolaridad(request.escolaridad());
         adultoMayor.setGrupoFamiliar(request.grupoFamiliar());
-        adultoMayor.setPension(request.pension());
+        adultoMayor.setPension(
+                request.pension()
+        );
+
+        if (request.pension()) {
+            if (
+                    request.tipoPension() == null ||
+                            request.tipoPension().isBlank()
+            ) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Debe indicar el tipo de pensión."
+                );
+            }
+
+            if (
+                    request.montoPension() == null ||
+                            request.montoPension().signum() <= 0
+            ) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "El monto de la pensión debe ser mayor que cero."
+                );
+            }
+
+            adultoMayor.setTipoPension(
+                    request.tipoPension().trim()
+            );
+
+            adultoMayor.setMontoPension(
+                    request.montoPension()
+            );
+        } else {
+            adultoMayor.setTipoPension(null);
+            adultoMayor.setMontoPension(null);
+        }
         adultoMayor.setFuncionalidadFisica(request.funcionalidadFisica());
         adultoMayor.setAyudaBiomecanica(request.ayudaBiomecanica());
         adultoMayor.setFechaIngreso(request.fechaIngreso());
@@ -309,11 +368,69 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
             UUID id,
             AdultoMayorUpdateRequest request
     ) {
+
+        if (!AUTH_HELPER.isUsuarioAdmin() && !AUTH_HELPER.isUsuarioAyudante() ) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Sólo un usuario administrador o ayudante puede editar un adulto mayor."
+            );
+        }
+
+        AUTH_HELPER.validarUsuarioActivo();
+
         AdultoMayor adultoMayor = adultoMayorRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Adulto mayor no encontrado"
+                        "Adulto mayor no encontrado."
                 ));
+
+        if (
+                !adultoMayor.isActivo() ||
+                        adultoMayor.getFechaFallecimiento() != null
+        ) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "No se puede editar un adulto mayor inactivo o fallecido."
+            );
+        }
+
+        if (
+                request.cuotaMensual() == null ||
+                        request.cuotaMensual().signum() < 0
+        ) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La cuota mensual no puede ser negativa."
+            );
+        }
+
+        String nuevoTipoPension = null;
+        BigDecimal nuevoMontoPension = null;
+
+        if (request.pension()) {
+            if (
+                    request.tipoPension() == null ||
+                            request.tipoPension().isBlank()
+            ) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Debe indicar el tipo de pensión."
+                );
+            }
+
+            if (
+                    request.montoPension() == null ||
+                            request.montoPension().signum() <= 0
+            ) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "El monto de la pensión debe ser mayor que cero."
+                );
+            }
+
+            nuevoTipoPension = request.tipoPension().trim();
+            nuevoMontoPension = request.montoPension();
+        }
 
         Map<String, Object> cambios = new LinkedHashMap<>();
 
@@ -340,6 +457,48 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
 
         agregarCambio(
                 cambios,
+                "estadoCivil",
+                adultoMayor.getEstadoCivil(),
+                request.estadoCivil()
+        );
+
+        agregarCambio(
+                cambios,
+                "gradoDependencia",
+                adultoMayor.getGradoDependencia(),
+                request.gradoDependencia()
+        );
+
+        agregarCambio(
+                cambios,
+                "cuotaMensual",
+                adultoMayor.getCuotaMensual(),
+                request.cuotaMensual()
+        );
+
+        agregarCambio(
+                cambios,
+                "pension",
+                adultoMayor.isPension(),
+                request.pension()
+        );
+
+        agregarCambio(
+                cambios,
+                "tipoPension",
+                adultoMayor.getTipoPension(),
+                nuevoTipoPension
+        );
+
+        agregarCambio(
+                cambios,
+                "montoPension",
+                adultoMayor.getMontoPension(),
+                nuevoMontoPension
+        );
+
+        agregarCambio(
+                cambios,
                 "funcionalidadFisica",
                 adultoMayor.getFuncionalidadFisica(),
                 request.funcionalidadFisica()
@@ -355,9 +514,16 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
         adultoMayor.setDireccion(request.direccion());
         adultoMayor.setEscolaridad(request.escolaridad());
         adultoMayor.setGrupoFamiliar(request.grupoFamiliar());
+        adultoMayor.setEstadoCivil(request.estadoCivil());
+        adultoMayor.setGradoDependencia(request.gradoDependencia());
+        adultoMayor.setCuotaMensual(request.cuotaMensual());
+
+        adultoMayor.setPension(request.pension());
+        adultoMayor.setTipoPension(nuevoTipoPension);
+        adultoMayor.setMontoPension(nuevoMontoPension);
+
         adultoMayor.setFuncionalidadFisica(request.funcionalidadFisica());
         adultoMayor.setAyudaBiomecanica(request.ayudaBiomecanica());
-
         adultoMayor.setUpdatedAt(LocalDateTime.now());
 
         Personal usuarioActualizador =
@@ -476,22 +642,75 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
     @Override
     public byte[] generarReporteAdultoPDF() {
         try{
-            List<AdultoMayorResponse> adulosMayores = listarAdultosMayoresSinFiltro();
+            if (!AUTH_HELPER.isUsuarioAdmin()) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "Sólo un usuario administrador puede generar reportes de adultos mayores."
+                );
+            }
+
+            AUTH_HELPER.validarUsuarioActivo();
+            List<AdultoMayorResponse> adultosMayores = listarAdultosMayoresSinFiltro();
 
             PdfTableReport<AdultoMayorResponse> reporte =
                     PdfTableReport.<AdultoMayorResponse>builder()
                             .titulo("Reporte de Adultos Mayores")
-                            .datos(adulosMayores)
+                            .datos(adultosMayores)
                             .columnas(List.of(
                                     new Column<>("Tipo Identificación", AdultoMayorResponse::tipoIdentificacion, TextAlignment.LEFT, 2f),
                                     new Column<>("Identificación", AdultoMayorResponse::identificacion, TextAlignment.LEFT, 1.5f),
                                     new Column<>("Nombre Completo", AdultoMayorResponse::nombreCompleto, TextAlignment.LEFT, 2.5f),
                                     new Column<>("Nacionalidad", AdultoMayorResponse::nacionalidad, TextAlignment.LEFT, 1.5f),
-                                    new Column<>("Dirección", AdultoMayorResponse::direccion, TextAlignment.LEFT, 2.5f),
-                                    new Column<>("Sexo", AdultoMayorResponse::sexo),
+                                    new Column<>("Estado civil", adulto -> adulto.estadoCivil() == null
+                                                    ? "No registrado"
+                                                    : adulto.estadoCivil(),
+                                            TextAlignment.LEFT,
+                                            1.3f
+                                    ),
+                                    new Column<>("Dependencia", adulto -> adulto.gradoDependencia() == null
+                                                    ? "No registrado"
+                                                    : adulto.gradoDependencia(),
+                                            TextAlignment.LEFT,
+                                            1.3f
+                                    ),
+                                    new Column<>(
+                                            "Cuota mensual", adulto -> adulto.cuotaMensual() == null
+                                                    ? "₡0.00"
+                                                    : "₡" + adulto.cuotaMensual().toPlainString(),
+                                            TextAlignment.RIGHT,
+                                            1f
+                                    ),
+                                    new Column<>("Pensión", adulto -> adulto.pension() ? "Sí" : "No",
+                                            TextAlignment.CENTER,
+                                            0.5f
+                                    ),
+                                    new Column<>("Tipo de pensión", adulto -> adulto.pension() &&
+                                                    adulto.tipoPension() != null
+                                                    ? adulto.tipoPension()
+                                                    : "No aplica",
+                                            TextAlignment.LEFT,
+                                            1.5f
+                                    ),
+
+                                    new Column<>("Monto de pensión", adulto -> adulto.pension() &&
+                                                    adulto.montoPension() != null
+                                                    ? "₡" + adulto.montoPension().toPlainString()
+                                                    : "No aplica",
+                                            TextAlignment.RIGHT,
+                                            1.4f
+                                    ),
+                                    new Column<>("Sexo", AdultoMayorResponse::sexo, TextAlignment.CENTER, 0.5f),
                                     new Column<>("Estado", AdultoMayorResponse::activo)
                             )).build();
-            return REPORT_SERVICE.generarTablaPDF(reporte);
+            byte[] archivo =
+                    REPORT_SERVICE.generarTablaPDF(reporte);
+
+            registrarAuditoriaReporte(
+                    "PDF",
+                    adultosMayores.size()
+            );
+
+            return archivo;
 
         }catch (IOException ex){
             throw new RuntimeException("Error de fuente.");
@@ -571,10 +790,47 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                                             org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
                                     ),
                                     new ExcelColumn<>(
+                                            "Estado civil",
+                                            AdultoMayorResponse::estadoCivil,
+                                            20,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+
+                                    new ExcelColumn<>(
+                                            "Grado de dependencia",
+                                            AdultoMayorResponse::gradoDependencia,
+                                            25,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+
+                                    new ExcelColumn<>(
+                                            "Cuota mensual",
+                                            AdultoMayorResponse::cuotaMensual,
+                                            18,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.RIGHT
+                                    ),
+                                    new ExcelColumn<>(
                                             "Pensión",
                                             a -> a.pension() ? "Sí" : "No",
                                             15,
                                             org.apache.poi.ss.usermodel.HorizontalAlignment.CENTER
+                                    ),
+                                    new ExcelColumn<>(
+                                            "Tipo de pensión",
+                                            adulto -> adulto.pension()
+                                                    ? adulto.tipoPension()
+                                                    : "No aplica",
+                                            25,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
+                                    ),
+
+                                    new ExcelColumn<>(
+                                            "Monto de pensión",
+                                            adulto -> adulto.pension()
+                                                    ? adulto.montoPension()
+                                                    : null,
+                                            20,
+                                            org.apache.poi.ss.usermodel.HorizontalAlignment.RIGHT
                                     ),
                                     new ExcelColumn<>(
                                             "Funcionalidad Física",
@@ -594,12 +850,6 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                                                     .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
                                             30,
                                             org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT
-                                    ),
-                                    new ExcelColumn<>(
-                                            "Motivo Retiro",
-                                            AdultoMayorResponse::activo,
-                                            15,
-                                            org.apache.poi.ss.usermodel.HorizontalAlignment.CENTER
                                     )
 
                     )).showTimestamp(true)
@@ -607,7 +857,15 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                         .autoFilter(true)
                         .freezeHeader(true)
                         .build();
-            return REPORT_SERVICE.generarTablaExcel(reporte);
+            byte[] archivo =
+                    REPORT_SERVICE.generarTablaExcel(reporte);
+
+            registrarAuditoriaReporte(
+                    "EXCEL",
+                    adultos.size()
+            );
+
+            return archivo;
         } catch (IOException ex) {
             throw new RuntimeException(
                     "Error al generar el reporte de personal en Excel.",
@@ -624,5 +882,26 @@ public class AdultoMayorServiceImpl implements AdultoMayorService {
                 ));
     }
 
+    private void registrarAuditoriaReporte(
+            String formato,
+            int cantidadRegistros
+    ) {
+        Map<String, Object> cambios =
+                new LinkedHashMap<>();
 
+        cambios.put("formato", formato);
+        cambios.put(
+                "cantidadRegistros",
+                cantidadRegistros
+        );
+
+        auditoriaService.registrarAccion(
+                "GENERAR_REPORTE",
+                "ADULTO_MAYOR",
+                "REPORTE",
+                "ADULTOS_MAYORES",
+                "Se generó un reporte de adultos mayores.",
+                cambios
+        );
+    }
 }

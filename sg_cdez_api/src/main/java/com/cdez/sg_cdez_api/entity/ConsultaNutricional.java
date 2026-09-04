@@ -46,6 +46,8 @@ public class ConsultaNutricional {
     private Boolean distension;
     private Boolean gases;
     private Boolean reflujo;
+    private Boolean diarrea;
+    private Boolean estrenimiento;
 
     @Column(name = "frecuencia_evacuaciones", length = 100)
     private String frecuenciaEvacuaciones;
@@ -55,9 +57,6 @@ public class ConsultaNutricional {
 
     @Column(name = "estado_cognitivo", columnDefinition = "TEXT")
     private String estadoCognitivo;
-
-    @OneToMany(mappedBy = "consultaNutricional")
-    private List<TamizajeNutricional> tamizajes;
 
     @OneToMany(mappedBy = "consultaNutricional")
     private List<ExamenLaboratorio> examenesLaboratorio;

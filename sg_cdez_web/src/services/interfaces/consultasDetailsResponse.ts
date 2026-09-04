@@ -1,13 +1,45 @@
 export type Apetito = "BUENO" | "REGULAR" | "MALO";
-export type TipoTamizaje = "MNA" | "SARC_F" | "MUST" | "NRS";
+export const TIPOS_TAMIZAJE = {
+    NUTRICION: ["MNA", "SARC_F", "MUST", "NRS"],
+    PSICOLOGIA: ["COGNITIVO", "ANSIEDAD", "OTROS"],
+} as const;
 
-export interface TamizajeResponse {
+export type EspecialidadTamizaje = keyof typeof TIPOS_TAMIZAJE;
+
+export type TipoTamizajeNutricional =
+    (typeof TIPOS_TAMIZAJE.NUTRICION)[number];
+
+export type TipoTamizajePsych =
+    (typeof TIPOS_TAMIZAJE.PSICOLOGIA)[number];
+
+export type TipoTamizaje =
+    | TipoTamizajeNutricional
+    | TipoTamizajePsych;
+
+interface TamizajeBaseResponse {
     tamizajeId: string;
-    tipo: TipoTamizaje;
-    puntaje: number;
-    resultado: string;
-    observaciones: string;
+    resultado: string | null;
+    observaciones: string | null;
 }
+
+
+export interface TamizajeNutricionalResponse
+  extends TamizajeBaseResponse {
+  tipo: TipoTamizajeNutricional;
+  puntaje: number;
+}
+
+
+export interface TamizajePsychResponse
+    extends TamizajeBaseResponse {
+    tipo: TipoTamizajePsych;
+    puntaje: null;
+}
+
+export type TamizajeResponse =
+  | TamizajeNutricionalResponse
+  | TamizajePsychResponse;
+
 
 export interface ExamenLaboratorioResponse {
     examenId: string;
@@ -33,7 +65,7 @@ export interface AntropometriaResponse {
 }
 
 export interface ConsultaNutricionalDetailResponse {
-    consultaNutricionalId : string;
+    consultaNutricionalId: string;
     historiaAlimentaria: string;
     apetito: Apetito;
     masticacion: string;
@@ -43,12 +75,19 @@ export interface ConsultaNutricionalDetailResponse {
     distension: boolean;
     gases: boolean;
     reflujo: boolean;
+    diarrea: boolean;
+    estrenimiento: boolean;
     frecuenciaEvacuaciones: string;
     consistenciaBristol: string;
     estadoCognitivo: string;
-    tamizajes: TamizajeResponse[];
+    tamizajes: TamizajeNutricionalResponse[];
     examenesLaboratorio: ExamenLaboratorioResponse[];
     antropometria: AntropometriaResponse
+}
+
+export interface ConsultaPsychDetailResponse {
+    consultaPsychId: string;
+    tamizajes: TamizajePsychResponse[];
 }
 
 export interface AdultoMayorConsultaResponse {
@@ -67,7 +106,7 @@ export interface PersonalConsultaResponse {
 }
 
 export interface ConsultaDetailResponse {
-    consultaId : string;
+    consultaId: string;
     adultoMayor: AdultoMayorConsultaResponse;
     motivo: string;
     tipoConsulta: string;
@@ -81,4 +120,5 @@ export interface ConsultaDetailResponse {
     createdAt: string;
     updatedAt: string;
     consultaNutricional: ConsultaNutricionalDetailResponse | null;
+    consultaPsych: ConsultaPsychDetailResponse | null;
 }

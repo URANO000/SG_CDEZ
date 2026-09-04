@@ -11,21 +11,63 @@ import {
 } from "@mantine/core";
 
 import { notifications } from "@mantine/notifications";
+import axios from "axios";
 
-import { actualizarPerfil, obtenerPerfil } from "../../services/perfilService";
+import {
+  actualizarPerfil,
+  obtenerPerfil,
+} from "../../services/perfilService";
 
 import type { PerfilResponse } from "../../services/interfaces/perfilInterface";
+
+import {
+  PerfilContactosForm,
+  type PerfilContactoFormValue,
+} from "../../components/ui/forms/PerfilContactosForm";
 
 import classes from "../../components/ui/styleModules/PersonalForm.module.css";
 
 export function Ajustes() {
-  const [perfil, setPerfil] = useState<PerfilResponse | null>(null);
+  const [perfil, setPerfil] =
+    useState<PerfilResponse | null>(null);
 
   const [direccion, setDireccion] = useState("");
+
+  const [contactos, setContactos] = useState<
+    PerfilContactoFormValue[]
+  >([]);
+
+  const [
+    contactosOriginalesIds,
+    setContactosOriginalesIds,
+  ] = useState<number[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState(false);
+
+  function cargarDatosEnFormulario(response: PerfilResponse) {
+    const contactosRecibidos: PerfilContactoFormValue[] = (
+      response.contactos ?? []
+    ).map((contacto) => ({
+      contactoId: contacto.contactoId,
+      tipoValor: contacto.tipoValor,
+      valor: contacto.valor ?? "",
+    }));
+
+    setPerfil(response);
+    setDireccion(response.direccion ?? "");
+    setContactos(contactosRecibidos);
+
+    setContactosOriginalesIds(
+      contactosRecibidos
+        .map((contacto) => contacto.contactoId)
+        .filter(
+          (contactoId): contactoId is number =>
+            contactoId !== undefined,
+        ),
+    );
+  }
 
   useEffect(() => {
     async function cargarPerfil() {
@@ -34,9 +76,7 @@ export function Ajustes() {
         setError(false);
 
         const response = await obtenerPerfil();
-
-        setPerfil(response);
-        setDireccion(response.direccion ?? "");
+        cargarDatosEnFormulario(response);
       } catch {
         setError(true);
       } finally {
@@ -47,32 +87,113 @@ export function Ajustes() {
     void cargarPerfil();
   }, []);
 
-  async function guardarCambios(event: React.FormEvent<HTMLFormElement>) {
+  async function guardarCambios(
+    event: React.FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault();
 
     if (!perfil) {
       return;
     }
 
+    const direccionNormalizada = direccion.trim();
+
+    if (!direccionNormalizada) {
+      notifications.show({
+        title: "Dirección requerida",
+        message: "Debe ingresar una dirección.",
+        color: "orange",
+      });
+
+      return;
+    }
+
+    const contactoIncompleto = contactos.some(
+      (contacto) =>
+        !contacto.tipoValor ||
+        !contacto.valor.trim(),
+    );
+
+    if (contactoIncompleto) {
+      notifications.show({
+        title: "Contacto incompleto",
+        message:
+          "Seleccione el tipo y complete la información de cada contacto.",
+        color: "orange",
+      });
+
+      return;
+    }
+
+    const contactosActualizar = contactos
+      .filter(
+        (
+          contacto,
+        ): contacto is PerfilContactoFormValue & {
+          contactoId: number;
+        } => contacto.contactoId !== undefined,
+      )
+      .map((contacto) => ({
+        contactoId: contacto.contactoId,
+        tipoValor: contacto.tipoValor,
+        valor: contacto.valor.trim(),
+      }));
+
+    const contactosCrear = contactos
+      .filter(
+        (contacto) => contacto.contactoId === undefined,
+      )
+      .map((contacto) => ({
+        tipoValor: contacto.tipoValor,
+        valor: contacto.valor.trim(),
+      }));
+
+    const contactosActualesIds = new Set(
+      contactosActualizar.map(
+        (contacto) => contacto.contactoId,
+      ),
+    );
+
+    const contactosDesactivar =
+      contactosOriginalesIds.filter(
+        (contactoId) =>
+          !contactosActualesIds.has(contactoId),
+      );
+
     try {
       setGuardando(true);
 
       const actualizado = await actualizarPerfil({
-        direccion: direccion.trim(),
+        direccion: direccionNormalizada,
+        contactosActualizar,
+        contactosDesactivar,
+        contactosCrear,
       });
 
-      setPerfil(actualizado);
-      setDireccion(actualizado.direccion ?? "");
+      cargarDatosEnFormulario(actualizado);
 
       notifications.show({
         title: "Perfil actualizado",
-        message: "La información se actualizó correctamente.",
+        message:
+          "La dirección y los contactos se actualizaron correctamente.",
         color: "green",
       });
-    } catch {
+    } catch (errorActualizacion) {
+      let mensaje =
+        "No se pudo actualizar la información del perfil.";
+
+      if (
+        axios.isAxiosError(errorActualizacion) &&
+        typeof errorActualizacion.response?.data?.message ===
+          "string"
+      ) {
+        mensaje =
+          errorActualizacion.response.data.message;
+      }
+
       notifications.show({
         title: "Error al actualizar",
-        message: "No se pudo actualizar la información del perfil.",
+        message: mensaje,
         color: "red",
       });
     } finally {
@@ -94,7 +215,9 @@ export function Ajustes() {
 
   if (error || !perfil) {
     return (
-      <Alert color="red">No se pudo cargar la información del perfil.</Alert>
+      <Alert color="red">
+        No se pudo cargar la información del perfil.
+      </Alert>
     );
   }
 
@@ -108,21 +231,30 @@ export function Ajustes() {
         </Title>
 
         <Text size="sm" className={classes.subtitle}>
-          Consulte y actualice su información personal.
+          Consulte y actualice su dirección e información
+          de contacto.
         </Text>
       </Paper>
 
-      <form onSubmit={guardarCambios} className={classes.form}>
+      <form
+        onSubmit={guardarCambios}
+        className={classes.form}
+      >
         <Paper className={classes.card}>
           <Group className={classes.sectionHeader}>
-            <Title order={4} className={classes.sectionTitle}>
+            <Title
+              order={4}
+              className={classes.sectionTitle}
+            >
               Información personal
             </Title>
           </Group>
 
           <div className={classes.formGrid}>
             <div className={classes.fieldGroup}>
-              <label className={classes.fieldLabel}>Nombre completo</label>
+              <label className={classes.fieldLabel}>
+                Nombre completo
+              </label>
 
               <input
                 className={classes.input}
@@ -132,13 +264,21 @@ export function Ajustes() {
             </div>
 
             <div className={classes.fieldGroup}>
-              <label className={classes.fieldLabel}>Rol</label>
+              <label className={classes.fieldLabel}>
+                Rol
+              </label>
 
-              <input className={classes.input} value={perfil.rol} disabled />
+              <input
+                className={classes.input}
+                value={perfil.rol}
+                disabled
+              />
             </div>
 
             <div className={classes.fieldGroup}>
-              <label className={classes.fieldLabel}>Especialidad</label>
+              <label className={classes.fieldLabel}>
+                Especialidad
+              </label>
 
               <input
                 className={classes.input}
@@ -160,7 +300,9 @@ export function Ajustes() {
             </div>
 
             <div className={classes.fieldGroup}>
-              <label className={classes.fieldLabel}>Identificación</label>
+              <label className={classes.fieldLabel}>
+                Identificación
+              </label>
 
               <input
                 className={classes.input}
@@ -170,7 +312,9 @@ export function Ajustes() {
             </div>
 
             <div className={classes.fieldGroup}>
-              <label className={classes.fieldLabel}>Carné</label>
+              <label className={classes.fieldLabel}>
+                Carné
+              </label>
 
               <input
                 className={classes.input}
@@ -180,31 +324,63 @@ export function Ajustes() {
             </div>
 
             <div className={classes.fieldGroup}>
-              <label className={classes.fieldLabel}>Correo</label>
+              <label className={classes.fieldLabel}>
+                Correo de inicio de sesión
+              </label>
 
-              <input className={classes.input} value={perfil.correo} disabled />
+              <input
+                className={classes.input}
+                value={perfil.correo}
+                disabled
+              />
+
+              <Text size="xs" className={classes.subtitle}>
+                Este correo solamente puede ser modificado
+                por un usuario administrador.
+              </Text>
             </div>
 
             <div className={classes.fieldGroup}>
-              <label className={classes.fieldLabel}>Estado</label>
+              <label className={classes.fieldLabel}>
+                Estado
+              </label>
 
-              <input className={classes.input} value={perfil.estado} disabled />
+              <input
+                className={classes.input}
+                value={perfil.estado}
+                disabled
+              />
             </div>
 
-            <div className={`${classes.fieldGroup} ${classes.fieldFull}`}>
-              <label className={classes.fieldLabel}>Dirección</label>
+            <div
+              className={`${classes.fieldGroup} ${classes.fieldFull}`}
+            >
+              <label className={classes.fieldLabel}>
+                Dirección
+              </label>
 
               <input
                 className={classes.input}
                 value={direccion}
                 maxLength={200}
-                onChange={(event) => setDireccion(event.target.value)}
+                required
+                onChange={(event) =>
+                  setDireccion(event.currentTarget.value)
+                }
               />
             </div>
           </div>
         </Paper>
 
-        <Group justify="flex-end" className={classes.submitBar}>
+        <PerfilContactosForm
+          contactos={contactos}
+          onChange={setContactos}
+        />
+
+        <Group
+          justify="flex-end"
+          className={classes.submitBar}
+        >
           <Button type="submit" loading={guardando}>
             Guardar cambios
           </Button>

@@ -16,21 +16,33 @@ import {
   Pagination,
   Select,
   Modal,
+  Tooltip,
 } from "@mantine/core";
 
 import axios from "axios";
 
 import type { EpicrisisResponse } from "../../services/interfaces/epicrisisInterface";
 
-import { BsArrowLeft, BsDownload, BsEye } from "react-icons/bs";
+import {
+  BsArrowLeft,
+  BsDownload,
+  BsEye,
+  BsPencilSquare,
+  BsPersonDash,
+} from "react-icons/bs";
 
-import { useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 
 import { obtenerAdultoMayorPorId } from "../../services/adultoMayorService";
 
 import type { AdultoMayorResponse } from "../../services/interfaces/adultoMayorInterface";
 
-import { listarEncargadosPorAdulto } from "../../services/encargadoLegalService";
+import { useAuth } from "../../services/authContext";
+
+import {
+  desactivarEncargadoLegal,
+  listarEncargadosPorAdulto,
+} from "../../services/encargadoLegalService";
 
 import type { EncargadoLegalResponse } from "../../services/interfaces/encargadoLegalInterface";
 
@@ -39,6 +51,8 @@ import classes from "./Expediente.module.css";
 import { EpicrisisTable } from "../../components/ui/tables/EpicrisisTable";
 
 import { EpicrisisForm } from "../../components/ui/forms/EpicrisisForm";
+
+import { MedicamentoForm } from "../../components/ui/forms/MedicamentoForm";
 
 import {
   descargarEpicrisis,
@@ -64,6 +78,19 @@ import type { PageResponse } from "../../services/interfaces/pageResponse";
 
 import { EncargadoLegalForm } from "../../components/ui/forms/EncargadoLegalForm";
 
+import { EncargadoLegalEditarForm } from "../../components/ui/forms/EncargadoLegalEditarForm";
+
+import { MedicamentoTable } from "../../components/ui/tables/MedicamentoTable";
+
+import { TIPOIDENTIFICACION } from "../../services/interfaces/personalCreateRequest";
+
+import {
+  desactivarMedicamento,
+  listarMedicamentosPorAdulto,
+} from "../../services/medicamentoService";
+
+import type { MedicamentoResponse } from "../../services/interfaces/medicamentoInterface";
+
 interface CampoInformacion {
   etiqueta: string;
   valor: string;
@@ -78,15 +105,26 @@ function mostrarFecha(fecha: string | null): string {
 }
 
 function mostrarSexo(sexo: string): string {
-  if (sexo === "H") {
-    return "Hombre";
+  if (sexo === "M") {
+    return "Masculino";
   }
 
-  if (sexo === "M") {
-    return "Mujer";
+  if (sexo === "F") {
+    return "Femenino";
   }
 
   return sexo;
+}
+function mostrarMonto(monto: number | null): string {
+  if (monto === null) {
+    return "No registrado";
+  }
+
+  return new Intl.NumberFormat("es-CR", {
+    style: "currency",
+    currency: "CRC",
+    minimumFractionDigits: 2,
+  }).format(monto);
 }
 
 function Campo({ etiqueta, valor }: CampoInformacion) {
@@ -99,57 +137,63 @@ function Campo({ etiqueta, valor }: CampoInformacion) {
   );
 }
 
+function mostrarTipoIdentificacion(tipo: string): string {
+  return (
+    TIPOIDENTIFICACION.find((opcion) => opcion.value === tipo)?.label ?? tipo
+  );
+}
+
 export function AdultoMayorExpediente() {
   const { adultoId } = useParams();
   const navigate = useNavigate();
-
+  const location = useLocation();
+  const { user } = useAuth();
+  const puedeGestionarExpediente =
+    user?.rol === "ROLE_ADMIN" || user?.rol === "ROLE_AYUDANTE";
   const [adultoMayor, setAdultoMayor] = useState<AdultoMayorResponse | null>(
     null,
   );
-
   const [loading, setLoading] = useState(true);
-
   const [error, setError] = useState(false);
-
   const [encargados, setEncargados] = useState<EncargadoLegalResponse[]>([]);
-
   const [encargadosLoading, setEncargadosLoading] = useState(true);
-
   const [encargadosError, setEncargadosError] = useState(false);
-
   const [modalEncargadoAbierto, setModalEncargadoAbierto] = useState(false);
-
+  const [encargadoAEditar, setEncargadoAEditar] =
+    useState<EncargadoLegalResponse | null>(null);
+  const [encargadoADesactivar, setEncargadoADesactivar] =
+    useState<EncargadoLegalResponse | null>(null);
+  const [desactivandoEncargado, setDesactivandoEncargado] = useState(false);
   const [epicrisisVigente, setEpicrisisVigente] =
     useState<EpicrisisResponse | null>(null);
-
   const [historialEpicrisis, setHistorialEpicrisis] =
     useState<PageResponse<EpicrisisResponse> | null>(null);
-
   const [documentos, setDocumentos] = useState<DocumentoResponse[]>([]);
-
   const [documentosLoading, setDocumentosLoading] = useState(true);
-
   const [documentosError, setDocumentosError] = useState(false);
-
   const [modalDocumentoAbierto, setModalDocumentoAbierto] = useState(false);
-
   const [documentoADesactivar, setDocumentoADesactivar] =
     useState<DocumentoResponse | null>(null);
-
   const [desactivandoDocumento, setDesactivandoDocumento] = useState(false);
+  const [medicamentoSeleccionado, setMedicamentoSeleccionado] =
+    useState<MedicamentoResponse | null>(null);
+  const [medicamentos, setMedicamentos] = useState<MedicamentoResponse[]>([]);
+  const [medicamentosLoading, setMedicamentosLoading] = useState(true);
+  const [medicamentosError, setMedicamentosError] = useState(false);
+  const [medicamentoAEditar, setMedicamentoAEditar] =
+    useState<MedicamentoResponse | null>(null);
 
+  const [medicamentoADesactivar, setMedicamentoADesactivar] =
+    useState<MedicamentoResponse | null>(null);
+
+  const [desactivandoMedicamento, setDesactivandoMedicamento] = useState(false);
+  const [modalMedicamentoAbierto, setModalMedicamentoAbierto] = useState(false);
   const [historialLoading, setHistorialLoading] = useState(true);
-
   const [historialError, setHistorialError] = useState(false);
-
   const [anioEpicrisis, setAnioEpicrisis] = useState<string | null>(null);
-
   const cantidadEpicrisis = 5;
-
   const [epicrisisLoading, setEpicrisisLoading] = useState(true);
-
   const [epicrisisError, setEpicrisisError] = useState(false);
-
   const [modalEpicrisisAbierto, setModalEpicrisisAbierto] = useState(false);
 
   async function cargarHistorialEpicrisis(pagina: number, anio?: number) {
@@ -212,6 +256,63 @@ export function AdultoMayorExpediente() {
     }
   }
 
+  async function cargarMedicamentos() {
+    if (!adultoId) {
+      return;
+    }
+
+    try {
+      setMedicamentosLoading(true);
+      setMedicamentosError(false);
+
+      const response = await listarMedicamentosPorAdulto(adultoId);
+
+      setMedicamentos(response);
+    } catch {
+      setMedicamentosError(true);
+    } finally {
+      setMedicamentosLoading(false);
+    }
+  }
+  function manejarMedicamentoRegistrado() {
+    setModalMedicamentoAbierto(false);
+    void cargarMedicamentos();
+  }
+
+  function manejarMedicamentoActualizado() {
+    setMedicamentoAEditar(null);
+    void cargarMedicamentos();
+  }
+
+  async function confirmarDesactivacionMedicamento() {
+    if (!medicamentoADesactivar) {
+      return;
+    }
+
+    try {
+      setDesactivandoMedicamento(true);
+
+      await desactivarMedicamento(medicamentoADesactivar.medicamentoId);
+
+      setMedicamentoADesactivar(null);
+      await cargarMedicamentos();
+
+      notifications.show({
+        title: "Medicamento desactivado",
+        message: "El medicamento dejó de mostrarse en el expediente.",
+        color: "green",
+      });
+    } catch {
+      notifications.show({
+        title: "Error al desactivar",
+        message: "No se pudo desactivar el medicamento.",
+        color: "red",
+      });
+    } finally {
+      setDesactivandoMedicamento(false);
+    }
+  }
+
   useEffect(() => {
     if (!adultoId) {
       return;
@@ -224,6 +325,14 @@ export function AdultoMayorExpediente() {
     if (!adultoId) return;
 
     void cargarHistorialEpicrisis(0);
+  }, [adultoId]);
+
+  useEffect(() => {
+    if (!adultoId) {
+      return;
+    }
+
+    void cargarMedicamentos();
   }, [adultoId]);
 
   useEffect(() => {
@@ -297,6 +406,8 @@ export function AdultoMayorExpediente() {
     );
   }
 
+  const expedienteEditable = adultoMayor.activo === "Activo";
+
   const resumen: CampoInformacion[] = [
     {
       etiqueta: "Nombre completo",
@@ -327,7 +438,7 @@ export function AdultoMayorExpediente() {
   const informacionGeneral: CampoInformacion[] = [
     {
       etiqueta: "Tipo de identificación",
-      valor: adultoMayor.tipoIdentificacion,
+      valor: mostrarTipoIdentificacion(adultoMayor.tipoIdentificacion),
     },
     {
       etiqueta: "Identificación",
@@ -354,8 +465,32 @@ export function AdultoMayorExpediente() {
       valor: adultoMayor.grupoFamiliar ?? "No registrado",
     },
     {
+      etiqueta: "Estado civil",
+      valor: adultoMayor.estadoCivil ?? "No registrado",
+    },
+    {
+      etiqueta: "Grado de dependencia",
+      valor: adultoMayor.gradoDependencia ?? "No registrado",
+    },
+    {
+      etiqueta: "Cuota mensual",
+      valor: mostrarMonto(adultoMayor.cuotaMensual),
+    },
+    {
       etiqueta: "Recibe pensión",
       valor: adultoMayor.pension ? "Sí" : "No",
+    },
+    {
+      etiqueta: "Tipo de pensión",
+      valor: adultoMayor.pension
+        ? (adultoMayor.tipoPension ?? "No registrado")
+        : "No aplica",
+    },
+    {
+      etiqueta: "Monto de pensión",
+      valor: adultoMayor.pension
+        ? mostrarMonto(adultoMayor.montoPension)
+        : "No aplica",
     },
     {
       etiqueta: "Funcionalidad física",
@@ -448,9 +583,7 @@ export function AdultoMayorExpediente() {
       ventana.document.title = "Cargando archivo...";
 
       const archivo = await descargarEpicrisis(epicrisis.epicrisisId);
-
       const url = URL.createObjectURL(archivo);
-
       ventana.location.href = url;
 
       window.setTimeout(() => {
@@ -545,6 +678,54 @@ export function AdultoMayorExpediente() {
     });
   }
 
+  function abrirEdicionEncargado(encargado: EncargadoLegalResponse) {
+    setEncargadoAEditar(encargado);
+  }
+
+  function manejarEncargadoActualizado(
+    encargadoActualizado: EncargadoLegalResponse,
+  ) {
+    setEncargados((actuales) =>
+      actuales.map((encargado) =>
+        encargado.encargadoId === encargadoActualizado.encargadoId
+          ? encargadoActualizado
+          : encargado,
+      ),
+    );
+
+    setEncargadoAEditar(null);
+  }
+
+  async function confirmarDesactivacionEncargado() {
+    if (!encargadoADesactivar) {
+      return;
+    }
+
+    try {
+      setDesactivandoEncargado(true);
+
+      await desactivarEncargadoLegal(encargadoADesactivar.encargadoId);
+
+      setEncargadoADesactivar(null);
+
+      await cargarEncargados();
+
+      notifications.show({
+        title: "Encargado desactivado",
+        message: "El encargado legal dejó de mostrarse en el expediente.",
+        color: "green",
+      });
+    } catch {
+      notifications.show({
+        title: "Error al desactivar",
+        message: "No se pudo desactivar el encargado legal.",
+        color: "red",
+      });
+    } finally {
+      setDesactivandoEncargado(false);
+    }
+  }
+
   function solicitarDesactivacionDocumento(documento: DocumentoResponse) {
     setDocumentoADesactivar(documento);
   }
@@ -586,7 +767,11 @@ export function AdultoMayorExpediente() {
           variant="subtle"
           aria-label="Volver al listado"
           onClick={() => {
-            navigate("/adultosMayores");
+            navigate("/adultosMayores", {
+              state: {
+                estadoListado: location.state?.estadoListado ?? "ACTIVO",
+              },
+            });
           }}
         >
           <BsArrowLeft size={18} />
@@ -613,7 +798,7 @@ export function AdultoMayorExpediente() {
             </Title>
 
             <Text size="sm" className={classes.secondaryText}>
-              {adultoMayor.tipoIdentificacion}
+              {mostrarTipoIdentificacion(adultoMayor.tipoIdentificacion)}
               {": "}
               {adultoMayor.identificacion}
             </Text>
@@ -643,6 +828,8 @@ export function AdultoMayorExpediente() {
           <Tabs.Tab value="epicrisis">Epicrisis</Tabs.Tab>
 
           <Tabs.Tab value="documentos">Documentos</Tabs.Tab>
+
+          <Tabs.Tab value="medicamentos">Medicamentos</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="resumen" className={classes.panel}>
@@ -694,9 +881,17 @@ export function AdultoMayorExpediente() {
               </Text>
             </div>
 
-            <Button onClick={() => setModalEncargadoAbierto(true)}>
-              + Registrar encargado
-            </Button>
+            {expedienteEditable &&
+              puedeGestionarExpediente &&
+              (encargados.length < 2 ? (
+                <Button onClick={() => setModalEncargadoAbierto(true)}>
+                  + Registrar encargado
+                </Button>
+              ) : (
+                <Text size="sm" c="dimmed">
+                  Máximo de 2 encargados alcanzado.
+                </Text>
+              ))}
           </Group>
           {encargadosLoading ? (
             <div className={classes.loadingState}>
@@ -731,9 +926,36 @@ export function AdultoMayorExpediente() {
                     key={encargado.encargadoId}
                     className={classes.encargadoCard}
                   >
-                    <Title order={4} className={classes.encargadoName}>
-                      {nombreCompleto}
-                    </Title>
+                    <Group justify="space-between" align="flex-start" mb="md">
+                      <Title order={4} className={classes.encargadoName}>
+                        {nombreCompleto}
+                      </Title>
+
+                      {expedienteEditable && puedeGestionarExpediente && (
+                        <Group gap={4}>
+                          <Tooltip label="Editar">
+                            <ActionIcon
+                              variant="subtle"
+                              aria-label="Editar encargado legal"
+                              onClick={() => abrirEdicionEncargado(encargado)}
+                            >
+                              <BsPencilSquare size={17} />
+                            </ActionIcon>
+                          </Tooltip>
+
+                          <Tooltip label="Desactivar">
+                            <ActionIcon
+                              variant="subtle"
+                              color="red"
+                              aria-label="Desactivar encargado legal"
+                              onClick={() => setEncargadoADesactivar(encargado)}
+                            >
+                              <BsPersonDash size={18} />
+                            </ActionIcon>
+                          </Tooltip>
+                        </Group>
+                      )}
+                    </Group>
 
                     <SimpleGrid
                       cols={{
@@ -743,8 +965,10 @@ export function AdultoMayorExpediente() {
                       spacing="lg"
                     >
                       <Campo
-                        etiqueta={"Tipo de identificación"}
-                        valor={encargado.tipoIdentificacion}
+                        etiqueta="Tipo de identificación"
+                        valor={mostrarTipoIdentificacion(
+                          encargado.tipoIdentificacion,
+                        )}
                       />
 
                       <Campo
@@ -812,17 +1036,74 @@ export function AdultoMayorExpediente() {
               onCancelar={() => setModalEncargadoAbierto(false)}
             />
           </Modal>
+          <Modal
+            opened={encargadoAEditar !== null}
+            onClose={() => setEncargadoAEditar(null)}
+            title={
+              <Stack gap={2}>
+                <Title order={3}>Editar encargado legal</Title>
+
+                <Text size="sm" c="dimmed" fw={400}>
+                  Actualice la dirección y los contactos del encargado legal.
+                </Text>
+              </Stack>
+            }
+            centered
+            size="lg"
+          >
+            {encargadoAEditar && (
+              <EncargadoLegalEditarForm
+                key={encargadoAEditar.encargadoId}
+                encargado={encargadoAEditar}
+                onActualizado={manejarEncargadoActualizado}
+                onCancelar={() => setEncargadoAEditar(null)}
+              />
+            )}
+          </Modal>
+          <Modal
+            opened={encargadoADesactivar !== null}
+            onClose={() => setEncargadoADesactivar(null)}
+            title="Desactivar encargado legal"
+            centered
+            size="md"
+          >
+            <Stack gap="lg">
+              <Text>
+                ¿Desea desactivar este encargado legal? Dejará de mostrarse
+                entre los encargados activos asociados al adulto mayor.
+              </Text>
+
+              <Group justify="flex-end">
+                <Button
+                  variant="default"
+                  onClick={() => setEncargadoADesactivar(null)}
+                >
+                  Cancelar
+                </Button>
+
+                <Button
+                  color="red"
+                  loading={desactivandoEncargado}
+                  onClick={() => void confirmarDesactivacionEncargado()}
+                >
+                  Desactivar
+                </Button>
+              </Group>
+            </Stack>
+          </Modal>
         </Tabs.Panel>
 
         <Tabs.Panel value="epicrisis" className={classes.panel}>
-          <Group justify="flex-end" mb="lg">
-            <Button
-              onClick={() => setModalEpicrisisAbierto(true)}
-              className={classes.registerButton}
-            >
-              + Nueva epicrisis
-            </Button>
-          </Group>
+          {expedienteEditable && puedeGestionarExpediente && (
+            <Group justify="flex-end" mb="lg">
+              <Button
+                onClick={() => setModalEpicrisisAbierto(true)}
+                className={classes.registerButton}
+              >
+                + Nueva epicrisis
+              </Button>
+            </Group>
+          )}
           {epicrisisLoading ? (
             <div className={classes.loadingSection}>
               <Loader color="var(--color-primary)" />
@@ -1005,13 +1286,14 @@ export function AdultoMayorExpediente() {
                 Archivos asociados al expediente del adulto mayor.
               </Text>
             </div>
-
-            <Button
-              onClick={() => setModalDocumentoAbierto(true)}
-              className={classes.registerButton}
-            >
-              + Adjuntar documento
-            </Button>
+            {expedienteEditable && (
+              <Button
+                onClick={() => setModalDocumentoAbierto(true)}
+                className={classes.registerButton}
+              >
+                + Adjuntar documento
+              </Button>
+            )}
           </Group>
 
           {documentosLoading ? (
@@ -1028,6 +1310,7 @@ export function AdultoMayorExpediente() {
               onVisualizar={manejarVisualizacionDocumento}
               onDescargar={manejarDescargaDocumento}
               onDesactivar={solicitarDesactivacionDocumento}
+              editable={expedienteEditable}
             />
           )}
 
@@ -1083,6 +1366,209 @@ export function AdultoMayorExpediente() {
                   color="red"
                   loading={desactivandoDocumento}
                   onClick={() => void confirmarDesactivacionDocumento()}
+                >
+                  Desactivar
+                </Button>
+              </Group>
+            </Stack>
+          </Modal>
+        </Tabs.Panel>
+        <Tabs.Panel value="medicamentos" className={classes.panel}>
+          <Group justify="space-between" align="center" mb="lg">
+            <div>
+              <Title order={4} className={classes.personName}>
+                Medicamentos
+              </Title>
+
+              <Text size="sm" className={classes.secondaryText}>
+                Medicamentos asociados al expediente del adulto mayor.
+              </Text>
+            </div>
+            {expedienteEditable && (
+              <Button
+                onClick={() => setModalMedicamentoAbierto(true)}
+                className={classes.registerButton}
+              >
+                + Registrar medicamento
+              </Button>
+            )}
+          </Group>
+
+          {medicamentosLoading ? (
+            <div className={classes.loadingSection}>
+              <Loader color="var(--color-primary)" />
+            </div>
+          ) : medicamentosError ? (
+            <Alert color="red">No se pudieron cargar los medicamentos.</Alert>
+          ) : (
+            <MedicamentoTable
+              medicamentos={medicamentos}
+              editable={expedienteEditable}
+              onConsultar={setMedicamentoSeleccionado}
+              onEditar={setMedicamentoAEditar}
+              onDesactivar={setMedicamentoADesactivar}
+            />
+          )}
+          <Modal
+            opened={modalMedicamentoAbierto}
+            onClose={() => setModalMedicamentoAbierto(false)}
+            title={
+              <Stack gap={2}>
+                <Title order={3}>Registrar medicamento</Title>
+
+                <Text size="sm" c="dimmed" fw={400}>
+                  Ingrese la información del medicamento.
+                </Text>
+              </Stack>
+            }
+            centered
+            size="md"
+          >
+            <MedicamentoForm
+              adultoId={adultoId}
+              onGuardado={manejarMedicamentoRegistrado}
+              onCancelar={() => setModalMedicamentoAbierto(false)}
+            />
+          </Modal>
+          <Modal
+            opened={medicamentoSeleccionado !== null}
+            onClose={() => setMedicamentoSeleccionado(null)}
+            title="Detalle del medicamento"
+            centered
+            size="lg"
+          >
+            {medicamentoSeleccionado && (
+              <Stack gap="lg">
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+                  <Campo
+                    etiqueta="Nombre"
+                    valor={medicamentoSeleccionado.nombre}
+                  />
+
+                  <Campo
+                    etiqueta="Tipo"
+                    valor={medicamentoSeleccionado.tipo
+                      .replaceAll("_", " ")
+                      .toLowerCase()
+                      .replace(/\b\w/g, (letra) => letra.toUpperCase())}
+                  />
+
+                  <Campo
+                    etiqueta="Dosis"
+                    valor={medicamentoSeleccionado.dosis || "No registrada"}
+                  />
+
+                  <Campo
+                    etiqueta="Horario"
+                    valor={medicamentoSeleccionado.horario || "No registrado"}
+                  />
+
+                  <Campo
+                    etiqueta="Registrado por"
+                    valor={medicamentoSeleccionado.createdBy}
+                  />
+
+                  <Campo
+                    etiqueta="Fecha de registro"
+                    valor={new Intl.DateTimeFormat("es-CR", {
+                      dateStyle: "long",
+                      timeStyle: "short",
+                    }).format(new Date(medicamentoSeleccionado.createdAt))}
+                  />
+
+                  {medicamentoSeleccionado.updatedBy && (
+                    <Campo
+                      etiqueta="Actualizado por"
+                      valor={medicamentoSeleccionado.updatedBy}
+                    />
+                  )}
+
+                  {medicamentoSeleccionado.updatedAt && (
+                    <Campo
+                      etiqueta="Fecha de actualización"
+                      valor={new Intl.DateTimeFormat("es-CR", {
+                        dateStyle: "long",
+                        timeStyle: "short",
+                      }).format(new Date(medicamentoSeleccionado.updatedAt))}
+                    />
+                  )}
+                </SimpleGrid>
+
+                <div>
+                  <Text className={classes.label}>Observaciones</Text>
+
+                  <Text className={classes.value}>
+                    {medicamentoSeleccionado.observaciones ||
+                      "Sin observaciones registradas."}
+                  </Text>
+                </div>
+
+                <Group justify="flex-end">
+                  <Button
+                    variant="default"
+                    onClick={() => setMedicamentoSeleccionado(null)}
+                  >
+                    Cerrar
+                  </Button>
+                </Group>
+              </Stack>
+            )}
+          </Modal>
+          <Modal
+            opened={medicamentoAEditar !== null}
+            onClose={() => setMedicamentoAEditar(null)}
+            title={
+              <Stack gap={2}>
+                <Title order={3}>Editar medicamento</Title>
+
+                <Text size="sm" c="dimmed" fw={400}>
+                  Actualice la información del medicamento.
+                </Text>
+              </Stack>
+            }
+            centered
+            size="md"
+          >
+            {medicamentoAEditar && (
+              <MedicamentoForm
+                key={medicamentoAEditar.medicamentoId}
+                adultoId={adultoId}
+                medicamento={medicamentoAEditar}
+                onGuardado={manejarMedicamentoActualizado}
+                onCancelar={() => setMedicamentoAEditar(null)}
+              />
+            )}
+          </Modal>
+          <Modal
+            opened={medicamentoADesactivar !== null}
+            onClose={() => setMedicamentoADesactivar(null)}
+            title="Desactivar medicamento"
+            centered
+          >
+            <Stack gap="md">
+              <Text>
+                ¿Desea desactivar el medicamento{" "}
+                <strong>{medicamentoADesactivar?.nombre}</strong>?
+              </Text>
+
+              <Text size="sm" className={classes.secondaryText}>
+                El medicamento dejará de mostrarse, pero no será eliminado del
+                sistema.
+              </Text>
+
+              <Group justify="flex-end">
+                <Button
+                  variant="default"
+                  disabled={desactivandoMedicamento}
+                  onClick={() => setMedicamentoADesactivar(null)}
+                >
+                  Cancelar
+                </Button>
+
+                <Button
+                  color="red"
+                  loading={desactivandoMedicamento}
+                  onClick={() => void confirmarDesactivacionMedicamento()}
                 >
                   Desactivar
                 </Button>

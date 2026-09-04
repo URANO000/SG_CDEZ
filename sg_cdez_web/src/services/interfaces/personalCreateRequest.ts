@@ -7,7 +7,8 @@ export const ESPECIALIDADES = [
     { value: "TERAPIA_FISICA", label: "Terapia Física" },
     { value: "TERAPIA_RESPIRATORIA", label: "Terapia Respiratoria" },
     { value: "TERAPIA_LENGUAJE", label: "Terapia de Lenguaje" },
-    {value: "COORDINACION", label: "Coordinación"}
+    {value: "COORDINACION", label: "Coordinación"},
+    {value: "TERAPIA_OCUPACIONAL", label: "Terapia Ocupacional"}
 ] as const;
 
 export type Especialidad = typeof ESPECIALIDADES[number]["value"];
@@ -22,6 +23,20 @@ export const TIPOIDENTIFICACION = [
     {value: "CRE", label: "Carné de refugiado"},
     {value: "PEX", label: "Pasaporte extranjero"}
 ]
+
+export const ROLES = [
+    { value: "1", label: "Administrador" },
+    { value: "2", label: "Usuario normal" },
+    { value: "3", label: "Ayudante administrativo" },
+] as const;
+
+export const ROL = [
+    { value: "ADMIN", label: "Administrador" },
+    { value: "PERSONAL", label: "Usuario normal" },
+    { value: "AYUDANTE", label: "Ayudante administrativo" },
+]
+
+export type Rol = typeof ROL[number]["value"];
 
 export type Tipoidentificacion = typeof TIPOIDENTIFICACION[number]["value"];
 

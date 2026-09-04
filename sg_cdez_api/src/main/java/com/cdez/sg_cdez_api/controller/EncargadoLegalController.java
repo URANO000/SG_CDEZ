@@ -48,4 +48,11 @@ public class EncargadoLegalController {
     ) {
         return encargadoLegalService.actualizarEncargado(encargadoId, request);
     }
+
+    @PatchMapping("/encargados/{encargadoId}/desactivar")
+    public EncargadoLegalResponse desactivarEncargado(
+            @PathVariable UUID encargadoId
+    ) {
+        return encargadoLegalService.desactivarEncargado(encargadoId);
+    }
 }

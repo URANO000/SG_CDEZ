@@ -170,6 +170,16 @@ export function ConsultaNutricionalCard({
                             label="Reflujo"
                             value={nutricional.reflujo} />
 
+                        <BooleanField
+                            label="Diarrea"
+                            value={nutricional.diarrea}
+                        />
+
+                        <BooleanField
+                            label="Estreñimiento"
+                            value={nutricional.estrenimiento}
+                        />
+
                     </SimpleGrid>
 
                 </div>

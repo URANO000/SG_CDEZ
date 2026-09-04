@@ -12,8 +12,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.UUID;
 
 
@@ -46,5 +50,14 @@ public class ConsultaController {
     @PostMapping("/desactivarConsulta/{id}")
     public ConsultaDetailResponse desactivarConsulta(@PathVariable(name = "id") UUID id){
         return SERVICE.desactivarConsulta(id);
+    }
+
+    @GetMapping("/consultas/{id}/pdf")
+    public ResponseEntity<byte[]> descargarConsultaPDF(@PathVariable(name = "id") UUID id) throws IOException {
+        byte[] pdf = SERVICE.exportarConsultaPDF(id);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=consulta.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 }

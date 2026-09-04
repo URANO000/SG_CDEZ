@@ -54,9 +54,26 @@ CREATE TABLE AdultoMayor(
 	direccion VARCHAR(200) NOT NULL,
 	escolaridad VARCHAR(80) NOT NULL,
 	grupo_familiar VARCHAR(200),
-	pension BOOL NOT NULL,
+	estado_civil VARCHAR(30) NULL,
+	grado_dependencia VARCHAR(30) NULL,
+	cuota_mensual NUMERIC(12, 2) NOT NULL DEFAULT 0,
+	pension BOOL NOT NULL DEFAULT FALSE,
+	tipo_pension VARCHAR(100) NULL,
+	monto_pension NUMERIC(12, 2) NULL,
 	funcionalidad_fisica VARCHAR(200) NULL,
-	ayuda_biomecanica BOOL NOT NULL,
+	ayuda_biomecanica BOOL NOT NULL DEFAULT FALSE,
+	CONSTRAINT chk_adulto_cuota_mensual
+	    CHECK (cuota_mensual >= 0),
+	CONSTRAINT chk_adulto_datos_pension
+	    CHECK (
+	        (pension = FALSE
+	            AND tipo_pension IS NULL
+	            AND monto_pension IS NULL)
+	        OR
+	        (pension = TRUE
+	            AND tipo_pension IS NOT NULL
+	            AND LENGTH(TRIM(tipo_pension)) > 0
+	            AND monto_pension > 0)),
 	fecha_ingreso TIMESTAMP NOT NULL,
 	fecha_retiro TIMESTAMP NULL,
 	fecha_fallecimiento TIMESTAMP NULL,
@@ -252,6 +269,8 @@ CREATE TABLE ConsultaNutricional(
 	distension BOOLEAN,
 	gases BOOLEAN,
 	reflujo BOOLEAN,
+	diarrea BOOLEAN,
+	estrenimiento BOOLEAN,
 	frecuencia_evacuaciones TEXT,
 	consistencia_bristol TEXT,
 	estado_cognitivo TEXT
@@ -271,16 +290,6 @@ CREATE TABLE Antropometria (
 	circunferencia_braquial DECIMAL(6,2),
     circunferencia_cintura DECIMAL(6,2),
     perdida_peso_porcentaje DECIMAL(5,2)
-);
-
-CREATE TABLE TamizajeNutricional(
-	tamizaje_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	consulta_nutricional_id UUID NOT NULL REFERENCES ConsultaNutricional(consulta_nutricional_id),
-
-	tipo VARCHAR(30) NOT NULL,
-	puntaje DECIMAL(6,2),
-	resultado VARCHAR(100),
-	observaciones TEXT
 );
 
 CREATE TABLE ExamenLaboratorio (
@@ -320,6 +329,22 @@ CREATE TABLE Referencia (
 	created_at TIMESTAMP NOT NUll
 );
 
+-- 29/08/2026
+
+CREATE TABLE ConsultaPsych(
+	consulta_psych_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	consulta_id UUID NOT NULL UNIQUE REFERENCES Consulta(consulta_id));
+
+CREATE TABLE Tamizaje(
+	tamizaje_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	consulta_id UUID NOT NULL REFERENCES Consulta(consulta_id),
+
+	tipo VARCHAR(30) NOT NULL,
+	puntaje DECIMAL(6,2),
+	resultado VARCHAR(100),
+	observaciones TEXT
+);
+
 CREATE UNIQUE INDEX IF NOT EXISTS ux_rol_nombre
     ON rol (LOWER(nombre));
 
@@ -328,10 +353,6 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_personal_usuario
 
 CREATE UNIQUE INDEX IF NOT EXISTS ux_personal_tipo_identificacion_identificacion
     ON personal (tipo_identificacion, identificacion);
-
-CREATE UNIQUE INDEX IF NOT EXISTS ux_personal_carnet
-    ON personal (carnet)
-    WHERE carnet IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS ix_personal_rol_id
     ON personal (rol_id);
@@ -398,4 +419,35 @@ CREATE INDEX IF NOT EXISTS ix_consulta_updated_by
     WHERE updated_by IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS ix_tamizaje_consulta_tipo
-    ON tamizajenutricional (consulta_nutricional_id, tipo);
+    ON tamizaje (consulta_id, tipo);
+
+-- 30/08/2026
+CREATE TABLE RefreshToken (
+    refresh_token_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    personal_id UUID NOT NULL
+        REFERENCES Personal(personal_id),
+    token_hash VARCHAR(64) NOT NULL UNIQUE,
+    recordarme BOOLEAN NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_used_at TIMESTAMP NULL,
+    expires_at TIMESTAMP NOT NULL,
+    revocado BOOLEAN NOT NULL DEFAULT FALSE,
+    revoked_at TIMESTAMP NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_refresh_token_hash
+    ON refreshtoken (token_hash);
+
+CREATE INDEX IF NOT EXISTS ix_refresh_token_personal_activo
+    ON refreshtoken (personal_id, expires_at)
+    WHERE revocado = FALSE;
+
+CREATE INDEX IF NOT EXISTS ix_refresh_token_expires_at
+    ON refreshtoken (expires_at);
+
+ALTER TABLE adultomayor
+ADD COLUMN IF NOT EXISTS tipo_pension VARCHAR(100);
+
+ALTER TABLE adultomayor
+ADD COLUMN IF NOT EXISTS monto_pension NUMERIC(12, 2);
+

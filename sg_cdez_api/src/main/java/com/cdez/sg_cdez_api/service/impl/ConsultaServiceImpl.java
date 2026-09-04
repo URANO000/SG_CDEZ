@@ -14,9 +14,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import jakarta.transaction.Transactional;
 
+import java.io.IOException;
 import java.time.*;
-import java.util.UUID;
+import java.util.*;
 
 
 @Service
@@ -30,7 +32,56 @@ public class ConsultaServiceImpl implements ConsultaService {
     private final AntropometriaService ANTROPOMETRIA_SERVICE;
     private final ExamenLaboratorioService EXAMENLAB_SERVICE;
     private final ReferenciaService REFERENCIA_SERVICE;
+    private final ReportService REPORT_SERVICE;
+    private final AuditoriaService AUDITORIA_SERVICE;
 
+    private void registrarAuditoria(
+            String accion,
+            Consulta consulta,
+            String descripcion
+    ) {
+        AUDITORIA_SERVICE.registrarAccion(
+                accion,
+                "CONSULTA",
+                "Consulta",
+                consulta.getConsultaId().toString(),
+                descripcion
+        );
+    }
+
+    private void agregarCambio(
+            Map<String, Object> cambios,
+            String campo,
+            Object anterior,
+            Object nuevo
+    ) {
+        if (Objects.equals(anterior, nuevo)) {
+            return;
+        }
+
+        Map<String, Object> detalle = new LinkedHashMap<>();
+        detalle.put("anterior", anterior);
+        detalle.put("nuevo", nuevo);
+
+        cambios.put(campo, detalle);
+    }
+
+    private void agregarCambioClinico(
+            Map<String, Object> cambios,
+            String campo,
+            Object anterior,
+            Object nuevo
+    ) {
+        if (Objects.equals(anterior, nuevo)) {
+            return;
+        }
+
+        Map<String, Object> detalle = new LinkedHashMap<>();
+        detalle.put("anterior", "Valor clínico protegido");
+        detalle.put("nuevo", "Valor clínico modificado");
+
+        cambios.put(campo, detalle);
+    }
     @Override
     public PageResponse<ConsultaPageResponse> listarConsultasFiltradas(ConsultaFiltro filtros, Pageable pageable) {
         Specification<Consulta> spec = Specification.unrestricted();
@@ -49,6 +100,14 @@ public class ConsultaServiceImpl implements ConsultaService {
 
         if(filtros.especialidad() != null){
             spec = spec.and(ConsultaSpecs.hasEspecialidad(filtros.especialidad()));
+        }
+
+        if(filtros.fecha() != null){
+            spec = spec.and(ConsultaSpecs.hasDate(filtros.fecha()));
+        }
+
+        if(filtros.fechaDesde() != null && filtros.fechaHasta() != null){
+            spec = spec.and(ConsultaSpecs.hasDateRange(filtros.fechaDesde(), filtros.fechaHasta()));
         }
 
 
@@ -105,16 +164,40 @@ public class ConsultaServiceImpl implements ConsultaService {
                 LocalDateTime.now(Clock.systemUTC())
         );
 
-        return REPOSITORY.save(nuevaConsulta);
+        Consulta consultaGuardada =
+                REPOSITORY.save(nuevaConsulta);
+
+        registrarAuditoria(
+                "REGISTRAR_CONSULTA",
+                consultaGuardada,
+                "Se registró una consulta para el adulto mayor: "
+                        + consultaGuardada
+                        .getAdultoMayor()
+                        .getNombreCompleto()
+                        + "."
+        );
+
+        return consultaGuardada;
     }
 
     @Override
-    public ConsultaDetailResponse crearConsulta(ConsultaCreateRequest request) {
-        Consulta consulta = crearConsultaEntity(request);
-        if(request.referencia() != null){
+    @Transactional
+    public ConsultaDetailResponse crearConsulta(
+            ConsultaCreateRequest request
+    ) {
+        Consulta consulta =
+                crearConsultaEntity(request);
+
+        ReferenciaCreateRequest referencia =
+                request.referencia();
+
+        if (
+                referencia != null &&
+                        referencia.receptorId() != null
+        ) {
             REFERENCIA_SERVICE.crearReferencia(
                     consulta,
-                    request.referencia()
+                    referencia
             );
         }
 
@@ -122,30 +205,150 @@ public class ConsultaServiceImpl implements ConsultaService {
     }
 
     @Override
-    public ConsultaDetailResponse actualizarConsulta(ConsultaUpdateRequest request, UUID id) {
+    public ConsultaDetailResponse actualizarConsulta(
+            ConsultaUpdateRequest request,
+            UUID id
+    ) {
         Consulta consultaActualizar = obtenerConsultaCheck(id);
 
-        verificarEdicionValida(consultaActualizar.getCreatedBy().getPersonalId());
+        verificarEdicionValida(
+                consultaActualizar.getCreatedBy().getPersonalId()
+        );
 
-        consultaActualizar.setTipoConsulta((request.tipoConsulta() == null)
-                ? null : request.tipoConsulta().trim().toUpperCase());
-        consultaActualizar.setMotivo((request.motivo() == null)
-                ? null : request.motivo().trim());
-        consultaActualizar.setDescripcion((request.descripcion() == null)
-                ? "N/A" : request.descripcion().trim());
-        consultaActualizar.setDiagnostico((request.diagnostico() == null)
-                ? "N/A" : request.diagnostico().trim());
-        consultaActualizar.setResultadosEvaluaciones((request.resultadosEvaluaciones() == null)
-                ? "N/A" : request.resultadosEvaluaciones());
-        consultaActualizar.setRecomendaciones((request.recomendaciones() == null)
-                ? "N/A" : request.recomendaciones().trim());
-        consultaActualizar.setNotas((request.notas() == null)
-                ? "N/A" : request.notas().trim());
+        String tipoConsultaNuevo =
+                request.tipoConsulta() == null
+                        ? null
+                        : request.tipoConsulta()
+                        .trim()
+                        .toUpperCase();
 
-        consultaActualizar.setUpdatedBy(AUTH_HELPER.obtenerUsuarioAutenticado());
-        consultaActualizar.setUpdatedAt(LocalDateTime.now(Clock.systemUTC()));
+        String motivoNuevo =
+                request.motivo() == null
+                        ? null
+                        : request.motivo().trim();
 
-        Consulta consultaActualizada = REPOSITORY.save(consultaActualizar);
+        String descripcionNueva =
+                request.descripcion() == null
+                        ? "N/A"
+                        : request.descripcion().trim();
+
+        String diagnosticoNuevo =
+                request.diagnostico() == null
+                        ? "N/A"
+                        : request.diagnostico().trim();
+
+        String resultadosNuevos =
+                request.resultadosEvaluaciones() == null
+                        ? "N/A"
+                        : request.resultadosEvaluaciones();
+
+        String recomendacionesNuevas =
+                request.recomendaciones() == null
+                        ? "N/A"
+                        : request.recomendaciones().trim();
+
+        String notasNuevas =
+                request.notas() == null
+                        ? "N/A"
+                        : request.notas().trim();
+
+        boolean esConsultaNutricional =
+                consultaActualizar.getConsultaNutricional() != null;
+
+        Map<String, Object> cambios = new LinkedHashMap<>();
+
+        agregarCambio(
+                cambios,
+                "tipoConsulta",
+                consultaActualizar.getTipoConsulta(),
+                tipoConsultaNuevo
+        );
+
+        agregarCambioClinico(
+                cambios,
+                "motivo",
+                consultaActualizar.getMotivo(),
+                motivoNuevo
+        );
+
+        agregarCambioClinico(
+                cambios,
+                "descripcion",
+                consultaActualizar.getDescripcion(),
+                descripcionNueva
+        );
+
+        agregarCambioClinico(
+                cambios,
+                "diagnostico",
+                consultaActualizar.getDiagnostico(),
+                diagnosticoNuevo
+        );
+
+        agregarCambioClinico(
+                cambios,
+                "resultadosEvaluaciones",
+                consultaActualizar.getResultadosEvaluaciones(),
+                resultadosNuevos
+        );
+
+        agregarCambioClinico(
+                cambios,
+                "recomendaciones",
+                consultaActualizar.getRecomendaciones(),
+                recomendacionesNuevas
+        );
+
+        agregarCambioClinico(
+                cambios,
+                "notas",
+                consultaActualizar.getNotas(),
+                notasNuevas
+        );
+
+        consultaActualizar.setTipoConsulta(tipoConsultaNuevo);
+        consultaActualizar.setMotivo(motivoNuevo);
+        consultaActualizar.setDescripcion(descripcionNueva);
+        consultaActualizar.setDiagnostico(diagnosticoNuevo);
+        consultaActualizar.setResultadosEvaluaciones(resultadosNuevos);
+        consultaActualizar.setRecomendaciones(recomendacionesNuevas);
+        consultaActualizar.setNotas(notasNuevas);
+
+        consultaActualizar.setUpdatedBy(
+                AUTH_HELPER.obtenerUsuarioAutenticado()
+        );
+
+        consultaActualizar.setUpdatedAt(
+                LocalDateTime.now(Clock.systemUTC())
+        );
+
+        Consulta consultaActualizada =
+                REPOSITORY.save(consultaActualizar);
+
+        AUDITORIA_SERVICE.registrarAccion(
+                esConsultaNutricional
+                        ? "ACTUALIZAR_CONSULTA_NUTRICIONAL"
+                        : "ACTUALIZAR_CONSULTA",
+                "CONSULTA",
+                "Consulta",
+                consultaActualizada.getConsultaId().toString(),
+                cambios.isEmpty()
+                        ? esConsultaNutricional
+                        ? "Se procesó la actualización de una consulta nutricional."
+                        : "Se procesó una actualización de consulta sin cambios."
+                        : esConsultaNutricional
+                        ? "Se actualizó una consulta nutricional del adulto mayor: "
+                        + consultaActualizada
+                        .getAdultoMayor()
+                        .getNombreCompleto()
+                        + "."
+                        : "Se actualizó una consulta del adulto mayor: "
+                        + consultaActualizada
+                        .getAdultoMayor()
+                        .getNombreCompleto()
+                        + ".",
+                cambios.isEmpty() ? null : cambios
+        );
 
         return mapDetailDTO(consultaActualizada);
     }
@@ -154,11 +357,41 @@ public class ConsultaServiceImpl implements ConsultaService {
     public ConsultaDetailResponse desactivarConsulta(UUID id) {
         Consulta consulta = obtenerConsultaCheck(id);
 
-        verificarEdicionValida(consulta.getCreatedBy().getPersonalId());
+        verificarEdicionValida(
+                consulta.getCreatedBy().getPersonalId()
+        );
 
         consulta.setActivo(false);
+        consulta.setUpdatedBy(
+                AUTH_HELPER.obtenerUsuarioAutenticado()
+        );
+        consulta.setUpdatedAt(
+                LocalDateTime.now(Clock.systemUTC())
+        );
 
         Consulta consultaDesactivada = REPOSITORY.save(consulta);
+
+        boolean esConsultaNutricional =
+                consulta.getConsultaNutricional() != null;
+
+        registrarAuditoria(
+                esConsultaNutricional
+                        ? "DESACTIVAR_CONSULTA_NUTRICIONAL"
+                        : "DESACTIVAR_CONSULTA",
+                consultaDesactivada,
+                esConsultaNutricional
+                        ? "Se desactivó una consulta nutricional del adulto mayor: "
+                        + consultaDesactivada
+                        .getAdultoMayor()
+                        .getNombreCompleto()
+                        + "."
+                        : "Se desactivó una consulta del adulto mayor: "
+                        + consultaDesactivada
+                        .getAdultoMayor()
+                        .getNombreCompleto()
+                        + "."
+        );
+
         return mapDetailDTO(consultaDesactivada);
     }
 
@@ -166,10 +399,15 @@ public class ConsultaServiceImpl implements ConsultaService {
         AdultoMayor adultoMayor = consulta.getAdultoMayor();
         Personal personal = consulta.getCreatedBy();
 
-        ConsultaNutricionalPageResponse nutricional = null;
+        UUID nutricional = null;
+        UUID psych = null;
 
         if(consulta.getConsultaNutricional() != null){
-            nutricional = nutricionalMapDTO(consulta.getConsultaNutricional());
+            nutricional = nutricionalDetaiLResponse(consulta.getConsultaNutricional());
+        }
+
+        if(consulta.getConsultaPsych() != null){
+            psych = psychDetailResponse(consulta.getConsultaPsych());
         }
 
         return new ConsultaPageResponse(
@@ -191,8 +429,14 @@ public class ConsultaServiceImpl implements ConsultaService {
                 ),
                 consulta.getCreatedAt(),
                 consulta.getUpdatedAt(),
-                nutricional
+                nutricional,
+                psych
         );
+    }
+
+    public byte[] exportarConsultaPDF(UUID consultaId) throws IOException{
+        ConsultaDetailResponse detalle = obtenerConsultaPorId(consultaId);
+        return REPORT_SERVICE.generarConsultaPDF(detalle);
     }
 
     private ConsultaDetailResponse mapDetailDTO(Consulta consulta) {
@@ -202,6 +446,11 @@ public class ConsultaServiceImpl implements ConsultaService {
         ConsultaNutricionalDetailResponse nutricional = null;
         if (consulta.getConsultaNutricional() != null) {
             nutricional = nutricionalMapDetailDTO(consulta.getConsultaNutricional());
+        }
+
+        ConsultaPsychResponse psych = null;
+        if(consulta.getConsultaPsych() != null){
+            psych = psychMapDetailDTO(consulta.getConsultaPsych());
         }
 
         Personal currentUser = AUTH_HELPER.obtenerUsuarioAutenticado();
@@ -235,14 +484,14 @@ public class ConsultaServiceImpl implements ConsultaService {
                 ),
                 consulta.getCreatedAt(),
                 consulta.getUpdatedAt(),
-                nutricional
+                nutricional,
+                puedeVerCamposClinicos ? psych : null
         );
     }
 
-    public ConsultaNutricionalPageResponse nutricionalMapDTO(ConsultaNutricional consultaNutricional){
-        return new ConsultaNutricionalPageResponse(
-                consultaNutricional.getConsultaNutricionalId()
-        );
+    public UUID nutricionalDetaiLResponse(ConsultaNutricional consultaNutricional){
+        return consultaNutricional.getConsultaNutricionalId();
+
     }
 
     private ConsultaNutricionalDetailResponse nutricionalMapDetailDTO(ConsultaNutricional consultaNutricional){
@@ -257,13 +506,26 @@ public class ConsultaServiceImpl implements ConsultaService {
                 consultaNutricional.getDistension(),
                 consultaNutricional.getGases(),
                 consultaNutricional.getReflujo(),
+                consultaNutricional.getDiarrea(),
+                consultaNutricional.getEstrenimiento(),
                 consultaNutricional.getFrecuenciaEvacuaciones(),
                 consultaNutricional.getConsistenciaBristol(),
                 consultaNutricional.getEstadoCognitivo(),
-                TAMIZAJE_SERVICE.listarTamizajesPorConsulta(consultaNutricional),
+                TAMIZAJE_SERVICE.listarTamizajesPorConsultaNutricional(consultaNutricional),
                 EXAMENLAB_SERVICE.listarExamenesPorConsulta(consultaNutricional),
                 ANTROPOMETRIA_SERVICE.obtenerAntropometriaPorConsulta(consultaNutricional)
         );
+    }
+
+    private ConsultaPsychResponse psychMapDetailDTO(ConsultaPsych consultaPsych){
+        return new ConsultaPsychResponse(
+                consultaPsych.getConsultaPsychId(),
+                TAMIZAJE_SERVICE.listarTamizajesPorConsultaPsych(consultaPsych)
+        );
+    }
+
+    private UUID psychDetailResponse(ConsultaPsych consultaPsych){
+        return consultaPsych.getConsultaPsychId();
     }
 
     public Consulta obtenerConsultaCheck(UUID id){

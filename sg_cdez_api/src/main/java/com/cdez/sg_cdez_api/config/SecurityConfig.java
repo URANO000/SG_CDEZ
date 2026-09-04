@@ -46,19 +46,78 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/forgot-password").permitAll()
                         .requestMatchers("/api/auth/restablecer-contrasena").permitAll()
                         .requestMatchers("/api/auth/cambiarContrasena/**").permitAll()
+                        .requestMatchers("/api/auth/refresh").permitAll()
                         .requestMatchers("/api/auth/session").hasAnyRole("PERSONAL", "ADMIN",  "AYUDANTE")
                         .requestMatchers("/api/auth/activar").permitAll()
                         .requestMatchers("/api/auth/reenviar-verificacion").permitAll()
 
                         .requestMatchers("/api/perfil/**").hasAnyRole("PERSONAL", "ADMIN",  "AYUDANTE")
-                        // Solo el rol ADMIN puede registrar adultos mayores
-                        .requestMatchers(HttpMethod.POST, "/api/adultos-mayores").hasAnyRole("ADMIN",  "AYUDANTE")
+                                // Registrar adultos mayores: solo ADMIN y AYUDANTE.
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/api/adultos-mayores"
+                                )
+                                .hasAnyRole("ADMIN", "AYUDANTE")
+                                // Registrar encargados legales: solo ADMIN y AYUDANTE.
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/api/adultos-mayores/*/encargados"
+                                )
+                                .hasAnyRole("ADMIN", "AYUDANTE")
 
-                        // Los roles PERSONAL y ADMIN pueden acceder al resto de operaciones del módulo
-                        .requestMatchers("/api/adultos-mayores/**").hasAnyRole("PERSONAL", "ADMIN",  "AYUDANTE")
+                                // Registrar epicrisis: solo ADMIN y AYUDANTE.
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/api/adultos-mayores/*/epicrisis"
+                                )
+                                .hasAnyRole("ADMIN", "AYUDANTE")
+                                // Editar adultos mayores: solo ADMIN y AYUDANTE.
+                                .requestMatchers(
+                                        HttpMethod.PUT,
+                                        "/api/adultos-mayores/**"
+                                )
+                                .hasAnyRole("ADMIN", "AYUDANTE")
 
-                        .requestMatchers("/api/epicrisis/**").hasAnyRole("ADMIN", "PERSONAL",  "AYUDANTE")
-                        .requestMatchers("/api/encargados/**").hasAnyRole("PERSONAL", "ADMIN",  "AYUDANTE")
+                                // Activar, desactivar o registrar fallecimiento.
+                                .requestMatchers(
+                                        HttpMethod.PATCH,
+                                        "/api/adultos-mayores/**"
+                                )
+                                .hasAnyRole("ADMIN", "AYUDANTE")
+
+                                // Consultar el expediente: todos los roles autenticados.
+                                .requestMatchers("/api/adultos-mayores/**")
+                                .hasAnyRole("PERSONAL", "ADMIN", "AYUDANTE")
+                                // Editar o desactivar encargados: solo ADMIN y AYUDANTE.
+                                .requestMatchers(
+                                        HttpMethod.PUT,
+                                        "/api/encargados/**"
+                                )
+                                .hasAnyRole("ADMIN", "AYUDANTE")
+                                .requestMatchers(
+                                        HttpMethod.PATCH,
+                                        "/api/encargados/**"
+                                )
+                                .hasAnyRole("ADMIN", "AYUDANTE")
+                                // Consultar encargados: todos los roles autenticados.
+                                .requestMatchers("/api/encargados/**")
+                                .hasAnyRole("PERSONAL", "ADMIN", "AYUDANTE")
+                                // Editar o desactivar epicrisis: solo ADMIN y AYUDANTE.
+                                .requestMatchers(
+                                        HttpMethod.PUT,
+                                        "/api/epicrisis/**"
+                                )
+                                .hasAnyRole("ADMIN", "AYUDANTE")
+
+                                .requestMatchers(
+                                        HttpMethod.PATCH,
+                                        "/api/epicrisis/**"
+                                )
+                                .hasAnyRole("ADMIN", "AYUDANTE")
+
+                                // Consultar, visualizar y descargar epicrisis: todos los roles.
+                                .requestMatchers("/api/epicrisis/**")
+                                .hasAnyRole("PERSONAL", "ADMIN", "AYUDANTE")
                         .requestMatchers("/api/documentos/**").hasAnyRole("PERSONAL", "ADMIN",  "AYUDANTE")
                         .requestMatchers("/api/auditorias/**").hasAnyRole("ADMIN",  "AYUDANTE")
                         .requestMatchers("/api/medicamentos/**").hasAnyRole("ADMIN",  "AYUDANTE", "PERSONAL")
@@ -71,10 +130,14 @@ public class SecurityConfig {
                         .requestMatchers("/api/personal/desactivarPersonal/**").hasRole("ADMIN")
                         .requestMatchers("/api/personal/reportePDF").hasRole("ADMIN")
                         .requestMatchers("/api/personal/reporteExcel").hasRole("ADMIN")
+                        .requestMatchers("/api/dashboard/admin").hasRole("ADMIN")
+                        .requestMatchers("/api/dashboard/personal").hasRole("PERSONAL")
+                        .requestMatchers("/api/dashboard/ayudante").hasRole("AYUDANTE")
 
 
                         .requestMatchers("/api/consulta/**").hasAnyRole("PERSONAL", "AYUDANTE")
                         .requestMatchers("/api/consulta-nutricional/**").hasAnyRole("PERSONAL",  "AYUDANTE")
+                        .requestMatchers("/api/consulta-psych/**").hasAnyRole("PERSONAL", "AYUDANTE")
 
                         .requestMatchers("/error").permitAll()
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()

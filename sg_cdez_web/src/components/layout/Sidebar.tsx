@@ -18,10 +18,11 @@ const footer = [
   { label: "Documentación", to: "/documentacion", icon: BsMapFill }
 ];
 
+
 export function Sidebar() {
   const location = useLocation();
   const { user } = useAuth();
-  const [opened, { toggle, close }] = useDisclosure(false);
+  const [opened, { toggle, close }] = useDisclosure(true);
 
   if (!user) {
     return null;
@@ -42,7 +43,7 @@ export function Sidebar() {
 
       {opened && <div className={classes.overlay} onClick={close} />}
 
-      <nav className={`${classes.navbar} ${opened ? classes.navbarOpen : ""}`}>
+      <nav  className={`${classes.navbar} ${opened ? classes.navbarOpen : classes.navbarClosed}`}>
         <div className={classes.header}>
           <img src="/zurqui-logo.png" alt="logo" className={classes.logo} />
         </div>

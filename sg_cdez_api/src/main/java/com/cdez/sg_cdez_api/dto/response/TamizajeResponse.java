@@ -10,6 +10,6 @@ public record TamizajeResponse(
         TipoTamizaje tipo,
         BigDecimal puntaje,
         String resultado,
-        String observaiones
+        String observaciones
 ) {
 }

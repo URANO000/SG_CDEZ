@@ -13,4 +13,9 @@ public interface ContactoRepository extends JpaRepository<Contacto, Integer> {
     List<Contacto> findByPersonalAndActivoTrue(Personal personal);
     List<Contacto> findByEncargado(EncargadoLegal encargadoLegal);
     Optional<Contacto> findByContactoIdAndPersonalPersonalId(Integer contactoId, UUID personalId);
+    Optional<Contacto> findByContactoIdAndEncargadoEncargadoId(
+            Integer contactoId,
+            UUID encargadoId
+    );
 }
+

@@ -10,7 +10,8 @@ import { AiOutlineSearch } from "react-icons/ai";
 import { Link } from "react-router";
 import { generarReportePDF, generarReporteExcel } from "../../services/personalService";
 import { ESPECIALIDADES } from "../../services/interfaces/personalCreateRequest";
-import {TbFileTypePdf, TbFileTypeXls, TbChevronDown} from "react-icons/tb";
+import { TbFileTypePdf, TbFileTypeXls, TbChevronDown } from "react-icons/tb";
+import { BsPlusLg } from "react-icons/bs";
 
 export function Personal() {
     const [filtros, setFiltros] = useState<PersonalFiltro>({
@@ -66,13 +67,14 @@ export function Personal() {
             <div className={classes.subpg}>
                 <div className={classes.btnBar}>
                     <Link to={'/personal/registrar'} className={classes.createBtn}>
-                        <Button>
+                        <Button
+                            leftSection={<BsPlusLg size={15} />}>
                             Registrar Personal
                         </Button>
                     </Link>
                     <Menu position="top-end" withinPortal radius="md">
                         <Menu.Target>
-                            <Button rightSection={<TbChevronDown size={18}/>} className={classes.reportBtn}>
+                            <Button rightSection={<TbChevronDown size={18} />} className={classes.reportBtn}>
                                 Generar Reporte
                             </Button>
                         </Menu.Target>
@@ -84,7 +86,7 @@ export function Personal() {
                                 PDF
                             </Menu.Item>
                             <Menu.Item
-                                leftSection={<TbFileTypeXls size={16}  />}
+                                leftSection={<TbFileTypeXls size={16} />}
                                 onClick={() => handleGenerateReport('excel')}
                             >
                                 Excel
@@ -92,6 +94,7 @@ export function Personal() {
                         </Menu.Dropdown>
                     </Menu>
                 </div>
+                <div className={classes.titleRule} />
                 <div className={classes.filterBar}>
                     <TextInput
                         placeholder="Buscar por nombre o identificación..."

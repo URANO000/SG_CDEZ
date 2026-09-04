@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -31,7 +32,26 @@ public class AdultoMayor {
     private String direccion;
     private String escolaridad;
     private String grupoFamiliar;
+    @Column(name = "estado_civil", length = 30)
+    private String estadoCivil;
+    @Column(name = "grado_dependencia", length = 30)
+    private String gradoDependencia;
+    @Column(
+            name = "cuota_mensual",
+            precision = 12,
+            scale = 2,
+            nullable = false
+    )
+    private BigDecimal cuotaMensual;
     private boolean pension;
+    @Column(name = "tipo_pension", length = 100)
+    private String tipoPension;
+    @Column(
+            name = "monto_pension",
+            precision = 12,
+            scale = 2
+    )
+    private BigDecimal montoPension;
     private String funcionalidadFisica;
     private boolean ayudaBiomecanica;
     private LocalDateTime fechaIngreso;

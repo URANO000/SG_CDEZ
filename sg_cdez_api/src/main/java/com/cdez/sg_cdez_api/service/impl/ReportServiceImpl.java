@@ -1,5 +1,6 @@
 package com.cdez.sg_cdez_api.service.impl;
 
+import com.cdez.sg_cdez_api.dto.response.ConsultaDetailResponse;
 import com.cdez.sg_cdez_api.entity.reports.ExcelColumn;
 import com.cdez.sg_cdez_api.entity.reports.ExcelTableReport;
 import com.cdez.sg_cdez_api.entity.reports.PdfTableReport;
@@ -36,6 +37,7 @@ import com.cdez.sg_cdez_api.entity.reports.Column;
 @Service
 @RequiredArgsConstructor
 public class ReportServiceImpl implements ReportService {
+    private final ConsultaPdfGeneratorService consultaPdfGenerator;
     private static final Color HEADER = new DeviceRgb(41, 76, 121);
     private static final Color ROW_ALT = new DeviceRgb(248, 249, 250);
     private static final Color BORDER = new DeviceRgb(220, 220, 220);
@@ -43,6 +45,12 @@ public class ReportServiceImpl implements ReportService {
     private static final float TITLE_SIZE = 22;
     private static final float HEADER_SIZE = 11;
     private static final float BODY_SIZE = 8.5f;
+
+
+    @Override
+    public byte[] generarConsultaPDF(ConsultaDetailResponse consulta) throws IOException {
+        return consultaPdfGenerator.generarConsultaPDF(consulta);
+    }
 
     @Override
     public <T> byte[] generarTablaPDF(PdfTableReport<T> report) throws IOException {

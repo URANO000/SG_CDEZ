@@ -237,6 +237,8 @@ export function ConsultaRegistrarForm() {
 
         try {
 
+            const receptorId = values.referencia.receptorId.trim();
+
             const consulta: ConsultaCreateRequest = {
                 adultoId:
                     adultoSeleccionado.adultoId,
@@ -261,13 +263,12 @@ export function ConsultaRegistrarForm() {
 
                 notas:
                     nullable(values.notas),
-                referencia:
-                {
-                    receptorId:
-                        values.referencia.receptorId,
-                    mensaje:
-                        values.referencia.mensaje
-                }
+                referencia: receptorId
+                    ? {
+                        receptorId,
+                        mensaje: nullable(values.referencia.mensaje),
+                    }
+                    : null,
             };
 
 

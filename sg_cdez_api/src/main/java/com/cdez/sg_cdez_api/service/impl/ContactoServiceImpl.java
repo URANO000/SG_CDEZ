@@ -110,6 +110,76 @@ public class ContactoServiceImpl implements ContactoService {
         }
     }
 
+    @Override
+    public List<ContactoResponse> actualizarContactoEncargado(
+            List<ContactoUpdateRequest> requests,
+            EncargadoLegal encargado
+    ) {
+        List<ContactoResponse> contactosActualizados =
+                new ArrayList<>();
+
+        for (ContactoUpdateRequest request : requests) {
+            Contacto contacto =
+                    CONTACTO_REPOSITORY
+                            .findByContactoIdAndEncargadoEncargadoId(
+                                    request.contactoId(),
+                                    encargado.getEncargadoId()
+                            )
+                            .orElseThrow(() ->
+                                    new ResponseStatusException(
+                                            HttpStatus.NOT_FOUND,
+                                            "El contacto indicado no pertenece al encargado legal."
+                                    )
+                            );
+
+            contacto.setTipoValor(request.tipoValor());
+            contacto.setValor(request.valor());
+            contacto.setUpdatedBy(
+                    AUTH_HELPER.obtenerUsuarioAutenticado()
+            );
+            contacto.setUpdatedAt(
+                    LocalDateTime.now(Clock.systemUTC())
+            );
+
+            contactosActualizados.add(
+                    mapDTO(CONTACTO_REPOSITORY.save(contacto))
+            );
+        }
+
+        return contactosActualizados;
+    }
+
+    @Override
+    public void desactivarContactosEncargado(
+            List<Integer> requests,
+            EncargadoLegal encargado
+    ) {
+        for (Integer contactoId : requests) {
+            Contacto contacto =
+                    CONTACTO_REPOSITORY
+                            .findByContactoIdAndEncargadoEncargadoId(
+                                    contactoId,
+                                    encargado.getEncargadoId()
+                            )
+                            .orElseThrow(() ->
+                                    new ResponseStatusException(
+                                            HttpStatus.NOT_FOUND,
+                                            "El contacto indicado no pertenece al encargado legal."
+                                    )
+                            );
+
+            contacto.setActivo(false);
+            contacto.setUpdatedBy(
+                    AUTH_HELPER.obtenerUsuarioAutenticado()
+            );
+            contacto.setUpdatedAt(
+                    LocalDateTime.now(Clock.systemUTC())
+            );
+
+            CONTACTO_REPOSITORY.save(contacto);
+        }
+    }
+
     private ContactoResponse mapDTO(Contacto contacto){
         return new ContactoResponse(
                 contacto.getContactoId(),
