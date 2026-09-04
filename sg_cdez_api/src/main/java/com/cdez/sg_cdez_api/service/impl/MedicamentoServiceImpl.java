@@ -141,6 +141,8 @@ public class MedicamentoServiceImpl implements MedicamentoService {
             );
         }
 
+        verificarEdicionValida(medicamentoAnterior.getCreatedBy().getPersonalId());
+
         Map<String, Object> cambios = new LinkedHashMap<>();
 
         agregarCambioProtegido(
@@ -225,6 +227,7 @@ public class MedicamentoServiceImpl implements MedicamentoService {
                                         "Medicamento indicado no existe."
                                 )
                         );
+        verificarEdicionValida(medicamento.getCreatedBy().getPersonalId());
 
         medicamento.setActivo(false);
         medicamento.setUpdatedBy(
@@ -258,6 +261,7 @@ public class MedicamentoServiceImpl implements MedicamentoService {
                                         "Medicamento indicado no existe."
                                 )
                         );
+        verificarEdicionValida(medicamento.getCreatedBy().getPersonalId());
 
         medicamento.setActivo(true);
         medicamento.setUpdatedBy(
@@ -297,6 +301,16 @@ public class MedicamentoServiceImpl implements MedicamentoService {
                 medicamento.getUpdatedAt()
 
         );
+    }
+
+    private void verificarEdicionValida(UUID id){
+        if(!AUTH_HELPER.obtenerUsuarioAutenticado().getPersonalId()
+                .equals(id)){
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Solo el creador de un medicamento puede editarlo."
+            );
+        }
     }
 
 }
