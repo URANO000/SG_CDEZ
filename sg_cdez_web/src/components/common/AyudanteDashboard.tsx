@@ -194,7 +194,7 @@ export function AyudanteDashboard() {
       <Stack gap="xl">
         {/* Encabezado */}
         <Group justify="space-between" align="flex-end">
-          <div>
+          <div style={{ paddingTop: '0.6rem'}}>
             <Badge variant="light" color="teal" mb="xs">
               Gestión operativa
             </Badge>

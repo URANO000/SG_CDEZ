@@ -145,7 +145,7 @@ export function PersonalDashboard() {
     <Container size="xl" py="xl">
       <Stack gap="xl">
         <Group justify="space-between" align="flex-end">
-          <div>
+          <div style={{ paddingTop: '0.7rem'}}>
             <Badge variant="light" mb="xs">
               Panel de trabajo
             </Badge>
