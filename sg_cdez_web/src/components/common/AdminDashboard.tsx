@@ -164,10 +164,11 @@ export function AdminDashboard() {
   ];
 
   return (
-    <Container size="xl" py="xl">
-      <Stack gap="xl">
+    <Container size="xl" py="xl" 
+    >
+      <Stack gap="xl" >
         <Group justify="space-between" align="flex-end">
-          <div>
+          <div style={{ paddingTop: '0.6rem'}}>
             <Badge variant="light" color="blue" mb="xs">
               Administración
             </Badge>

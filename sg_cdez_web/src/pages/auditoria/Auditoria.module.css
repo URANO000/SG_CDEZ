@@ -1,5 +1,5 @@
 .pageHeader {
-  padding: 24px 30px 22px;
+  padding: 20px 30px 20px 80px;
 
   background-color: var(--table-color-light);
   border-bottom: 1px solid rgba(107, 99, 117, 0.18);

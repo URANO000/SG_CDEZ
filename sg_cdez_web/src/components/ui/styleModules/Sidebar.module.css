@@ -1,19 +1,25 @@
 
 /* Sidebar.module.css */
 .navbar {
- display: flex;
+  display: flex;
   flex-direction: column;
   height: 100%;
   width: 280px;
   flex-shrink: 0;
   background-color: var(--color-sidebar);
+  overflow: hidden;
+  transition: width 0.25s ease;
+}
+
+.navbarClosed {
+  width: 0;
 }
 
 .header {
   padding: 1rem;
   border-bottom: 1px solid var(--color-sidebar-border);
+  white-space: nowrap;
 }
-
 .links {
   flex: 1;
 }
@@ -54,12 +60,11 @@
   display: block;
 }
 .burger {
-  display: none;
   position: fixed;
   top: 1rem;
   left: 1rem;
   z-index: 200;
-  color: var(--color-sidebar);
+  --burger-color: var(--color-navbar);
 }
 
 .overlay {
@@ -67,10 +72,6 @@
 }
 
 @media (max-width: 768px) {
-  .burger {
-    display: block;
-  }
-
   .navbar {
     position: fixed;
     top: 0;
@@ -86,6 +87,11 @@
     box-shadow: var(--shadow);
   }
 
+  /* on mobile, "closed" means translateX, not width:0 — override */
+  .navbarClosed {
+    width: 260px;
+  }
+
   .overlay {
     display: block;
     position: fixed;
@@ -97,6 +103,11 @@
 
 @media (max-width: 480px) {
   .navbar {
+    width: 85vw;
+    max-width: 280px;
+  }
+
+  .navbarClosed {
     width: 85vw;
     max-width: 280px;
   }
