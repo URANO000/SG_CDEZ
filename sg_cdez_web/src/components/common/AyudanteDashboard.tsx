@@ -400,6 +400,7 @@ export function AyudanteDashboard() {
                           value={porcentaje}
                           size="md"
                           radius="xl"
+                          animated
                         />
                       </div>
                     );

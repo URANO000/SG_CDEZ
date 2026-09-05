@@ -1,156 +1,242 @@
 package com.cdez.sg_cdez_api.service.impl;
 
 import com.cdez.sg_cdez_api.service.EmailService;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpStatus;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.client.*;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Async
 public class EmailServiceImpl implements EmailService {
-    private final JavaMailSender MAIL_SENDER;
-    private final TemplateEngine TEMPLATE_ENGINE;
+    private static final String BREVO_API_URL =
+            "https://api.brevo.com/v3/smtp/email";
+
+    private final TemplateEngine templateEngine;
 
     @Value("${app.frontend-url}")
     private String frontendUrl;
 
+    @Value("${brevo.api-key}")
+    private String brevoApiKey;
+
+    @Value("${brevo.sender-email}")
+    private String senderEmail;
+
+    @Value("${brevo.sender-name}")
+    private String senderName;
+
     @Override
-    public void enviarCorreoVerificacion(String usuario, String token, String nombre) {
+    public void enviarCorreoVerificacion(
+            String usuario,
+            String token,
+            String nombre
+    ) {
+        String enlace = crearEnlaceConToken("/activar", token);
 
-        String enlace = frontendUrl + "/activar?token=" + token;
-        String imageResourceName = "zurquiLogo";
-
-        Context context = new Context();
+        Context context = crearContextoBase();
         context.setVariable("enlace", enlace);
         context.setVariable("nombre", nombre);
-        context.setVariable(
-                "imageResourceName",
-                imageResourceName
+
+        String html = templateEngine.process(
+                "activacion-email",
+                context
         );
 
-        String html = TEMPLATE_ENGINE.process("activacion-email", context);
+        enviarCorreoBrevo(
+                usuario,
+                nombre,
+                "Activación de cuenta",
+                html
+        );
+    }
 
-        try{
-            MimeMessage mensaje = MAIL_SENDER.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mensaje,true, "UTF-8");
-            helper.setTo(usuario);
-            helper.setSubject("Activación de cuenta");
-            helper.setText(html, true);
 
-            ClassPathResource logo =
-                    new ClassPathResource(
-                            "static/zurqui-logo.png"
-                    );
+    @Override
+    public void enviarCorreoReset(
+            String usuario,
+            String token,
+            String nombre
+    ) {
+        String enlace = crearEnlaceConToken(
+                "/restablecer-contrasena",
+                token
+        );
 
-            helper.addInline(
-                    imageResourceName,
-                    logo,
-                    "image/png"
-            );
-            MAIL_SENDER.send(mensaje);
-        }catch (MessagingException e) {
-            throw new RuntimeException("Error enviando correo de verificación", e);
-        }
+        Context context = crearContextoBase();
+        context.setVariable("enlace", enlace);
+        context.setVariable("nombre", nombre);
+
+        String html = templateEngine.process(
+                "restablecer-contrasena",
+                context
+        );
+
+        enviarCorreoBrevo(
+                usuario,
+                nombre,
+                "Restablecer contraseña",
+                html
+        );
     }
 
     @Override
-    public void enviarCorreoReset(String usuario, String token, String nombre) {
-        String enlace = frontendUrl + "/restablecer-contrasena?token=" + token;
-        String imageResourceName = "zurquiLogo";
+    public void enviarCorreoReferencia(
+            String correoReceptor,
+            String nombreReceptor,
+            String nombreEmisor,
+            String especialidadEmisor,
+            String nombreAdultoMayor,
+            String mensaje,
+            String consultaId
+    ) {
+        String enlace = UriComponentsBuilder
+                .fromUriString(frontendUrl)
+                .pathSegment(
+                        "consulta",
+                        consultaId,
+                        "detalle"
+                )
+                .build()
+                .toUriString();
 
-        Context context = new Context();
+        Context context = crearContextoBase();
         context.setVariable("enlace", enlace);
-        context.setVariable("nombre", nombre);
         context.setVariable(
-                "imageResourceName",
-                imageResourceName
+                "nombreReceptor",
+                nombreReceptor
+        );
+        context.setVariable(
+                "nombreEmisor",
+                nombreEmisor
+        );
+        context.setVariable(
+                "especialidadEmisor",
+                especialidadEmisor
+        );
+        context.setVariable(
+                "nombreAdultoMayor",
+                nombreAdultoMayor
+        );
+        context.setVariable(
+                "mensajeReferencia",
+                mensaje
         );
 
-        String html = TEMPLATE_ENGINE.process("restablecer-contrasena", context);
+        String html = templateEngine.process(
+                "referencia",
+                context
+        );
 
-        try{
-            MimeMessage mensaje = MAIL_SENDER.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mensaje,true, "UTF-8");
-            helper.setTo(usuario);
-            helper.setSubject("Restablecer contraseña");
-            helper.setText(html, true);
-            ClassPathResource logo =
-                    new ClassPathResource(
-                            "static/zurqui-logo.png"
-                    );
-
-            helper.addInline(
-                    imageResourceName,
-                    logo,
-                    "image/png"
-            );
-            MAIL_SENDER.send(mensaje);
-        }catch (MessagingException e) {
-            throw new RuntimeException("Error enviando correo de restablecimiento de contraseña", e);
-        }
-
+        enviarCorreoBrevo(
+                correoReceptor,
+                nombreReceptor,
+                "Nueva referencia - " + nombreAdultoMayor,
+                html
+        );
     }
 
-    @Override
-    public void enviarCorreoReferencia(String correoReceptor, String nombreReceptor, String nombreEmisor, String especialidadEmisor, String nombreAdultoMayor, String mensaje, String consultaId) {
-        String enlace =  frontendUrl + "/consulta/" + consultaId + "/detalle";
+    private Context crearContextoBase() {
         Context context = new Context();
 
-        String imageResourceName = "zurquiLogo";
-
-        context.setVariable("enlace", enlace);
-
-        context.setVariable("nombreReceptor", nombreReceptor);
-        context.setVariable("nombreEmisor", nombreEmisor);
-        context.setVariable("especialidadEmisor", especialidadEmisor);
-        context.setVariable("nombreAdultoMayor", nombreAdultoMayor);
-        context.setVariable("mensajeReferencia", mensaje);
         context.setVariable(
-                "imageResourceName",
-                imageResourceName
+                "logoUrl",
+                frontendUrl + "/zurqui-logo.png"
         );
 
-        String html = TEMPLATE_ENGINE.process("referencia", context);
+        return context;
+    }
 
-        try{
-            MimeMessage message = MAIL_SENDER.createMimeMessage();
+    private String crearEnlaceConToken(
+            String ruta,
+            String token
+    ) {
+        return UriComponentsBuilder
+                .fromUriString(frontendUrl)
+                .path(ruta)
+                .queryParam("token", token)
+                .build()
+                .encode()
+                .toUriString();
+    }
 
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setTo(correoReceptor);
-            helper.setSubject("Nueva referencia - " + nombreAdultoMayor);
-            helper.setText(html, true);
-            ClassPathResource logo =
-                    new ClassPathResource(
-                            "static/zurqui-logo.png"
-                    );
+    private void enviarCorreoBrevo(
+            String destinatario,
+            String nombreDestinatario,
+            String asunto,
+            String html
+    ) {
+        BrevoEmailRequest request = new BrevoEmailRequest(
+                new ContactoBrevo(
+                        senderEmail,
+                        senderName
+                ),
+                List.of(
+                        new ContactoBrevo(
+                                destinatario,
+                                nombreDestinatario
+                        )
+                ),
+                asunto,
+                html
+        );
 
-            helper.addInline(
-                    imageResourceName,
-                    logo,
-                    "image/png"
+        try {
+            RestClient.create()
+                    .post()
+                    .uri(BREVO_API_URL)
+                    .header(
+                            HttpHeaders.ACCEPT,
+                            MediaType.APPLICATION_JSON_VALUE
+                    )
+                    .header(
+                            HttpHeaders.CONTENT_TYPE,
+                            MediaType.APPLICATION_JSON_VALUE
+                    )
+                    .header(
+                            "api-key",
+                            brevoApiKey
+                    )
+                    .body(request)
+                    .retrieve()
+                    .toBodilessEntity();
+
+        } catch (RestClientResponseException exception) {
+            throw new RuntimeException(
+                    "Brevo rechazó el correo. Código HTTP: "
+                            + exception.getStatusCode()
+                            + ". Respuesta: "
+                            + exception.getResponseBodyAsString(),
+                    exception
             );
 
-            MAIL_SENDER.send(message);
-
-        } catch (MessagingException e){
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error enviando correo de referencia",
-                    e
+        } catch (ResourceAccessException exception) {
+            throw new RuntimeException(
+                    "No se pudo conectar con el servicio de correo Brevo",
+                    exception
             );
         }
+    }
 
+    private record BrevoEmailRequest(
+            ContactoBrevo sender,
+            List<ContactoBrevo> to,
+            String subject,
+            String htmlContent
+    ) {
+    }
 
+    private record ContactoBrevo(
+            String email,
+            String name
+    ) {
     }
 }
