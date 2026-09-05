@@ -261,6 +261,7 @@ export function PersonalDashboard() {
                         value={porcentaje}
                         radius="xl"
                         size="md"
+                        animated
                       />
                     </div>
                   );
