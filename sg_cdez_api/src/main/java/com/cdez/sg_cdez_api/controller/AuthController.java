@@ -13,6 +13,7 @@ import org.springframework.http.*;
 import org.springframework.security.core.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.Instant;
 
@@ -24,6 +25,12 @@ public class AuthController {
     private final PersonalService PERSONAL_SERVICE;
     private final JwtService JWT_SERVICE;
     private final RefreshTokenService REFRESH_TOKEN_SERVICE;
+
+    @Value("${app.cookie.secure}")
+    private boolean cookieSecure;
+
+    @Value("${app.cookie.same-site}")
+    private String cookieSameSite;
 
     //Login Api
     @PostMapping("/iniciarSesion")
@@ -77,8 +84,8 @@ public class AuthController {
                                     authResponse.getRefreshToken()
                             )
                             .httpOnly(true)
-                            .secure(false) // true en producción
-                            .sameSite("Strict")
+                            .secure(cookieSecure)
+                            .sameSite(cookieSameSite)
                             .path("/api/auth")
                             .maxAge(
                                     REFRESH_TOKEN_SERVICE
@@ -261,8 +268,8 @@ public class AuthController {
                                 nuevoAccessToken
                         )
                         .httpOnly(true)
-                        .secure(false) // true en producción
-                        .sameSite("Strict")
+                        .secure(cookieSecure)
+                        .sameSite(cookieSameSite)
                         .path("/")
                         .build();
 
@@ -361,8 +368,8 @@ public class AuthController {
                                     authResponse.getAccessToken()
                             )
                             .httpOnly(true)
-                            .secure(false) // true en producción
-                            .sameSite("Strict")
+                            .secure(cookieSecure)
+                            .sameSite(cookieSameSite)
                             .path("/")
                             .build();
 
@@ -372,8 +379,8 @@ public class AuthController {
                                     authResponse.getRefreshToken()
                             )
                             .httpOnly(true)
-                            .secure(false) // true en producción
-                            .sameSite("Strict")
+                            .secure(cookieSecure)
+                            .sameSite(cookieSameSite)
                             .path("/api/auth")
                             .maxAge(
                                     REFRESH_TOKEN_SERVICE
@@ -461,8 +468,8 @@ public class AuthController {
                         ""
                 )
                 .httpOnly(true)
-                .secure(false) // true en producción
-                .sameSite("Strict")
+                .secure(cookieSecure)
+                .sameSite(cookieSameSite)
                 .path(path)
                 .maxAge(0)
                 .build();

@@ -153,7 +153,14 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider())
 
                 //Agregar el filtro de JWT creado antes del filtro estándar
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(
+                        jwtAuthFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                )
+                .addFilterBefore(
+                        new OriginValidationFilter(frontendUrl),
+                        JwtAuthFilter.class
+                );
         return http.build();
     }
 
