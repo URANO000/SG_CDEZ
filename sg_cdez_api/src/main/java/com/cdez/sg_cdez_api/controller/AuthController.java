@@ -60,8 +60,8 @@ public class AuthController {
                                 authResponse.getAccessToken()
                         )
                         .httpOnly(true)
-                        .secure(cookieSecure)
-                        .sameSite(cookieSameSite)
+                        .secure(true) // true en producción
+                        .sameSite("Strict")
                         .path("/")
                         .build();
 
