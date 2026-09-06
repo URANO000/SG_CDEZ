@@ -53,7 +53,7 @@ public class AuthController {
                                 authResponse.getAccessToken()
                         )
                         .httpOnly(true)
-                        .secure(false) // true en producción
+                        .secure(true) // true en producción
                         .sameSite("Strict")
                         .path("/")
                         .build();
