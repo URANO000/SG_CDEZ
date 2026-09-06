@@ -37,12 +37,7 @@ import {
 
 import type {
     ConsultaDetailResponse,
-    TipoTamizajePsych,
 } from "../../../services/interfaces/consultasDetailsResponse";
-
-import type {
-    AdultoMayorResponse,
-} from "../../../services/interfaces/adultoMayorInterface";
 
 import type {
     ConsultaPsychActualizarRequest,
