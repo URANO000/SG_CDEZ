@@ -40,6 +40,23 @@ public class SecurityConfig {
                 //Disabling de CSRF porque no se requiere para stateless JWT
                 .csrf(csrf -> csrf.disable())
 
+                // From MDN Observatory recommendations :)
+                .headers(headers -> headers
+                        .frameOptions(frameOptions ->
+                                frameOptions.deny()
+                        )
+
+                        .contentSecurityPolicy(csp ->
+                                csp.policyDirectives(
+                                        "default-src 'self'; " +
+                                                "base-uri 'self'; " +
+                                                "object-src 'none'; " +
+                                                "frame-ancestors 'none'; " +
+                                                "form-action 'self'"
+                                )
+                        )
+                )
+
                 //Configurar reglas de autorización
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/iniciarSesion").permitAll()
